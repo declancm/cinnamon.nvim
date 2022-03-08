@@ -139,7 +139,7 @@ function M.MovementDistance(movement, useCount)
   local row = vim.fn.getcurpos()[2]
   local curswant = vim.fn.getcurpos()[5]
   local file = vim.fn.bufname '%'
-  if useCount == 1 and vim.v.count1 > 1 then
+  if useCount ~= 0 and vim.v.count1 > 1 then
     vim.cmd('norm! ' .. vim.v.count1 .. movement)
   else
     vim.cmd('norm! ' .. movement)
