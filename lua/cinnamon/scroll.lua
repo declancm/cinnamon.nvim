@@ -43,7 +43,7 @@ function M.Scroll(movement, scrollWin, useCount, delay, slowdown, maxLines)
   end
   -- It the distance is too long, perform the movement without the scroll.
   if distance > maxLines or distance < -maxLines then
-    if useCount == 1 and vim.v.count1 > 1 then
+    if useCount ~= 0 and vim.v.count1 > 1 then
       vim.cmd('norm! ' .. vim.v.count1 .. movement)
     else
       vim.cmd('norm! ' .. movement)
