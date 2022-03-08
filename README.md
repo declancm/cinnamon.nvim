@@ -1,4 +1,4 @@
-# cinnamon-scroll
+# Cinnamon Scroll (Neovim)
 
 A scrolling plugin written in lua that works with any movement command.
 
