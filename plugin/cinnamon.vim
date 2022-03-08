@@ -26,7 +26,7 @@ function! s:Scroll(movement, scrollWin = '1', useCount = '0', delay = '5',
     let l:newColumn = measurments[1]
     " If there is no vertical movement, return.
     if l:distance == 0
-        " center the screen if it's not centered.
+        " Center the screen if it's not centered.
         if a:scrollWin == 1 && exists("g:cinnamon_centered") && g:cinnamon_centered == 1
             normal! zz
         endif
@@ -57,7 +57,7 @@ function! s:Scroll(movement, scrollWin = '1', useCount = '0', delay = '5',
     else
         call <SID>ScrollUp(l:distance, a:delay, a:scrollWin, a:slowdown)
     endif
-    " center the screen if it's not centered.
+    " Center the screen if it's not centered.
     call <sid>CenterScreen(0, a:scrollWin, a:delay, a:slowdown)
     " Change the cursor column position if required.
     if l:newColumn != -1 | call cursor(line("."), l:newColumn) | endif
@@ -78,7 +78,7 @@ function! s:ScrollDown(distance, delay, scrollWin, slowdown)
         silent exec "norm! j"
         if a:scrollWin == 1
             if exists("g:cinnamon_centered") && g:cinnamon_centered == 1
-                " Stay at the centre of the screen.
+                " Stay at the center of the screen.
                 if winline() > l:halfHeight | silent exec "norm! \<C-E>" | endif
             else
                 " Scroll the window if the current line is not within the
@@ -167,18 +167,14 @@ endfunction
 
 function! s:SleepDelay(remaining, delay, slowdown)
     redraw
-    if a:slowdown == 1
-        " Don't create a delay when scrolling completed.
-        if a:remaining <= 0
-            redraw
-            return
-        endif
-        " Increase the delay near the end of the scroll.
-        if a:remaining <= 4
-            silent exec "sleep " . (a:delay * (5 - a:remaining)) . "m"
-        else
-            silent exec "sleep " . a:delay . "m"
-        endif
+    " Don't create a delay when scrolling completed.
+    if a:remaining <= 0
+        redraw
+        return
+    endif
+    " Increase the delay near the end of the scroll.
+    if a:remaining <= 4 && a:slowdown == 1
+        silent exec "sleep " . (a:delay * (5 - a:remaining)) . "m"
     else
         silent exec "sleep " . a:delay . "m"
     endif

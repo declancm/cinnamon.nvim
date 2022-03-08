@@ -1,14 +1,106 @@
--- TODO: Create the functions here in lua
+local M = {}
 
-function Scroll(movement, scrollWin, useCount, delay, slowdown, maxLines)
-  if (movement == "j" or movement == "k") and vim.v.count1 == 1 then
-    vim.cmd("norm! " .. movement)
+function M.Scroll(movement, scrollWin, useCount, delay, slowdown, maxLines)
+  -- Setting defaults:
+  scrollWin = scrollWin or 1
+  useCount = useCount or 0
+  delay = delay or 5
+  slowdown = slowdown or 1
+  maxLines = maxLines or 150
+  -- Don't waste time performing the whole function if only moving one line.
+  if (movement == 'j' or movement == 'k') and vim.v.count1 == 1 then
+    vim.cmd('norm! ' .. movement)
     return
+  end
+  -- Get the scroll distance and the column position.
+  local measurements = require('cinnamon').MovementDistance(movement, useCount)
+  local distance = measurements[1]
+  local newColumn = measurements[2]
+  -- If there is no vertical movement, return.
+  if distance == 0 then
+    -- Center the screen if it's not centered.
+    if scrollWin == 1 and vim.g.cinnamon_centered == 1 then
+      vim.cmd 'normal! zz'
+    end
+    -- Change the cursor column position if required.
+    if newColumn ~= -1 then
+      vim.fn.cursor(vim.fn.line '.', newColumn)
+    end
+    return
+  end
+  -- It the distance is too long, perform the movement without the scroll.
+  if distance > maxLines or distance < -maxLines then
+    if useCount == 1 and vim.v.count1 > 1 then
+      vim.cmd('norm! ' .. vim.v.count1 .. movement)
+    else
+      vim.cmd('norm! ' .. movement)
+    end
+    return
+  end
+  -- Perform the scroll.
+  if distance > 0 then
+    require('cinnamon').ScrollDown(distance, delay, scrollWin, slowdown)
+  else
+    require('cinnamon').ScrollUp(distance, delay, scrollWin, slowdown)
+  end
+  -- Center the screen if it's not centered.
+  require('cinnamon').CenterScreen(0, scrollWin, delay, slowdown)
+  -- Change the cursor column position if required.
+  if newColumn ~= -1 then
+    vim.fn.cursor(vim.fn.line '.', newColumn)
   end
 end
 
-function CheckFold(counter)
-  local foldStart = vim.fn.foldclosed(".")
+function M.ScrollDown(distance, delay, scrollWin, slowdown)
+  local halfHeight = math.ceil(vim.fn.winheight(0) / 2)
+  if vim.fn.winline() > halfHeight then
+    require('cinnamon').CenterScreen(distance, scrollWin, delay, slowdown)
+  end
+  local counter = 1
+  while counter <= distance do
+    counter = require('cinnamon').CheckFold(counter)
+    vim.cmd 'norm! j'
+    if scrollWin == 1 then
+      if vim.g.cinnamon_centered == 1 and vim.fn.winline() > halfHeight then
+        -- Stay at the center of the screen.
+        vim.cmd 'norm! \\<C-E>'
+      elseif not (vim.fn.winline() <= vim.bo.so + 1 or vim.fn.winline() >= vim.fn.winheight '%' - vim.bo.so) then
+        -- Scroll the window if the current line is not within the scrolloff
+        -- borders.
+        vim.cmd 'norm! \\<C-E>'
+      end
+    end
+    counter = counter + 1
+    require('cinnamon').SleepDelay(distance - counter, delay, slowdown)
+  end
+end
+
+function M.ScrollUp(distance, delay, scrollWin, slowdown)
+  local halfHeight = math.ceil(vim.fn.winheight(0) / 2)
+  if vim.fn.winline() < halfHeight then
+    require('cinnamon').CenterScreen(-distance, scrollWin, delay, slowdown)
+  end
+  local counter = 1
+  while counter <= -distance do
+    counter = require('cinnamon').CheckFold(counter)
+    vim.cmd 'norm! k'
+    if scrollWin == 1 then
+      if vim.g.cinnamon_centered == 1 and vim.fn.winline() < halfHeight then
+        -- Stay at the center of the screen.
+        vim.cmd 'norm! \\<C-Y>'
+      elseif not (vim.fn.winline() <= vim.bo.so + 1 or vim.fn.winline() >= vim.fn.winheight '%' - vim.bo.so) then
+        -- Scroll the window if the current line is not within the scrolloff
+        -- borders.
+        vim.cmd 'norm! \\<C-Y>'
+      end
+    end
+    counter = counter + 1
+    require('cinnamon').SleepDelay(-distance + counter, delay, slowdown)
+  end
+end
+
+function M.CheckFold(counter)
+  local foldStart = vim.fn.foldclosed '.'
   -- If a fold exists, add the length to the counter.
   if foldStart ~= -1 then
     local foldSize = vim.fn.foldclosedend(foldStart) - foldStart
@@ -17,145 +109,69 @@ function CheckFold(counter)
   return counter
 end
 
-function MovementDistance(movement, useCount)
+function M.MovementDistance(movement, useCount)
+  local newColumn = -1
+  -- Create a backup for the current window view.
   local viewSaved = vim.fn.winsaveview()
+  -- Calculate distance by subtracting the original position from the new
+  -- position after performing the movement.
   local row = vim.fn.getcurpos()[2]
   local curswant = vim.fn.getcurpos()[5]
-  local file = vim.fn.bufname("%")
+  local file = vim.fn.bufname '%'
   if useCount == 1 and vim.v.count1 > 1 then
-    vim.cmd("norm! " .. vim.v.count1 .. movement)
+    vim.cmd('norm! ' .. vim.v.count1 .. movement)
   else
-    vim.cmd("norm! " .. movement)
+    vim.cmd('norm! ' .. movement)
   end
   local newRow = vim.fn.getcurpos()[2]
-  local newFile = vim.fn.bufname("%")
+  local newFile = vim.fn.bufname '%'
+  -- Check if the file has changed.
+  if file ~= newFile then
+    -- Center the screen.
+    vim.cmd 'norm! zz'
+    return { 0, -1 }
+  end
+  -- Calculate the movement distance.
+  local distance = newRow - row
+  -- Get the new column position if 'curswant' has changed.
+  if curswant ~= vim.fn.getcurpos()[5] then
+    newColumn = vim.fn.getcurpos()[3]
+  end
+  -- Restore the window view.
+  vim.fn.winrestview(viewSaved)
+  return { distance, newColumn }
 end
 
--- function! s:Scroll(movement, scrollWin = '1', useCount = '0', delay = '5', slowdown = '1', maxLines = '300') abort
---     " Don't waste time performing the whole function if only moving one line.
---     if a:movement == 'j' && v:count1 == 1
---         silent execute("normal! j")
---         return
---     elseif a:movement == 'k' && v:count1 == 1
---         silent execute("normal! k")
---         return
---     endif
---     " Save the last used arguments in a variable for vim-repeat.
---     if !exists("g:cinnamon_repeat") | let g:cinnamon_repeat = 1 | endif
---     if g:cinnamon_repeat == 1
---         let b:cinnamonArgs = '"'.a:movement.'","'.a:scrollWin.'","'.a:useCount.'","'.a:delay.'","'.a:slowdown.'","'.a:maxLines.'"'
---         let b:cinnamonCount = v:count1
---     endif
---     " Get the scroll distance and the column position.
---     let measurments = <SID>MovementDistance(a:movement, a:useCount)
---     let l:distance = measurments[0]
---     let l:newColumn = measurments[1]
---     if l:distance == 0
---         " Set vim-repeat.
---         if g:cinnamon_repeat == 1
---             silent! call repeat#set("\<Plug>CinnamonRepeat",b:cinnamonCount)
---         endif
---         return
---     endif
---     " If scrolling distance is too great, just perform the movement without scroll.
---     if l:distance > a:maxLines || l:distance < -a:maxLines
---         if a:useCount == 1
---             silent execute("normal! " . v:count1 . a:movement)
---         else
---             silent execute("normal! " . a:movement)
---         endif
---         " Set vim-repeat.
---         if g:cinnamon_repeat == 1
---             silent! call repeat#set("\<Plug>CinnamonRepeat",b:cinnamonCount)
---         endif
---         return
---     endif
---     let l:counter = 1
---     if distance > 0
---         " Scrolling downwards.
---         while l:counter <= l:distance
---             " Check if a fold exists at current line.
---             let l:counter = <SID>CheckFold(l:counter)
---             " Move down by one line.
---             silent execute("normal! j")
---             if a:scrollWin == 1
---                 " Scroll the window if the current line is not within the scrolloff borders.
---                 if ! (winline() <= &scrolloff + 1 || winline() >= winheight('%') - &scrolloff)
---                     silent execute("normal! \<C-E>")
---                 endif
---             endif
---             let l:counter += 1
---             let l:remaining = l:distance - l:counter
---             call <SID>SleepDelay(l:remaining, a:delay, a:slowdown)
---         endwhile
---     else
---         " Scrolling upwards.
---         while l:counter <= -l:distance
---             " Check if a fold exists at current line.
---             let l:counter = <SID>CheckFold(l:counter)
---             " Move up by one line.
---             silent execute("normal! k")
---             if a:scrollWin == 1
---                 " Scroll the window if the current line is not within the scrolloff borders.
---                 if ! (winline() <= &scrolloff + 1 || winline() >= winheight('%') - &scrolloff)
---                     silent execute("normal! \<C-Y>")
---                 endif
---             endif
---             let l:counter += 1
---             let l:remaining = - (l:distance + l:counter)
---             call <SID>SleepDelay(l:remaining, a:delay, a:slowdown)
---         endwhile
---     endif
---     " Change the cursor column position.
---     if l:newColumn != -1 | call cursor(line("."), l:newColumn) | endif
---     " Set vim-repeat.
---     if g:cinnamon_repeat == 1
---         silent! call repeat#set("\<Plug>CinnamonRepeat",b:cinnamonCount)
---     endif
--- endfunction
+function M.SleepDelay(remaining, delay, slowdown)
+  vim.cmd 'redraw'
+  -- Don't create a delay when scrolling comleted.
+  if remaining <= 0 then
+    vim.cmd 'redraw'
+    return
+  end
+  -- Increase the delay near the end of the scroll.
+  if remaining <= 4 and slowdown == 1 then
+    vim.cmd('sleep ' .. delay * (5 - remaining) .. 'm')
+  else
+    vim.cmd('sleep ' .. delay .. 'm')
+  end
+end
 
--- function! s:CheckFold(counter)
---     let l:counter = a:counter
---     let l:foldStart = foldclosed(".")
---     " If a fold exists, add the length to the counter.
---     if l:foldStart != -1
---         " Calculate the fold size.
---         let l:foldSize = foldclosedend(l:foldStart) - l:foldStart
---         let l:counter += l:foldSize
---     endif
---     return l:counter
--- endfunction
+function M.CenterScreen(remaining, scrollWin, delay, slowdown)
+  local halfHeight = math.ceil(vim.fn.winheight(0) / 2)
+  if scrollWin == 1 and vim.g.cinnamon_centered == 1 then
+    local prevLine = vim.fn.winline()
+    while vim.fn.winline() > halfHeight do
+      vim.cmd 'norm! \\<C-E>'
+      local newLine = vim.fn.winline()
+      require('cinnamon').SleepDelay(newLine - halfHeight + remaining, delay, slowdown)
+      -- If line isn't changing, break the endless loop.
+      if newLine == prevLine then
+        break
+      end
+      prevLine = newLine
+    end
+  end
+end
 
--- function! s:MovementDistance(movement, useCount)
---     " Create a backup for the current window view.
---     let l:winview = winsaveview()
---     " Calculate distance by subtracting the original position from the position
---     " after performing the movement.
---     let l:row = getcurpos()[1]
---     let l:curswant = getcurpos()[4]
---     let l:file = bufname("%")
---     if a:useCount == 1
---         silent execute("normal! " . v:count1 . a:movement)
---     else
---         silent execute("normal! " . a:movement)
---     endif
---     let l:newRow = getcurpos()[1]
---     let l:newFile = bufname("%")
---     " Check if the file has changed.
---     if l:file != l:newFile
---         let l:distance = 0
---         return
---     endif
---     let l:distance = l:newRow - l:row
---     " Get the column position if 'curswant' has changed.
---     if l:curswant == getcurpos()[4]
---         let l:newColumn = -1
---     else
---         let l:newColumn = getcurpos()[2]
---     endif
---     " Restore the window view.
---     call winrestview(l:winview)
---     " Return a list of the values.
---     let measurements = [l:distance,l:newColumn]
---     return measurements
--- endfunction
+return M
