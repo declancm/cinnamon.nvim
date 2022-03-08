@@ -1,10 +1,12 @@
-# Cinnamon Scroll (Neovim)
+# Cinnamon Scroll (Neovim)🌀
 
 A scrolling plugin written in lua that works with any movement command.
 
 Is is written in lua, highly customizable, supports using single repeat '.'\
 (as it doesn't break or replace your last performed command), and even supports\
 scrolling over folds :D.
+
+_Petition for a cinnamon roll emoji:_ <https://www.change.org/p/apple-cinnamon-roll-emoji>
 
 ## Installation
 
