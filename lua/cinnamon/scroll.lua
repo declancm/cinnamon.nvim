@@ -74,13 +74,17 @@ function M.ScrollDown(distance, delay, scrollWin, slowdown)
     counter = require('cinnamon.scroll').CheckFold(counter)
     vim.cmd 'norm! j'
     if scrollWin == 1 then
-      if vim.g.cinnamon_centered == 1 and vim.fn.winline() > halfHeight then
+      if vim.g.cinnamon_centered == 1 then
         -- Stay at the center of the screen.
-        vim.cmd 'norm! \\<C-E>'
-      elseif not (vim.fn.winline() <= vim.o.so + 1 or vim.fn.winline() >= vim.fn.winheight '%' - vim.o.so) then
+        if vim.fn.winline() > halfHeight then
+          vim.cmd [[silent exec "norm! \<C-E>"]]
+        end
+      else
         -- Scroll the window if the current line is not within the scrolloff
         -- borders.
-        vim.cmd 'norm! \\<C-E>'
+        if not (vim.fn.winline() <= vim.o.so + 1 or vim.fn.winline() >= vim.fn.winheight '%' - vim.o.so) then
+          vim.cmd [[silent exec "norm! \<C-E>"]]
+        end
       end
     end
     counter = counter + 1
@@ -98,13 +102,17 @@ function M.ScrollUp(distance, delay, scrollWin, slowdown)
     counter = require('cinnamon.scroll').CheckFold(counter)
     vim.cmd 'norm! k'
     if scrollWin == 1 then
-      if vim.g.cinnamon_centered == 1 and vim.fn.winline() < halfHeight then
+      if vim.g.cinnamon_centered == 1 then
         -- Stay at the center of the screen.
-        vim.cmd 'norm! \\<C-Y>'
-      elseif not (vim.fn.winline() <= vim.o.so + 1 or vim.fn.winline() >= vim.fn.winheight '%' - vim.o.so) then
+        if vim.fn.winline() < halfHeight then
+          vim.cmd [[silent exec "norm! \<C-Y>"]]
+        end
+      else
         -- Scroll the window if the current line is not within the scrolloff
         -- borders.
-        vim.cmd 'norm! \\<C-Y>'
+        if not (vim.fn.winline() <= vim.o.so + 1 or vim.fn.winline() >= vim.fn.winheight '%' - vim.o.so) then
+          vim.cmd [[silent exec "norm! \<C-Y>"]]
+        end
       end
     end
     counter = counter + 1
@@ -175,9 +183,19 @@ function M.CenterScreen(remaining, scrollWin, delay, slowdown)
   if scrollWin == 1 and vim.g.cinnamon_centered == 1 then
     local prevLine = vim.fn.winline()
     while vim.fn.winline() > halfHeight do
-      vim.cmd 'norm! \\<C-E>'
+      vim.cmd [[silent exec "norm! \<C-E>"]]
       local newLine = vim.fn.winline()
       require('cinnamon.scroll').SleepDelay(newLine - halfHeight + remaining, delay, slowdown)
+      -- If line isn't changing, break the endless loop.
+      if newLine == prevLine then
+        break
+      end
+      prevLine = newLine
+    end
+    while vim.fn.winline() < halfHeight do
+      vim.cmd [[silent exec "norm! \<C-Y>"]]
+      local newLine = vim.fn.winline()
+      require('cinnamon.scroll').SleepDelay(halfHeight - newLine + remaining, delay, slowdown)
       -- If line isn't changing, break the endless loop.
       if newLine == prevLine then
         break
