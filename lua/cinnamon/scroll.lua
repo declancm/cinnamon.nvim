@@ -77,7 +77,7 @@ function M.ScrollDown(distance, delay, scrollWin, slowdown)
       if vim.g.cinnamon_centered == 1 and vim.fn.winline() > halfHeight then
         -- Stay at the center of the screen.
         vim.cmd 'norm! \\<C-E>'
-      elseif not (vim.fn.winline() <= vim.bo.so + 1 or vim.fn.winline() >= vim.fn.winheight '%' - vim.bo.so) then
+      elseif not (vim.fn.winline() <= vim.o.so + 1 or vim.fn.winline() >= vim.fn.winheight '%' - vim.o.so) then
         -- Scroll the window if the current line is not within the scrolloff
         -- borders.
         vim.cmd 'norm! \\<C-E>'
@@ -101,7 +101,7 @@ function M.ScrollUp(distance, delay, scrollWin, slowdown)
       if vim.g.cinnamon_centered == 1 and vim.fn.winline() < halfHeight then
         -- Stay at the center of the screen.
         vim.cmd 'norm! \\<C-Y>'
-      elseif not (vim.fn.winline() <= vim.bo.so + 1 or vim.fn.winline() >= vim.fn.winheight '%' - vim.bo.so) then
+      elseif not (vim.fn.winline() <= vim.o.so + 1 or vim.fn.winline() >= vim.fn.winheight '%' - vim.o.so) then
         -- Scroll the window if the current line is not within the scrolloff
         -- borders.
         vim.cmd 'norm! \\<C-Y>'
