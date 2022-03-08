@@ -37,6 +37,7 @@ M.setup = function()
 
     -- Previous cursor location:
     keymap('n', '<C-o>', "<Cmd>lua Cinnamon.Scroll('<C-o>', 1, 0, 3)<CR>", opts)
+    keymap('n', '<C-i>', "<Cmd>lua Cinnamon.Scroll('1<C-i>', 1, 0, 3)<CR>", opts)
   end
 
   if vim.g.cinnamon_extras == 1 then

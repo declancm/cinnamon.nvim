@@ -64,9 +64,13 @@ keymap('n', 'N', "<Cmd>lua Cinnamon.Scroll('N', 1, 0, 3)<CR>", opts)
 keymap('n', '*', "<Cmd>lua Cinnamon.Scroll('*', 1, 0, 3)<CR>", opts)
 keymap('n', '#', "<Cmd>lua Cinnamon.Scroll('#', 1, 0, 3)<CR>", opts)
 
--- Previous cursor location:
+-- Previous/next cursor location:
 keymap('n', '<C-o>', "<Cmd>lua Cinnamon.Scroll('<C-o>', 1, 0, 3)<CR>", opts)
+keymap('n', '<C-i>', "<Cmd>lua Cinnamon.Scroll('1<C-i>', 1, 0, 3)<CR>", opts)
 ```
+
+_Note: `1<C-i>` has to be used instead of `<C-i>` to prevent it from being\
+expanded into a literal tab, as `<Tab>` and `<C-i>` are equivalent for vim._
 
 To **disable** the default keymaps, add the following to your .vimrc:
 

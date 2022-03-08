@@ -143,6 +143,7 @@ function M.MovementDistance(movement, useCount)
     vim.cmd('norm! ' .. vim.v.count1 .. movement)
   else
     vim.cmd('norm! ' .. movement)
+    -- vim.fn.feedkeys(movement, 'tn')
   end
   local newRow = vim.fn.getcurpos()[2]
   local newFile = vim.fn.bufname '%'
