@@ -1,17 +1,24 @@
 local M = {}
 
--- Cinnamon.Scroll('arg1', 'arg2', 'arg3', 'arg4', 'arg5', 'arg6')
+-- TODO: get n and N to work well with folds.
+-- TODO: make it work for g commands such as gj and gk.
 
--- arg1 = The movement command (eg. 'gg'). This argument is required as there's\
---        no default value.
--- arg2 = Scroll the window with the cursor. (1 for on, 0 for off). Default is 1.
--- arg3 = Accept a count before the command (1 for on, 0 for off). Default is 0.
--- arg4 = Length of delay between lines (in ms). Default is 5.
--- arg5 = Slowdown at the end of the movement (1 for on, 0 for off). Default is 1.
--- arg6 = Max number of lines before scrolling is skipped. Mainly just for big\
---        commands such as 'gg' and 'G'. Default is 150.
+--[[
 
--- Note: Each argument is a string separated by a comma.
+require('cinnamon.scroll').Scroll('arg1', 'arg2', 'arg3', 'arg4', 'arg5', 'arg6')
+
+arg1 = The movement command (eg. 'gg'). This argument is required as there's\
+no default value.
+arg2 = Scroll the window with the cursor. (1 for on, 0 for off). Default is 1.
+arg3 = Accept a count before the command (1 for on, 0 for off). Default is 0.
+arg4 = Length of delay between lines (in ms). Default is 5.
+arg5 = Slowdown at the end of the movement (1 for on, 0 for off). Default is 1.
+arg6 = Max number of lines before scrolling is skipped. Mainly just for big\
+commands such as 'gg' and 'G'. Default is 150.
+
+Note: Each argument is a string separated by a comma.
+
+]]
 
 function M.Scroll(movement, scrollWin, useCount, delay, slowdown, maxLines)
   -- Setting defaults:
@@ -26,21 +33,7 @@ function M.Scroll(movement, scrollWin, useCount, delay, slowdown, maxLines)
     return
   end
   -- Get the scroll distance and the column position.
-  local measurements = require('cinnamon.scroll').MovementDistance(movement, useCount)
-  local distance = measurements[1]
-  local newColumn = measurements[2]
-  -- If there is no vertical movement, return.
-  if distance == 0 then
-    -- Center the screen if it's not centered.
-    if scrollWin == 1 and vim.g.cinnamon_centered == 1 then
-      vim.cmd 'normal! zz'
-    end
-    -- Change the cursor column position if required.
-    if newColumn ~= -1 then
-      vim.fn.cursor(vim.fn.line '.', newColumn)
-    end
-    return
-  end
+  local distance, newColumn, fileChanged = require('cinnamon.scroll').MovementDistance(movement, useCount)
   -- It the distance is too long, perform the movement without the scroll.
   if distance > maxLines or distance < -maxLines then
     if useCount ~= 0 and vim.v.count1 > 1 then
@@ -53,16 +46,26 @@ function M.Scroll(movement, scrollWin, useCount, delay, slowdown, maxLines)
   -- Perform the scroll.
   if distance > 0 then
     require('cinnamon.scroll').ScrollDown(distance, delay, scrollWin, slowdown)
-  else
+  elseif distance < 0 then
     require('cinnamon.scroll').ScrollUp(distance, delay, scrollWin, slowdown)
   end
   -- Center the screen if it's not centered.
-  require('cinnamon.scroll').CenterScreen(0, scrollWin, delay, slowdown)
+  if fileChanged == false then
+    require('cinnamon.scroll').CenterScreen(0, scrollWin, delay, slowdown)
+  end
   -- Change the cursor column position if required.
   if newColumn ~= -1 then
     vim.fn.cursor(vim.fn.line '.', newColumn)
   end
 end
+
+--[[
+
+require('cinnamon.scroll').ScrollDown(distance, delay, scrollWin, slowdown)
+
+Performs the actual scrolling movement downwards based on the given arguments.
+
+]]
 
 function M.ScrollDown(distance, delay, scrollWin, slowdown)
   local halfHeight = math.ceil(vim.fn.winheight(0) / 2)
@@ -92,6 +95,14 @@ function M.ScrollDown(distance, delay, scrollWin, slowdown)
   end
 end
 
+--[[
+
+require('cinnamon.scroll').ScrollDown(distance, delay, scrollWin, slowdown)
+
+Performs the actual scrolling movement upwards based on the given arguments.
+
+]]
+
 function M.ScrollUp(distance, delay, scrollWin, slowdown)
   local halfHeight = math.ceil(vim.fn.winheight(0) / 2)
   if vim.fn.winline() < halfHeight then
@@ -120,6 +131,15 @@ function M.ScrollUp(distance, delay, scrollWin, slowdown)
   end
 end
 
+--[[
+
+require('cinnamon.scroll').CheckFold(counter)
+
+The function will check if the current cursor position during the movement is a
+fold. If so, add the full length of the fold to the cursor.
+
+]]
+
 function M.CheckFold(counter)
   local foldStart = vim.fn.foldclosed '.'
   -- If a fold exists, add the length to the counter.
@@ -138,7 +158,7 @@ function M.MovementDistance(movement, useCount)
   -- position after performing the movement.
   local row = vim.fn.getcurpos()[2]
   local curswant = vim.fn.getcurpos()[5]
-  local file = vim.fn.bufname '%'
+  local prevFile = vim.fn.bufname '%'
   if useCount ~= 0 and vim.v.count1 > 1 then
     vim.cmd('norm! ' .. vim.v.count1 .. movement)
   else
@@ -148,10 +168,10 @@ function M.MovementDistance(movement, useCount)
   local newRow = vim.fn.getcurpos()[2]
   local newFile = vim.fn.bufname '%'
   -- Check if the file has changed.
-  if file ~= newFile then
+  if prevFile ~= newFile then
     -- Center the screen.
     vim.cmd 'norm! zz'
-    return { 0, -1 }
+    return 0, -1, true
   end
   -- Calculate the movement distance.
   local distance = newRow - row
@@ -161,7 +181,7 @@ function M.MovementDistance(movement, useCount)
   end
   -- Restore the window view.
   vim.fn.winrestview(viewSaved)
-  return { distance, newColumn }
+  return distance, newColumn, false
 end
 
 function M.SleepDelay(remaining, delay, slowdown)
@@ -178,6 +198,14 @@ function M.SleepDelay(remaining, delay, slowdown)
     vim.cmd('sleep ' .. delay .. 'm')
   end
 end
+
+--[[
+
+require('cinnamon.scroll').CenterScreen(remaining, scrollWin, delay, slowdown)
+
+If window scrolling and screen centering are enabled, center the screen smoothly.
+
+]]
 
 function M.CenterScreen(remaining, scrollWin, delay, slowdown)
   local halfHeight = math.ceil(vim.fn.winheight(0) / 2)
