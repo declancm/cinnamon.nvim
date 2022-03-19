@@ -36,16 +36,17 @@ Cinnamon.Scroll('arg1', 'arg2', 'arg3', 'arg4', 'arg5', 'arg6')
 
 _Note: arg1 is a string while the others are integers._
 
-## Options
+## Configuration
 
-An options table can be passed into the setup function for custom settings. The
-default settings are:
+A settings table can be passed into the setup function for custom options.
+
+The default settings are:
 
 ```lua
 require('cinnamon').setup {
-  -- Enable or disable default keymaps:
+  -- Enable default keymaps:
   default_keymaps = true,
-  -- Enable or disable extra keymaps:
+  -- Enable extra keymaps:
   extra_keymaps = false,
   -- Keep cursor centered in window when using window scrolling (arg2):
   centered = true,
@@ -53,7 +54,7 @@ require('cinnamon').setup {
 ```
 
 There is no need to call `require('cinnamon').setup()` if you do not wish to set
-custom options.
+custom settings.
 
 ## Default Keymaps
 
