@@ -77,7 +77,7 @@ function M.ScrollDown(distance, delay, scrollWin, slowdown)
     counter = require('cinnamon.scroll').CheckFold(counter)
     vim.cmd 'norm! j'
     if scrollWin == 1 then
-      if vim.g.cinnamon_centered == 1 then
+      if vim.g.__cinnamon_centered == 1 then
         -- Stay at the center of the screen.
         if vim.fn.winline() > halfHeight then
           vim.cmd [[silent exec "norm! \<C-E>"]]
@@ -113,7 +113,7 @@ function M.ScrollUp(distance, delay, scrollWin, slowdown)
     counter = require('cinnamon.scroll').CheckFold(counter)
     vim.cmd 'norm! k'
     if scrollWin == 1 then
-      if vim.g.cinnamon_centered == 1 then
+      if vim.g.__cinnamon_centered == 1 then
         -- Stay at the center of the screen.
         if vim.fn.winline() < halfHeight then
           vim.cmd [[silent exec "norm! \<C-Y>"]]
@@ -209,7 +209,7 @@ If window scrolling and screen centering are enabled, center the screen smoothly
 
 function M.CenterScreen(remaining, scrollWin, delay, slowdown)
   local halfHeight = math.ceil(vim.fn.winheight(0) / 2)
-  if scrollWin == 1 and vim.g.cinnamon_centered == 1 then
+  if scrollWin == 1 and vim.g.__cinnamon_centered == 1 then
     local prevLine = vim.fn.winline()
     while vim.fn.winline() > halfHeight do
       vim.cmd [[silent exec "norm! \<C-E>"]]

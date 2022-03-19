@@ -19,10 +19,13 @@ M.setup = function(options)
     end
   end
 
+  -- Deprecated settings:
   if vim.g.cinnamon_no_defaults == 1 then
+    print "Using 'vim.g.cinnamon_no_defaults' is now deprecated :(. Please use \"require('cinnamon').setup { default_keymaps = false }\" instead."
     options['default_keymaps'] = false
   end
   if vim.g.cinnamon_extras == 1 then
+    print "Using 'vim.g.cinnamon_extras' is now deprecated :(. Please use \"require('cinnamon').setup { extra_keymaps = true }\" instead."
     options['cinnamon_extras'] = true
   end
 
@@ -32,7 +35,7 @@ M.setup = function(options)
   Cinnamon = require 'cinnamon.scroll'
 
   -- Variables:
-  vim.g.cinnamon_centered = (options.centered == true) and 1 or 0
+  vim.g.__cinnamon_centered = (options.centered == true) and 1 or 0
 
   -- Keymaps:
   if options.default_keymaps == true then
@@ -83,7 +86,7 @@ M.setup = function(options)
     keymap('x', '<Down>', "<Cmd>lua Cinnamon.Scroll('j', 0, 1, 2, 0)<CR>", opts)
   end
 
-  vim.g.cinnamon_setup_completed = 1
+  vim.g.__cinnamon_setup_completed = 1
 end
 
 return M
