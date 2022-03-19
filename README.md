@@ -2,15 +2,15 @@
 
 A scrolling plugin written in lua that works with any movement command.
 
-Is is written in lua, highly customizable, supports using single repeat '.'\
-(as it doesn't break or replace your last performed command), and even supports\
+Is is written in lua, highly customizable, supports using single repeat '.'
+(as it doesn't break or replace your last performed command), and even supports
 scrolling over folds :D.
 
 _Petition for a cinnamon roll emoji:_ <https://www.change.org/p/apple-cinnamon-roll-emoji>
 
 ## Installation
 
-Install with your favorite package manager. No configuration is required to get\
+Install with your favorite package manager. No configuration is required to get
 started with the default keymaps.
 
 ### Packer
@@ -25,16 +25,35 @@ use 'declancm/cinnamon.nvim'
 Cinnamon.Scroll('arg1', 'arg2', 'arg3', 'arg4', 'arg5', 'arg6')
 ```
 
-* arg1 = The movement command (eg. 'gg'). This argument is required as there's\
+* arg1 = The movement command (eg. 'gg'). This argument is required as there's
   no default value.
 * arg2 = Scroll the window with the cursor. (1 for on, 0 for off). Default is 1.
 * arg3 = Accept a count before the command (1 for on, 0 for off). Default is 0.
 * arg4 = Length of delay between lines (in ms). Default is 5.
 * arg5 = Slowdown at the end of the movement (1 for on, 0 for off). Default is 1.
-* arg6 = Max number of lines before scrolling is skipped. Mainly just for big\
+* arg6 = Max number of lines before scrolling is skipped. Mainly just for big
   commands such as 'gg' and 'G'. Default is 150.
 
-_Note: arg1 is a string while the others are numbers._
+_Note: arg1 is a string while the others are integers._
+
+## Options
+
+An options table can be passed into the setup function for custom settings. The
+default settings are:
+
+```lua
+require('cinnamon').setup {
+  -- Enable or disable default keymaps:
+  default_keymaps = true,
+  -- Enable or disable extra keymaps:
+  extra_keymaps = false,
+  -- Keep cursor centered in window when using window scrolling (arg2):
+  centered = true,
+}
+```
+
+There is no need to call `require('cinnamon').setup()` if you do not wish to set
+custom options.
 
 ## Default Keymaps
 
@@ -74,12 +93,6 @@ keymap('n', '<C-i>', "<Cmd>lua Cinnamon.Scroll('1<C-i>', 1, 0, 3)<CR>", opts)
 _Note: `1<C-i>` has to be used instead of `<C-i>` to prevent it from being\
 expanded into a literal tab, as `<Tab>` and `<C-i>` are equivalent for vim._
 
-To **disable** the default keymaps, add the following to your .vimrc:
-
-```lua
-vim.g.cinnamon_no_defaults = 1
-```
-
 ## Extra Keymaps
 
 ```lua
@@ -103,23 +116,22 @@ keymap('x', '<Up>', "<Cmd>lua Cinnamon.Scroll('k', 0, 1, 2, 0)<CR>", opts)
 keymap('x', '<Down>', "<Cmd>lua Cinnamon.Scroll('j', 0, 1, 2, 0)<CR>", opts)
 ```
 
-To **enable** the extra keymaps, add the following to your .vimrc:
-
-```lua
-vim.g.cinnamon_extras = 1
-```
-
 ## Creating Custom Keymaps
 
-Custom keymaps can be created using the 'Cinnamon' command.
+Custom keymaps can be created using the 'Scroll' function.
 
 ```lua
--- Disable default keymaps:
-vim.g.cinnamon_no_defaults = 1
+-- Disable the default keymaps:
+require('cinnamon').setup {
+  default_keymaps = false,
+}
 
--- Scroll half a window without centering the cursor:
-keymap('', '<C-u>', "<Cmd>lua Cinnamon.Scroll('<C-u>', 0)<CR>", opts)
-keymap('', '<C-d>', "<Cmd>lua Cinnamon.Scroll('<C-d>', 0)<CR>", opts)
-keymap('i', '<C-u>', "<Cmd>lua Cinnamon.Scroll('<C-u>', 0)<CR>", opts)
-keymap('i', '<C-d>', "<Cmd>lua Cinnamon.Scroll('<C-d>', 0)<CR>", opts)
+local opts = { noremap = true, silent = true }
+local keymap = vim.api.nvim_set_keymap
+
+-- Add your custom keymaps:
+keymap('n', '{', "<Cmd>lua Cinnamon.Scroll('{')<dCR>", opts)
+keymap('n', '}', "<Cmd>lua Cinnamon.Scroll('}')<CR>", opts)
+keymap('x', '{', "<Cmd>lua Cinnamon.Scroll('{')<CR>", opts)
+keymap('x', '}', "<Cmd>lua Cinnamon.Scroll('}')<CR>", opts)
 ```
