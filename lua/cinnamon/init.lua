@@ -7,7 +7,9 @@ M.setup = function()
   Cinnamon = require 'cinnamon.scroll'
 
   -- Options:
-  vim.g.cinnamon_centered = 1
+  if vim.g.cinnamon_centered ~= 1 then
+    vim.g.cinnamon_centered = 0
+  end
 
   -- Keymaps:
   if vim.g.cinnamon_no_defaults ~= 1 then
