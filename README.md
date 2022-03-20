@@ -22,7 +22,7 @@ use 'declancm/cinnamon.nvim'
 ## The Function
 
 ```lua
-Cinnamon.Scroll('arg1', 'arg2', 'arg3', 'arg4', 'arg5', 'arg6')
+Cinnamon.Scroll('arg1', 'arg2', 'arg3', 'arg4', 'arg5')
 ```
 
 * arg1 = The movement command (eg. 'gg'). This argument is required as there's
@@ -31,8 +31,6 @@ Cinnamon.Scroll('arg1', 'arg2', 'arg3', 'arg4', 'arg5', 'arg6')
 * arg3 = Accept a count before the command (1 for on, 0 for off). Default is 0.
 * arg4 = Length of delay between lines (in ms). Default is 5.
 * arg5 = Slowdown at the end of the movement (1 for on, 0 for off). Default is 1.
-* arg6 = Max number of lines before scrolling is skipped. Mainly just for big
-  commands such as 'gg' and 'G'. Default is 150.
 
 _Note: arg1 is a string while the others are integers._
 
@@ -50,6 +48,8 @@ require('cinnamon').setup {
   extra_keymaps = false,
   -- Keep cursor centered in window when using window scrolling (arg2):
   centered = true,
+  -- Max number of lines moved before scrolling is skipped (mainly for big commands such as 'gg' and 'G'):
+  scroll_limit = 150,
 }
 ```
 
@@ -102,9 +102,9 @@ local keymap = vim.api.nvim_set_keymap
 
 -- Line number movements:
 keymap('n', 'gg', "<Cmd>lua Cinnamon.Scroll('gg', 0, 0, 3)<CR>", opts)
-keymap('n', 'G', "<Cmd>lua Cinnamon.Scroll('G', 0, 0, 3)<CR>", opts)
+keymap('n', 'G', "<Cmd>lua Cinnamon.Scroll('G', 0, 1, 3)<CR>", opts)
 keymap('x', 'gg', "<Cmd>lua Cinnamon.Scroll('gg', 0, 0, 3)<CR>", opts)
-keymap('x', 'G', "<Cmd>lua Cinnamon.Scroll('G', 0, 0, 3)<CR>", opts)
+keymap('x', 'G', "<Cmd>lua Cinnamon.Scroll('G', 0, 1, 3)<CR>", opts)
 
 -- Up/down movements:
 keymap('n', 'k', "<Cmd>lua Cinnamon.Scroll('k', 0, 1, 2, 0)<CR>", opts)

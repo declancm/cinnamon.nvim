@@ -10,6 +10,7 @@ M.setup = function(options)
     default_keymaps = true,
     extra_keymaps = false,
     centered = true,
+    scroll_limit = 150,
   }
 
   -- Generate the options table:
@@ -35,7 +36,8 @@ M.setup = function(options)
   Cinnamon = require 'cinnamon.scroll'
 
   -- Variables:
-  vim.g.__cinnamon_centered = (options.centered == true) and 1 or 0
+  vim.g.__cinnamon_centered = options.centered
+  vim.g.__cinnamon_scroll_limit = options.scroll_limit
 
   -- Keymaps:
   if options.default_keymaps == true then

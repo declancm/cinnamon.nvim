@@ -13,20 +13,18 @@ arg2 = Scroll the window with the cursor. (1 for on, 0 for off). Default is 1.
 arg3 = Accept a count before the command (1 for on, 0 for off). Default is 0.
 arg4 = Length of delay between lines (in ms). Default is 5.
 arg5 = Slowdown at the end of the movement (1 for on, 0 for off). Default is 1.
-arg6 = Max number of lines before scrolling is skipped. Mainly just for big\
-commands such as 'gg' and 'G'. Default is 150.
 
 Note: Each argument is a string separated by a comma.
 
 ]]
 
-function M.Scroll(movement, scrollWin, useCount, delay, slowdown, maxLines)
+function M.Scroll(movement, scrollWin, useCount, delay, slowdown)
   -- Setting defaults:
   scrollWin = scrollWin or 1
   useCount = useCount or 0
   delay = delay or 5
   slowdown = slowdown or 1
-  maxLines = maxLines or 150
+  local maxLines = vim.g.__cinnamon_scroll_limit
   -- Don't waste time performing the whole function if only moving one line.
   if (movement == 'j' or movement == 'k') and vim.v.count1 == 1 then
     vim.cmd('norm! ' .. movement)
@@ -77,7 +75,7 @@ function M.ScrollDown(distance, delay, scrollWin, slowdown)
     counter = require('cinnamon.scroll').CheckFold(counter)
     vim.cmd 'norm! j'
     if scrollWin == 1 then
-      if vim.g.__cinnamon_centered == 1 then
+      if vim.g.__cinnamon_centered == true then
         -- Stay at the center of the screen.
         if vim.fn.winline() > halfHeight then
           vim.cmd [[silent exec "norm! \<C-E>"]]
@@ -113,7 +111,7 @@ function M.ScrollUp(distance, delay, scrollWin, slowdown)
     counter = require('cinnamon.scroll').CheckFold(counter)
     vim.cmd 'norm! k'
     if scrollWin == 1 then
-      if vim.g.__cinnamon_centered == 1 then
+      if vim.g.__cinnamon_centered == true then
         -- Stay at the center of the screen.
         if vim.fn.winline() < halfHeight then
           vim.cmd [[silent exec "norm! \<C-Y>"]]
@@ -209,7 +207,7 @@ If window scrolling and screen centering are enabled, center the screen smoothly
 
 function M.CenterScreen(remaining, scrollWin, delay, slowdown)
   local halfHeight = math.ceil(vim.fn.winheight(0) / 2)
-  if scrollWin == 1 and vim.g.__cinnamon_centered == 1 then
+  if scrollWin == 1 and vim.g.__cinnamon_centered == true then
     local prevLine = vim.fn.winline()
     while vim.fn.winline() > halfHeight do
       vim.cmd [[silent exec "norm! \<C-E>"]]
