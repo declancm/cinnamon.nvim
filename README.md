@@ -1,10 +1,10 @@
-# Cinnamon Scroll (Neovim)🌀
+# Cinnamon Scroll (Neovim) 🌀
 
-A scrolling plugin written in lua that works with any movement command.
+A scrolling plugin written in lua that works with any 👏 movement 👏 command 👏.
 
-Is is written in lua, highly customizable, supports using single repeat '.'
-(as it doesn't break or replace your last performed command), and even supports
-scrolling over folds :D.
+Is is written in lua, highly customizable, supports single repeat '.' (as it
+doesn't break or replace your last performed command), and supports scrolling
+over folds :D.
 
 _Petition for a cinnamon roll emoji:_ <https://www.change.org/p/apple-cinnamon-roll-emoji>
 
@@ -115,24 +115,4 @@ keymap('x', 'k', "<Cmd>lua Cinnamon.Scroll('k', 0, 1, 2, 0)<CR>", opts)
 keymap('x', 'j', "<Cmd>lua Cinnamon.Scroll('j', 0, 1, 2, 0)<CR>", opts)
 keymap('x', '<Up>', "<Cmd>lua Cinnamon.Scroll('k', 0, 1, 2, 0)<CR>", opts)
 keymap('x', '<Down>', "<Cmd>lua Cinnamon.Scroll('j', 0, 1, 2, 0)<CR>", opts)
-```
-
-## Creating Custom Keymaps
-
-Custom keymaps can be created using the 'Scroll' function.
-
-```lua
--- Disable the default keymaps:
-require('cinnamon').setup {
-  default_keymaps = false,
-}
-
-local opts = { noremap = true, silent = true }
-local keymap = vim.api.nvim_set_keymap
-
--- Add your custom keymaps:
-keymap('n', '{', "<Cmd>lua Cinnamon.Scroll('{')<dCR>", opts)
-keymap('n', '}', "<Cmd>lua Cinnamon.Scroll('}')<CR>", opts)
-keymap('x', '{', "<Cmd>lua Cinnamon.Scroll('{')<CR>", opts)
-keymap('x', '}', "<Cmd>lua Cinnamon.Scroll('}')<CR>", opts)
 ```
