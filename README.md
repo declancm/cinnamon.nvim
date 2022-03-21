@@ -46,8 +46,12 @@ require('cinnamon').setup {
   default_keymaps = true,
   -- Enable extra keymaps:
   extra_keymaps = false,
+  -- Enable extended keymaps:
+  extended_keymaps = false,
   -- Keep cursor centered in window when using window scrolling (arg2):
   centered = true,
+  -- Disable the plugin:
+  disable = false,
   -- Max number of lines moved before scrolling is skipped (mainly for big commands such as 'gg' and 'G'):
   scroll_limit = 150,
 }
@@ -73,6 +77,19 @@ keymap('n', '<C-b>', "<Cmd>lua Cinnamon.Scroll('<C-b>', 1, 1)<CR>", opts)
 keymap('n', '<C-f>', "<Cmd>lua Cinnamon.Scroll('<C-f>', 1, 1)<CR>", opts)
 keymap('n', '<PageUp>', "<Cmd>lua Cinnamon.Scroll('<C-b>', 1, 1)<CR>", opts)
 keymap('n', '<PageDown>', "<Cmd>lua Cinnamon.Scroll('<C-f>', 1, 1)<CR>", opts)
+```
+
+## Extra Keymaps
+
+```lua
+-- Line number movements:
+local opts = { noremap = true, silent = true }
+local keymap = vim.api.nvim_set_keymap
+
+keymap('n', 'gg', "<Cmd>lua Cinnamon.Scroll('gg', 0, 0, 3)<CR>", opts)
+keymap('n', 'G', "<Cmd>lua Cinnamon.Scroll('G', 0, 1, 3)<CR>", opts)
+keymap('x', 'gg', "<Cmd>lua Cinnamon.Scroll('gg', 0, 0, 3)<CR>", opts)
+keymap('x', 'G', "<Cmd>lua Cinnamon.Scroll('G', 0, 1, 3)<CR>", opts)
 
 -- Paragraph movements:
 keymap('n', '{', "<Cmd>lua Cinnamon.Scroll('{', 0)<dCR>", opts)
@@ -85,34 +102,46 @@ keymap('n', 'n', "<Cmd>lua Cinnamon.Scroll('n', 1, 0, 3)<CR>", opts)
 keymap('n', 'N', "<Cmd>lua Cinnamon.Scroll('N', 1, 0, 3)<CR>", opts)
 keymap('n', '*', "<Cmd>lua Cinnamon.Scroll('*', 1, 0, 3)<CR>", opts)
 keymap('n', '#', "<Cmd>lua Cinnamon.Scroll('#', 1, 0, 3)<CR>", opts)
+keymap('n', 'g*', "<Cmd>lua Cinnamon.Scroll('g*', 1, 0, 3)<CR>", opts)
+keymap('n', 'g#', "<Cmd>lua Cinnamon.Scroll('g#', 1, 0, 3)<CR>", opts)
 
 -- Previous/next cursor location:
 keymap('n', '<C-o>', "<Cmd>lua Cinnamon.Scroll('<C-o>', 1, 0, 3)<CR>", opts)
 keymap('n', '<C-i>', "<Cmd>lua Cinnamon.Scroll('1<C-i>', 1, 0, 3)<CR>", opts)
 ```
 
-_Note: `1<C-i>` has to be used instead of `<C-i>` to prevent it from being\
+_Note: `1<C-i>` has to be used instead of `<C-i>` to prevent it from being
 expanded into a literal tab, as `<Tab>` and `<C-i>` are equivalent for vim._
 
-## Extra Keymaps
+## Extended Keymaps
 
 ```lua
 local opts = { noremap = true, silent = true }
 local keymap = vim.api.nvim_set_keymap
 
--- Line number movements:
-keymap('n', 'gg', "<Cmd>lua Cinnamon.Scroll('gg', 0, 0, 3)<CR>", opts)
-keymap('n', 'G', "<Cmd>lua Cinnamon.Scroll('G', 0, 1, 3)<CR>", opts)
-keymap('x', 'gg', "<Cmd>lua Cinnamon.Scroll('gg', 0, 0, 3)<CR>", opts)
-keymap('x', 'G', "<Cmd>lua Cinnamon.Scroll('G', 0, 1, 3)<CR>", opts)
-
 -- Up/down movements:
 keymap('n', 'k', "<Cmd>lua Cinnamon.Scroll('k', 0, 1, 2, 0)<CR>", opts)
 keymap('n', 'j', "<Cmd>lua Cinnamon.Scroll('j', 0, 1, 2, 0)<CR>", opts)
-keymap('n', '<Up>', "<Cmd>lua Cinnamon.Scroll('k', 0, 1, 2, 0)<CR>", opts)
-keymap('n', '<Down>', "<Cmd>lua Cinnamon.Scroll('j', 0, 1, 2, 0)<CR>", opts)
 keymap('x', 'k', "<Cmd>lua Cinnamon.Scroll('k', 0, 1, 2, 0)<CR>", opts)
 keymap('x', 'j', "<Cmd>lua Cinnamon.Scroll('j', 0, 1, 2, 0)<CR>", opts)
+keymap('n', '<Up>', "<Cmd>lua Cinnamon.Scroll('k', 0, 1, 2, 0)<CR>", opts)
+keymap('n', '<Down>', "<Cmd>lua Cinnamon.Scroll('j', 0, 1, 2, 0)<CR>", opts)
 keymap('x', '<Up>', "<Cmd>lua Cinnamon.Scroll('k', 0, 1, 2, 0)<CR>", opts)
 keymap('x', '<Down>', "<Cmd>lua Cinnamon.Scroll('j', 0, 1, 2, 0)<CR>", opts)
+```
+## Custom Keymaps
+
+If creating a custom keymap which is within 'default keymaps' or 'extra 
+keymaps', make sure they are disabled so yours isn't overridden.
+
+Example:
+
+```lua
+require('cinnamon').setup { default_keymaps = false }
+
+local opts = { noremap = true, silent = true }
+local keymap = vim.api.nvim_set_keymap
+
+keymap('', '<C-u>', "<Cmd>lua Cinnamon.Scroll('<C-u>')<CR>", opts)
+keymap('', '<C-d>', "<Cmd>lua Cinnamon.Scroll('<C-d>')<CR>", opts)
 ```

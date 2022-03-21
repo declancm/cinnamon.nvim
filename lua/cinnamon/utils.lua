@@ -35,7 +35,7 @@ function M.ScrollDown(distance, scrollWin, delay, slowdown)
   end
   local counter = 1
   while counter <= distance do
-    counter = require('cinnamon.utils').CheckFold(counter)
+    counter = require('cinnamon.utils').CheckForFold(counter)
     vim.cmd 'norm! j'
     if scrollWin == 1 then
       if vim.g.__cinnamon_centered == true then
@@ -64,7 +64,7 @@ function M.ScrollUp(distance, scrollWin, delay, slowdown)
   end
   local counter = 1
   while counter <= -distance do
-    counter = require('cinnamon.utils').CheckFold(counter)
+    counter = require('cinnamon.utils').CheckForFold(counter)
     vim.cmd 'norm! k'
     if scrollWin == 1 then
       if vim.g.__cinnamon_centered == true then
@@ -86,7 +86,7 @@ function M.ScrollUp(distance, scrollWin, delay, slowdown)
   require('cinnamon.utils').CenterScreen(0, scrollWin, delay, slowdown)
 end
 
-function M.CheckFold(counter)
+function M.CheckForFold(counter)
   local foldStart = vim.fn.foldclosed '.'
   -- If a fold exists, add the length to the counter.
   if foldStart ~= -1 then
@@ -96,7 +96,7 @@ function M.CheckFold(counter)
   return counter
 end
 
-function M.MovementDistance(movement, useCount)
+function M.GetScrollDistance(movement, useCount)
   local newColumn = -1
   -- Create a backup for the current window view.
   local viewSaved = vim.fn.winsaveview()
@@ -111,6 +111,7 @@ function M.MovementDistance(movement, useCount)
     vim.cmd('norm! ' .. movement)
     -- vim.fn.feedkeys(movement, 'tn')
   end
+  -- If searching within a fold, open the fold.
   for _, command in pairs { 'n', 'N', '*', '#', 'g*', 'g#' } do
     if command == movement and vim.fn.foldclosed '.' ~= -1 then
       vim.cmd 'norm! zo'

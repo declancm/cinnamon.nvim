@@ -18,6 +18,10 @@ Note: Each argument is a string separated by a comma.
 ]]
 
 function M.Scroll(movement, scrollWin, useCount, delay, slowdown)
+  if vim.g.__cinnamon_disabled then
+    print 'Cinnamon is disabled.'
+    return
+  end
   -- Check if movement argument exists.
   if not movement then
     vim.cmd [[echohl ErrorMsg | echo "Cinnamon: The movement argument cannot be nil." | echohl None]]
@@ -40,7 +44,10 @@ function M.Scroll(movement, scrollWin, useCount, delay, slowdown)
     return
   end
   -- Get the scroll distance and the column position.
-  local distance, newColumn, fileChanged, limitExceeded = require('cinnamon.utils').MovementDistance(movement, useCount)
+  local distance, newColumn, fileChanged, limitExceeded = require('cinnamon.utils').GetScrollDistance(
+    movement,
+    useCount
+  )
   if fileChanged then
     return
   elseif limitExceeded then
