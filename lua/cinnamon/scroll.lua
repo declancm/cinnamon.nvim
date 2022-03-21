@@ -1,6 +1,5 @@
 local M = {}
 
--- TODO: get n and N to work well with folds.
 -- TODO: get the scroll to work for g commands such as gj and gk.
 
 --[[
@@ -19,63 +18,42 @@ Note: Each argument is a string separated by a comma.
 ]]
 
 function M.Scroll(movement, scrollWin, useCount, delay, slowdown)
+  -- Check if movement argument exists.
+  if not movement then
+    vim.cmd [[echohl ErrorMsg | echo "Cinnamon: The movement argument cannot be nil." | echohl None]]
+    return
+  end
   -- Setting defaults:
   scrollWin = scrollWin or 1
   useCount = useCount or 0
   delay = delay or 5
   slowdown = slowdown or 1
-  local maxLines = vim.g.__cinnamon_scroll_limit
-  -- Don't waste time performing the whole function if only moving one line.
-  for _, item in pairs { 'j', 'k' } do
-    if item == movement and vim.v.count1 == 1 then
+  -- Execute movement if just moving one line.
+  for _, command in pairs { 'j', 'k' } do
+    if command == movement and vim.v.count1 == 1 then
       vim.cmd('norm! ' .. movement)
       return
     end
   end
-  -- If no search pattern, return an error if using a search movement.
-  for _, command in pairs { 'n', 'N' } do
-    if command == movement then
-      local pattern = vim.fn.getreg '/'
-      if pattern == '' then
-        vim.cmd [[echohl ErrorMsg | echo "Cinnamon: The search pattern is empty." | echohl None]]
-        return
-      end
-      if vim.fn.search(pattern, 'nw') == 0 then
-        vim.cmd [[echohl ErrorMsg | echo "Cinnamon: Pattern not found: " . getreg('/') | echohl None ]] -- E486
-        return
-      end
-    end
-  end
-  -- If no word under cursor, return an error if using a search movement.
-  for _, command in pairs { '*', '#', 'g*', 'g#' } do
-    if command == movement then
-      -- Check if string is empty or only whitespace.
-      if vim.fn.getline('.'):match '^%s*$' then
-        vim.cmd [[echohl ErrorMsg | echo "Cinnamon: No string under cursor." | echohl None]] -- E348
-        return
-      end
-    end
+  -- Check for any errors with the movement.
+  if require('cinnamon.utils').CheckMovementErrors(movement) == true then
+    return
   end
   -- Get the scroll distance and the column position.
-  local distance, newColumn, fileChanged = require('cinnamon.utils').MovementDistance(movement, useCount)
-  -- It the distance is too long, perform the movement without the scroll.
-  if distance > maxLines or distance < -maxLines then
-    if useCount ~= 0 and vim.v.count1 > 1 then
-      vim.cmd('norm! ' .. vim.v.count1 .. movement)
-    else
-      vim.cmd('norm! ' .. movement)
+  local distance, newColumn, fileChanged, limitExceeded = require('cinnamon.utils').MovementDistance(movement, useCount)
+  if fileChanged then
+    return
+  elseif limitExceeded then
+    if scrollWin == 1 and vim.g.__cinnamon_centered == true then
+      vim.cmd 'norm! zz'
     end
     return
   end
   -- Perform the scroll.
   if distance > 0 then
-    require('cinnamon.utils').ScrollDown(distance, delay, scrollWin, slowdown)
+    require('cinnamon.utils').ScrollDown(distance, scrollWin, delay, slowdown)
   elseif distance < 0 then
-    require('cinnamon.utils').ScrollUp(distance, delay, scrollWin, slowdown)
-  end
-  -- Center the screen if it's not centered.
-  if fileChanged == false then
-    require('cinnamon.utils').CenterScreen(0, scrollWin, delay, slowdown)
+    require('cinnamon.utils').ScrollUp(distance, scrollWin, delay, slowdown)
   end
   -- Change the cursor column position if required.
   if newColumn ~= -1 then

@@ -1,14 +1,34 @@
 local M = {}
 
---[[
+function M.CheckMovementErrors(movement)
+  -- If no search pattern, return an error if using a search movement.
+  for _, command in pairs { 'n', 'N' } do
+    if command == movement then
+      local pattern = vim.fn.getreg '/'
+      if pattern == '' then
+        vim.cmd [[echohl ErrorMsg | echo "Cinnamon: The search pattern is empty." | echohl None]]
+        return true
+      end
+      if vim.fn.search(pattern, 'nw') == 0 then
+        vim.cmd [[echohl ErrorMsg | echo "Cinnamon: Pattern not found: " . getreg('/') | echohl None ]] -- E486
+        return true
+      end
+    end
+  end
+  -- If no word under cursor, return an error if using a search movement.
+  for _, command in pairs { '*', '#', 'g*', 'g#' } do
+    if command == movement then
+      -- Check if string is empty or only whitespace.
+      if vim.fn.getline('.'):match '^%s*$' then
+        vim.cmd [[echohl ErrorMsg | echo "Cinnamon: No string under cursor." | echohl None]] -- E348
+        return true
+      end
+    end
+  end
+  return false
+end
 
-require('cinnamon.utils').ScrollDown(distance, delay, scrollWin, slowdown)
-
-Performs the actual scrolling movement downwards based on the given arguments.
-
-]]
-
-function M.ScrollDown(distance, delay, scrollWin, slowdown)
+function M.ScrollDown(distance, scrollWin, delay, slowdown)
   local halfHeight = math.ceil(vim.fn.winheight(0) / 2)
   if vim.fn.winline() > halfHeight then
     require('cinnamon.utils').CenterScreen(distance, scrollWin, delay, slowdown)
@@ -24,8 +44,7 @@ function M.ScrollDown(distance, delay, scrollWin, slowdown)
           vim.cmd [[silent exec "norm! \<C-E>"]]
         end
       else
-        -- Scroll the window if the current line is not within the scrolloff
-        -- borders.
+        -- Scroll the window if the current line is not within 'scrolloff'.
         if not (vim.fn.winline() <= vim.o.so + 1 or vim.fn.winline() >= vim.fn.winheight '%' - vim.o.so) then
           vim.cmd [[silent exec "norm! \<C-E>"]]
         end
@@ -34,17 +53,11 @@ function M.ScrollDown(distance, delay, scrollWin, slowdown)
     counter = counter + 1
     require('cinnamon.utils').SleepDelay(distance - counter, delay, slowdown)
   end
+  -- Center the screen.
+  require('cinnamon.utils').CenterScreen(0, scrollWin, delay, slowdown)
 end
 
---[[
-
-require('cinnamon.utils').ScrollDown(distance, delay, scrollWin, slowdown)
-
-Performs the actual scrolling movement upwards based on the given arguments.
-
-]]
-
-function M.ScrollUp(distance, delay, scrollWin, slowdown)
+function M.ScrollUp(distance, scrollWin, delay, slowdown)
   local halfHeight = math.ceil(vim.fn.winheight(0) / 2)
   if vim.fn.winline() < halfHeight then
     require('cinnamon.utils').CenterScreen(-distance, scrollWin, delay, slowdown)
@@ -60,8 +73,7 @@ function M.ScrollUp(distance, delay, scrollWin, slowdown)
           vim.cmd [[silent exec "norm! \<C-Y>"]]
         end
       else
-        -- Scroll the window if the current line is not within the scrolloff
-        -- borders.
+        -- Scroll the window if the current line is not within 'scrolloff'.
         if not (vim.fn.winline() <= vim.o.so + 1 or vim.fn.winline() >= vim.fn.winheight '%' - vim.o.so) then
           vim.cmd [[silent exec "norm! \<C-Y>"]]
         end
@@ -70,16 +82,9 @@ function M.ScrollUp(distance, delay, scrollWin, slowdown)
     counter = counter + 1
     require('cinnamon.utils').SleepDelay(-distance + counter, delay, slowdown)
   end
+  -- Center the screen.
+  require('cinnamon.utils').CenterScreen(0, scrollWin, delay, slowdown)
 end
-
---[[
-
-require('cinnamon.utils').CheckFold(counter)
-
-The function will check if the current cursor position during the movement is a
-fold. If so, add the full length of the fold to the cursor.
-
-]]
 
 function M.CheckFold(counter)
   local foldStart = vim.fn.foldclosed '.'
@@ -106,23 +111,33 @@ function M.MovementDistance(movement, useCount)
     vim.cmd('norm! ' .. movement)
     -- vim.fn.feedkeys(movement, 'tn')
   end
+  for _, command in pairs { 'n', 'N', '*', '#', 'g*', 'g#' } do
+    if command == movement and vim.fn.foldclosed '.' ~= -1 then
+      vim.cmd 'norm! zo'
+    end
+  end
   local newRow = vim.fn.getcurpos()[2]
   local newFile = vim.fn.bufname '%'
   -- Check if the file has changed.
   if prevFile ~= newFile then
     -- Center the screen.
     vim.cmd 'norm! zz'
-    return 0, -1, true
+    return 0, -1, true, false
   end
   -- Calculate the movement distance.
   local distance = newRow - row
+  -- Check if the distance is too long.
+  local scrollLimit = vim.g.__cinnamon_scroll_limit
+  if distance > scrollLimit or distance < -scrollLimit then
+    return 0, -1, false, true
+  end
   -- Get the new column position if 'curswant' has changed.
   if curswant ~= vim.fn.getcurpos()[5] then
     newColumn = vim.fn.getcurpos()[3]
   end
   -- Restore the window view.
   vim.fn.winrestview(viewSaved)
-  return distance, newColumn, false
+  return distance, newColumn, false, false
 end
 
 function M.SleepDelay(remaining, delay, slowdown)
@@ -139,14 +154,6 @@ function M.SleepDelay(remaining, delay, slowdown)
     vim.cmd('sleep ' .. delay .. 'm')
   end
 end
-
---[[
-
-require('cinnamon.utils').CenterScreen(remaining, scrollWin, delay, slowdown)
-
-If window scrolling and screen centering are enabled, center the screen smoothly.
-
-]]
 
 function M.CenterScreen(remaining, scrollWin, delay, slowdown)
   local halfHeight = math.ceil(vim.fn.winheight(0) / 2)
