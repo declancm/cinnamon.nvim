@@ -1,9 +1,7 @@
 local M = {}
 
 -- TODO: get n and N to work well with folds.
--- TODO: display a better error message if search not found.
--- Create an array of all the search movements and check the value of @/ ?
--- TODO: make it work for g commands such as gj and gk.
+-- TODO: get the scroll to work for g commands such as gj and gk.
 
 --[[
 
@@ -37,11 +35,12 @@ function M.Scroll(movement, scrollWin, useCount, delay, slowdown)
   -- If no search pattern, return an error if using a search movement.
   for _, command in pairs { 'n', 'N' } do
     if command == movement then
-      if vim.fn.getreg '/' == '' then
+      local pattern = vim.fn.getreg '/'
+      if pattern == '' then
         vim.cmd [[echohl ErrorMsg | echo "Cinnamon: The search pattern is empty." | echohl None]]
         return
       end
-      if vim.fn.search(vim.fn.getreg '/', 'nw') == 0 then
+      if vim.fn.search(pattern, 'nw') == 0 then
         vim.cmd [[echohl ErrorMsg | echo "Cinnamon: Pattern not found: " . getreg('/') | echohl None ]] -- E486
         return
       end
