@@ -11,7 +11,8 @@ _Petition for a cinnamon roll emoji:_ <https://www.change.org/p/apple-cinnamon-r
 ## Installation
 
 Install with your favorite package manager. No configuration is required to get
-started with the default keymaps.
+started with the default keymaps. I highly recommend trying the extra keymaps as
+the are what set this plugin apart.
 
 ### Packer
 
@@ -22,7 +23,7 @@ use 'declancm/cinnamon.nvim'
 ## The Function
 
 ```lua
-Cinnamon.Scroll('arg1', 'arg2', 'arg3', 'arg4', 'arg5')
+Cinnamon.Scroll(arg1, arg2, arg3, arg4, arg5)
 ```
 
 * arg1 = The movement command (eg. 'gg'). This argument is required as there's
@@ -42,18 +43,12 @@ The default settings are:
 
 ```lua
 require('cinnamon').setup {
-  -- Enable default keymaps:
-  default_keymaps = true,
-  -- Enable extra keymaps:
-  extra_keymaps = false,
-  -- Enable extended keymaps:
-  extended_keymaps = false,
-  -- Keep cursor centered in window when using window scrolling (arg2):
-  centered = true,
-  -- Disable the plugin:
-  disable = false,
-  -- Max number of lines moved before scrolling is skipped (mainly for big commands such as 'gg' and 'G'):
-  scroll_limit = 150,
+  default_keymaps = true    -- Enable default keymaps.
+  extra_keymaps = false,    -- Enable extra keymaps.
+  extended_keymaps = false, -- Enable extended keymaps.
+  centered = true,    -- Keep cursor centered in window when using window scrolling (arg2):
+  disable = false,    -- Disable the plugin.
+  scroll_limit = 150, -- Max number of lines moved before scrolling is skipped.
 }
 ```
 
@@ -143,6 +138,6 @@ require('cinnamon').setup { default_keymaps = false }
 local opts = { noremap = true, silent = true }
 local keymap = vim.api.nvim_set_keymap
 
-keymap('', '<C-u>', "<Cmd>lua Cinnamon.Scroll('<C-u>')<CR>", opts)
-keymap('', '<C-d>', "<Cmd>lua Cinnamon.Scroll('<C-d>')<CR>", opts)
+keymap('', '<C-u>', "<Cmd>lua Cinnamon.Scroll('<C-u>', 1, 0, 3)<CR>", opts)
+keymap('', '<C-d>', "<Cmd>lua Cinnamon.Scroll('<C-d>', 1, 0, 3)<CR>", opts)
 ```
