@@ -19,12 +19,12 @@ Note: Each argument is a string separated by a comma.
 
 function M.Scroll(movement, scrollWin, useCount, delay, slowdown)
   if vim.g.__cinnamon_disabled then
-    print 'Cinnamon is disabled.'
+    print('Cinnamon is disabled.')
     return
   end
   -- Check if movement argument exists.
   if not movement then
-    vim.cmd [[echohl ErrorMsg | echo "Cinnamon: The movement argument cannot be nil." | echohl None]]
+    vim.cmd([[echohl ErrorMsg | echo "Cinnamon: The movement argument cannot be nil." | echohl None]])
     return
   end
   -- Setting defaults:
@@ -52,7 +52,7 @@ function M.Scroll(movement, scrollWin, useCount, delay, slowdown)
     return
   elseif limitExceeded then
     if scrollWin == 1 and vim.g.__cinnamon_centered == true then
-      vim.cmd 'norm! zz'
+      vim.cmd('norm! zz')
     end
     return
   end
@@ -64,7 +64,7 @@ function M.Scroll(movement, scrollWin, useCount, delay, slowdown)
   end
   -- Change the cursor column position if required.
   if newColumn ~= -1 then
-    vim.fn.cursor(vim.fn.line '.', newColumn)
+    vim.fn.cursor(vim.fn.line('.'), newColumn)
   end
 end
 

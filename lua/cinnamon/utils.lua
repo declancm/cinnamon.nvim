@@ -4,13 +4,13 @@ function M.CheckMovementErrors(movement)
   -- If no search pattern, return an error if using a search movement.
   for _, command in pairs { 'n', 'N' } do
     if command == movement then
-      local pattern = vim.fn.getreg '/'
+      local pattern = vim.fn.getreg('/')
       if pattern == '' then
-        vim.cmd [[echohl ErrorMsg | echo "Cinnamon: The search pattern is empty." | echohl None]]
+        vim.cmd([[echohl ErrorMsg | echo "Cinnamon: The search pattern is empty." | echohl None]])
         return true
       end
       if vim.fn.search(pattern, 'nw') == 0 then
-        vim.cmd [[echohl ErrorMsg | echo "Cinnamon: Pattern not found: " . getreg('/') | echohl None ]] -- E486
+        vim.cmd([[echohl ErrorMsg | echo "Cinnamon: Pattern not found: " . getreg('/') | echohl None ]]) -- E486
         return true
       end
     end
@@ -19,8 +19,8 @@ function M.CheckMovementErrors(movement)
   for _, command in pairs { '*', '#', 'g*', 'g#' } do
     if command == movement then
       -- Check if string is empty or only whitespace.
-      if vim.fn.getline('.'):match '^%s*$' then
-        vim.cmd [[echohl ErrorMsg | echo "Cinnamon: No string under cursor." | echohl None]] -- E348
+      if vim.fn.getline('.'):match('^%s*$') then
+        vim.cmd([[echohl ErrorMsg | echo "Cinnamon: No string under cursor." | echohl None]]) -- E348
         return true
       end
     end
@@ -36,17 +36,17 @@ function M.ScrollDown(distance, scrollWin, delay, slowdown)
   local counter = 1
   while counter <= distance do
     counter = require('cinnamon.utils').CheckForFold(counter)
-    vim.cmd 'norm! j'
+    vim.cmd('norm! j')
     if scrollWin == 1 then
       if vim.g.__cinnamon_centered == true then
         -- Stay at the center of the screen.
         if vim.fn.winline() > halfHeight then
-          vim.cmd [[silent exec "norm! \<C-E>"]]
+          vim.cmd([[silent exec "norm! \<C-E>"]])
         end
       else
         -- Scroll the window if the current line is not within 'scrolloff'.
-        if not (vim.fn.winline() <= vim.o.so + 1 or vim.fn.winline() >= vim.fn.winheight '%' - vim.o.so) then
-          vim.cmd [[silent exec "norm! \<C-E>"]]
+        if not (vim.fn.winline() <= vim.o.so + 1 or vim.fn.winline() >= vim.fn.winheight('%') - vim.o.so) then
+          vim.cmd([[silent exec "norm! \<C-E>"]])
         end
       end
     end
@@ -65,17 +65,17 @@ function M.ScrollUp(distance, scrollWin, delay, slowdown)
   local counter = 1
   while counter <= -distance do
     counter = require('cinnamon.utils').CheckForFold(counter)
-    vim.cmd 'norm! k'
+    vim.cmd('norm! k')
     if scrollWin == 1 then
       if vim.g.__cinnamon_centered == true then
         -- Stay at the center of the screen.
         if vim.fn.winline() < halfHeight then
-          vim.cmd [[silent exec "norm! \<C-Y>"]]
+          vim.cmd([[silent exec "norm! \<C-Y>"]])
         end
       else
         -- Scroll the window if the current line is not within 'scrolloff'.
-        if not (vim.fn.winline() <= vim.o.so + 1 or vim.fn.winline() >= vim.fn.winheight '%' - vim.o.so) then
-          vim.cmd [[silent exec "norm! \<C-Y>"]]
+        if not (vim.fn.winline() <= vim.o.so + 1 or vim.fn.winline() >= vim.fn.winheight('%') - vim.o.so) then
+          vim.cmd([[silent exec "norm! \<C-Y>"]])
         end
       end
     end
@@ -87,7 +87,7 @@ function M.ScrollUp(distance, scrollWin, delay, slowdown)
 end
 
 function M.CheckForFold(counter)
-  local foldStart = vim.fn.foldclosed '.'
+  local foldStart = vim.fn.foldclosed('.')
   -- If a fold exists, add the length to the counter.
   if foldStart ~= -1 then
     local foldSize = vim.fn.foldclosedend(foldStart) - foldStart
@@ -104,7 +104,7 @@ function M.GetScrollDistance(movement, useCount)
   -- position after performing the movement.
   local row = vim.fn.getcurpos()[2]
   local curswant = vim.fn.getcurpos()[5]
-  local prevFile = vim.fn.bufname '%'
+  local prevFile = vim.fn.getreg('%')
   if useCount ~= 0 and vim.v.count1 > 1 then
     vim.cmd('norm! ' .. vim.v.count1 .. movement)
   else
@@ -113,16 +113,16 @@ function M.GetScrollDistance(movement, useCount)
   end
   -- If searching within a fold, open the fold.
   for _, command in pairs { 'n', 'N', '*', '#', 'g*', 'g#' } do
-    if command == movement and vim.fn.foldclosed '.' ~= -1 then
-      vim.cmd 'norm! zo'
+    if command == movement and vim.fn.foldclosed('.') ~= -1 then
+      vim.cmd('norm! zo')
     end
   end
   local newRow = vim.fn.getcurpos()[2]
-  local newFile = vim.fn.bufname '%'
+  local newFile = vim.fn.getreg('%')
   -- Check if the file has changed.
   if prevFile ~= newFile then
     -- Center the screen.
-    vim.cmd 'norm! zz'
+    vim.cmd('norm! zz')
     return 0, -1, true, false
   end
   -- Calculate the movement distance.
@@ -142,10 +142,10 @@ function M.GetScrollDistance(movement, useCount)
 end
 
 function M.SleepDelay(remaining, delay, slowdown)
-  vim.cmd 'redraw'
+  vim.cmd('redraw')
   -- Don't create a delay when scrolling comleted.
   if remaining <= 0 then
-    vim.cmd 'redraw'
+    vim.cmd('redraw')
     return
   end
   -- Increase the delay near the end of the scroll.
@@ -161,7 +161,7 @@ function M.CenterScreen(remaining, scrollWin, delay, slowdown)
   if scrollWin == 1 and vim.g.__cinnamon_centered == true then
     local prevLine = vim.fn.winline()
     while vim.fn.winline() > halfHeight do
-      vim.cmd [[silent exec "norm! \<C-E>"]]
+      vim.cmd([[silent exec "norm! \<C-E>"]])
       local newLine = vim.fn.winline()
       require('cinnamon.utils').SleepDelay(newLine - halfHeight + remaining, delay, slowdown)
       -- If line isn't changing, break the endless loop.
@@ -171,7 +171,7 @@ function M.CenterScreen(remaining, scrollWin, delay, slowdown)
       prevLine = newLine
     end
     while vim.fn.winline() < halfHeight do
-      vim.cmd [[silent exec "norm! \<C-Y>"]]
+      vim.cmd([[silent exec "norm! \<C-Y>"]])
       local newLine = vim.fn.winline()
       require('cinnamon.utils').SleepDelay(halfHeight - newLine + remaining, delay, slowdown)
       -- If line isn't changing, break the endless loop.

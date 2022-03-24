@@ -31,18 +31,18 @@ M.setup = function(options)
 
   -- Deprecated settings:
   if vim.g.cinnamon_no_defaults == 1 then
-    print "Using 'vim.g.cinnamon_no_defaults' is now deprecated :(. Please use \"require('cinnamon').setup { default_keymaps = false }\" instead."
+    print("Using 'vim.g.cinnamon_no_defaults' is now deprecated :(. Please use \"require('cinnamon').setup { default_keymaps = false }\" instead.")
     options['default_keymaps'] = false
   end
   if vim.g.cinnamon_extras == 1 then
-    print "Using 'vim.g.cinnamon_extras' is now deprecated :(. Please use \"require('cinnamon').setup { extra_keymaps = true }\" instead."
+    print("Using 'vim.g.cinnamon_extras' is now deprecated :(. Please use \"require('cinnamon').setup { extra_keymaps = true }\" instead.")
     options['cinnamon_extras'] = true
   end
 
   local opts = { noremap = true, silent = true }
   local keymap = vim.api.nvim_set_keymap
 
-  Cinnamon = require 'cinnamon.scroll'
+  Cinnamon = require('cinnamon.scroll')
 
   -- Variables:
   vim.g.__cinnamon_centered = options.centered
