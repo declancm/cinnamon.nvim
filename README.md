@@ -1,10 +1,17 @@
 # Cinnamon Scroll (Neovim) 🌀
 
-A scrolling plugin written in lua that works with any 👏 movement 👏 command 👏.
+Smooth scrolling for __ANY__ movement command 🤯. A highly customizable Neovim
+plugin written in Lua which doesn't break the single-repeat "." command (unlike
+some other plugins) and supports scrolling over folds.
 
-Is is written in lua, highly customizable, supports single repeat '.' (as it
-doesn't break or replace your last performed command), and supports scrolling
-over folds :D.
+__Now supports the go-to-definition and go-to-declaration builtin LSP functions 🥳🎉.__
+
+```lua
+-- LSP jump-to-definition.
+keymap('n', 'gd', "<Cmd>lua Cinnamon.Scroll('definition')<CR>", opts)
+-- LSP jump-to-declaration.
+keymap('n', 'gD', "<Cmd>lua Cinnamon.Scroll('declaration')<CR>", opts)
+```
 
 _Petition for a cinnamon roll emoji:_ <https://www.change.org/p/apple-cinnamon-roll-emoji>
 
@@ -26,12 +33,20 @@ use 'declancm/cinnamon.nvim'
 Cinnamon.Scroll(arg1, arg2, arg3, arg4, arg5)
 ```
 
-* arg1 = The movement command (eg. 'gg'). This argument is required as there's
-  no default value.
-* arg2 = Scroll the window with the cursor. (1 for on, 0 for off). Default is 1.
-* arg3 = Accept a count before the command (1 for on, 0 for off). Default is 0.
-* arg4 = Length of delay between lines (in ms). Default is 5.
-* arg5 = Slowdown at the end of the movement (1 for on, 0 for off). Default is 1.
+<!-- * __arg1__ = The movement command or function call. To use a function call, make -->
+<!--   sure to prepend ':' to the argument value. This argument is required as -->
+<!--   there's no default value. -->
+<!--   * Example movement: `'ggVG'` (highlight file) -->
+<!--   * Example function call: `':lua vim.lsp.buf.definition()'` (go to definition) -->
+* __arg1__ = A string containing the movement command. To use the go-to-definition LSP
+  function, use 'definition' (or 'declaration' for go-to-declaration, but this is not
+  supported by many language servers). This argument is required as there's no default
+  value.
+  * Example movement: 'ggVG' (highlight file)
+* __arg2__ = Scroll the window with the cursor. (1 for on, 0 for off). Default is 1.
+* __arg3__ = Accept a count before the command (1 for on, 0 for off). Default is 0.
+* __arg4__ = Length of delay between lines (in ms). Default is 5.
+* __arg5__ = Slowdown at the end of the movement (1 for on, 0 for off). Default is 1.
 
 _Note: arg1 is a string while the others are integers._
 
@@ -63,8 +78,8 @@ local keymap = vim.api.nvim_set_keymap
 
 -- Half-window movements:
 keymap('', '<C-u>', "<Cmd>lua Cinnamon.Scroll('<C-u>')<CR>", opts)
-keymap('', '<C-d>', "<Cmd>lua Cinnamon.Scroll('<C-d>')<CR>", opts)
 keymap('i', '<C-u>', "<Cmd>lua Cinnamon.Scroll('<C-u>')<CR>", opts)
+keymap('', '<C-d>', "<Cmd>lua Cinnamon.Scroll('<C-d>')<CR>", opts)
 keymap('i', '<C-d>', "<Cmd>lua Cinnamon.Scroll('<C-d>')<CR>", opts)
 
 -- Page movements:
@@ -83,14 +98,14 @@ local keymap = vim.api.nvim_set_keymap
 
 -- Start/end of file and line number movements:
 keymap('n', 'gg', "<Cmd>lua Cinnamon.Scroll('gg', 0, 0, 3)<CR>", opts)
-keymap('n', 'G', "<Cmd>lua Cinnamon.Scroll('G', 0, 1, 3)<CR>", opts)
 keymap('x', 'gg', "<Cmd>lua Cinnamon.Scroll('gg', 0, 0, 3)<CR>", opts)
+keymap('n', 'G', "<Cmd>lua Cinnamon.Scroll('G', 0, 1, 3)<CR>", opts)
 keymap('x', 'G', "<Cmd>lua Cinnamon.Scroll('G', 0, 1, 3)<CR>", opts)
 
 -- Paragraph movements:
 keymap('n', '{', "<Cmd>lua Cinnamon.Scroll('{', 0)<dCR>", opts)
-keymap('n', '}', "<Cmd>lua Cinnamon.Scroll('}', 0)<CR>", opts)
 keymap('x', '{', "<Cmd>lua Cinnamon.Scroll('{', 0)<CR>", opts)
+keymap('n', '}', "<Cmd>lua Cinnamon.Scroll('}', 0)<CR>", opts)
 keymap('x', '}', "<Cmd>lua Cinnamon.Scroll('}', 0)<CR>", opts)
 
 -- Previous/next search result:
@@ -117,27 +132,27 @@ local keymap = vim.api.nvim_set_keymap
 
 -- Up/down movements:
 keymap('n', 'k', "<Cmd>lua Cinnamon.Scroll('k', 0, 1, 2, 0)<CR>", opts)
-keymap('n', 'j', "<Cmd>lua Cinnamon.Scroll('j', 0, 1, 2, 0)<CR>", opts)
 keymap('x', 'k', "<Cmd>lua Cinnamon.Scroll('k', 0, 1, 2, 0)<CR>", opts)
+keymap('n', 'j', "<Cmd>lua Cinnamon.Scroll('j', 0, 1, 2, 0)<CR>", opts)
 keymap('x', 'j', "<Cmd>lua Cinnamon.Scroll('j', 0, 1, 2, 0)<CR>", opts)
 keymap('n', '<Up>', "<Cmd>lua Cinnamon.Scroll('k', 0, 1, 2, 0)<CR>", opts)
-keymap('n', '<Down>', "<Cmd>lua Cinnamon.Scroll('j', 0, 1, 2, 0)<CR>", opts)
 keymap('x', '<Up>', "<Cmd>lua Cinnamon.Scroll('k', 0, 1, 2, 0)<CR>", opts)
+keymap('n', '<Down>', "<Cmd>lua Cinnamon.Scroll('j', 0, 1, 2, 0)<CR>", opts)
 keymap('x', '<Down>', "<Cmd>lua Cinnamon.Scroll('j', 0, 1, 2, 0)<CR>", opts)
 ```
 ## Custom Keymaps
 
-If creating a custom keymap which is within 'default keymaps' or 'extra 
-keymaps', make sure they are disabled so yours isn't overridden.
-
-Example:
+If creating a custom keymap which is within the preset keymaps, make sure they 
+are disabled so yours isn't overridden.
 
 ```lua
+-- Disabling the default keymaps.
 require('cinnamon').setup { default_keymaps = false }
 
 local opts = { noremap = true, silent = true }
 local keymap = vim.api.nvim_set_keymap
 
+-- Customizing keymaps that are part of the default mappings.
 keymap('', '<C-u>', "<Cmd>lua Cinnamon.Scroll('<C-u>', 1, 0, 3)<CR>", opts)
 keymap('', '<C-d>', "<Cmd>lua Cinnamon.Scroll('<C-d>', 1, 0, 3)<CR>", opts)
 ```

@@ -1,9 +1,11 @@
 local M = {}
 
-function M.CheckMovementErrors(movement)
-  -- If no search pattern, return an error if using a search movement.
-  for _, command in pairs { 'n', 'N' } do
-    if command == movement then
+-- TODO: add a proper wait for lua functions instead of using a delay
+
+function M.CheckMovementErrors(command)
+  -- If no search pattern, return an error if using a search command.
+  for _, item in pairs { 'n', 'N' } do
+    if item == command then
       local pattern = vim.fn.getreg('/')
       if pattern == '' then
         vim.cmd([[echohl ErrorMsg | echo "Cinnamon: The search pattern is empty." | echohl None]])
@@ -15,9 +17,9 @@ function M.CheckMovementErrors(movement)
       end
     end
   end
-  -- If no word under cursor, return an error if using a search movement.
-  for _, command in pairs { '*', '#', 'g*', 'g#' } do
-    if command == movement then
+  -- If no word under cursor, return an error if using a search command.
+  for _, item in pairs { '*', '#', 'g*', 'g#' } do
+    if item == command then
       -- Check if string is empty or only whitespace.
       if vim.fn.getline('.'):match('^%s*$') then
         vim.cmd([[echohl ErrorMsg | echo "Cinnamon: No string under cursor." | echohl None]]) -- E348
@@ -28,6 +30,16 @@ function M.CheckMovementErrors(movement)
   return false
 end
 
+local function CheckForFold(counter)
+  local foldStart = vim.fn.foldclosed('.')
+  -- If a fold exists, add the length to the counter.
+  if foldStart ~= -1 then
+    local foldSize = vim.fn.foldclosedend(foldStart) - foldStart
+    counter = counter + foldSize
+  end
+  return counter
+end
+
 function M.ScrollDown(distance, scrollWin, delay, slowdown)
   local halfHeight = math.ceil(vim.fn.winheight(0) / 2)
   if vim.fn.winline() > halfHeight then
@@ -35,7 +47,7 @@ function M.ScrollDown(distance, scrollWin, delay, slowdown)
   end
   local counter = 1
   while counter <= distance do
-    counter = require('cinnamon.utils').CheckForFold(counter)
+    counter = CheckForFold(counter)
     vim.cmd('norm! j')
     if scrollWin == 1 then
       if vim.g.__cinnamon_centered == true then
@@ -64,7 +76,7 @@ function M.ScrollUp(distance, scrollWin, delay, slowdown)
   end
   local counter = 1
   while counter <= -distance do
-    counter = require('cinnamon.utils').CheckForFold(counter)
+    counter = CheckForFold(counter)
     vim.cmd('norm! k')
     if scrollWin == 1 then
       if vim.g.__cinnamon_centered == true then
@@ -86,34 +98,55 @@ function M.ScrollUp(distance, scrollWin, delay, slowdown)
   require('cinnamon.utils').CenterScreen(0, scrollWin, delay, slowdown)
 end
 
-function M.CheckForFold(counter)
-  local foldStart = vim.fn.foldclosed('.')
-  -- If a fold exists, add the length to the counter.
-  if foldStart ~= -1 then
-    local foldSize = vim.fn.foldclosedend(foldStart) - foldStart
-    counter = counter + foldSize
+local function LspFunctionWait(command)
+  local originalTagStack = vim.fn.gettagstack()
+  -- Call the lsp function.
+  if command == 'declaration' then
+    require('vim.lsp.buf').declaration()
+  elseif command == 'definition' then
+    require('vim.lsp.buf').definition()
   end
-  return counter
+  -- The tagstack is still pushed even if the location isn't being changed so monitor it.
+  local count = 0
+  while true do
+    count = count + 1
+    -- Break if the tagstack changes.
+    if vim.fn.gettagstack() ~= originalTagStack then
+      break
+    end
+    -- Break if the count gets too high.
+    if count > 500 then
+      vim.cmd([[echohl ErrorMsg | echo "Cinnamon: An error occurred with the LSP function call." | echohl None]])
+      break
+    end
+  end
+  -- The tagstack is set before location is changed so use a delay before getting location.
+  vim.cmd('sleep 100m')
 end
 
-function M.GetScrollDistance(movement, useCount)
+function M.GetScrollDistance(command, useCount)
   local newColumn = -1
   -- Create a backup for the current window view.
   local viewSaved = vim.fn.winsaveview()
   -- Calculate distance by subtracting the original position from the new
-  -- position after performing the movement.
+  -- position after performing the command.
   local row = vim.fn.getcurpos()[2]
   local curswant = vim.fn.getcurpos()[5]
   local prevFile = vim.fn.getreg('%')
-  if useCount ~= 0 and vim.v.count1 > 1 then
-    vim.cmd('norm! ' .. vim.v.count1 .. movement)
+  -- Perform the command.
+  if command == 'definition' or command == 'declaration' then
+    LspFunctionWait(command)
+    -- elseif command:sub(1, 1) == ':' then
+    --   vim.cmd(command:sub(2))
+    --   vim.cmd('sleep 100m')
+  elseif useCount ~= 0 and vim.v.count1 > 1 then
+    vim.cmd('norm! ' .. vim.v.count1 .. command)
   else
-    vim.cmd('norm! ' .. movement)
-    -- vim.fn.feedkeys(movement, 'tn')
+    vim.cmd('norm! ' .. command)
   end
   -- If searching within a fold, open the fold.
-  for _, command in pairs { 'n', 'N', '*', '#', 'g*', 'g#' } do
-    if command == movement and vim.fn.foldclosed('.') ~= -1 then
+  for _, searchCommands in pairs { 'n', 'N', '*', '#', 'g*', 'g#' } do
+    if command == searchCommands and vim.fn.foldclosed('.') ~= -1 then
       vim.cmd('norm! zo')
     end
   end

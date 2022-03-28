@@ -1,5 +1,7 @@
 local M = {}
 
+local utils = require('cinnamon.utils')
+
 -- TODO: get the scroll to work for g commands such as gj and gk.
 
 --[[
@@ -17,14 +19,14 @@ Note: Each argument is a string separated by a comma.
 
 ]]
 
-function M.Scroll(movement, scrollWin, useCount, delay, slowdown)
+function M.Scroll(command, scrollWin, useCount, delay, slowdown)
   if vim.g.__cinnamon_disabled then
     print('Cinnamon is disabled.')
     return
   end
-  -- Check if movement argument exists.
-  if not movement then
-    vim.cmd([[echohl ErrorMsg | echo "Cinnamon: The movement argument cannot be nil." | echohl None]])
+  -- Check if command argument exists.
+  if not command then
+    vim.cmd([[echohl ErrorMsg | echo "Cinnamon: The command argument cannot be nil." | echohl None]])
     return
   end
   -- Setting defaults:
@@ -32,22 +34,19 @@ function M.Scroll(movement, scrollWin, useCount, delay, slowdown)
   useCount = useCount or 0
   delay = delay or 5
   slowdown = slowdown or 1
-  -- Execute movement if just moving one line.
-  for _, command in pairs { 'j', 'k' } do
-    if command == movement and vim.v.count1 == 1 then
-      vim.cmd('norm! ' .. movement)
+  -- Execute command if just moving one line.
+  for _, item in pairs { 'j', 'k' } do
+    if item == command and vim.v.count1 == 1 then
+      vim.cmd('norm! ' .. command)
       return
     end
   end
-  -- Check for any errors with the movement.
-  if require('cinnamon.utils').CheckMovementErrors(movement) == true then
+  -- Check for any errors with the command.
+  if utils.CheckMovementErrors(command) == true then
     return
   end
   -- Get the scroll distance and the column position.
-  local distance, newColumn, fileChanged, limitExceeded = require('cinnamon.utils').GetScrollDistance(
-    movement,
-    useCount
-  )
+  local distance, newColumn, fileChanged, limitExceeded = utils.GetScrollDistance(command, useCount)
   if fileChanged then
     return
   elseif limitExceeded then
@@ -58,9 +57,9 @@ function M.Scroll(movement, scrollWin, useCount, delay, slowdown)
   end
   -- Perform the scroll.
   if distance > 0 then
-    require('cinnamon.utils').ScrollDown(distance, scrollWin, delay, slowdown)
+    utils.ScrollDown(distance, scrollWin, delay, slowdown)
   elseif distance < 0 then
-    require('cinnamon.utils').ScrollUp(distance, scrollWin, delay, slowdown)
+    utils.ScrollUp(distance, scrollWin, delay, slowdown)
   end
   -- Change the cursor column position if required.
   if newColumn ~= -1 then
