@@ -8,8 +8,8 @@ local utils = require('cinnamon.utils')
 
 require('cinnamon.scroll').Scroll('arg1', 'arg2', 'arg3', 'arg4', 'arg5', 'arg6')
 
-arg1 = The movement command (eg. 'gg'). This argument is required as there's\
-no default value.
+arg1 = The movement command (eg. 'ggVG' to highlight the file). This argument
+       is required as there's no default value.
 arg2 = Scroll the window with the cursor. (1 for on, 0 for off). Default is 1.
 arg3 = Accept a count before the command (1 for on, 0 for off). Default is 0.
 arg4 = Length of delay between lines (in ms). Default is 5.

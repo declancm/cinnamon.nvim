@@ -7,9 +7,9 @@ some other plugins) and supports scrolling over folds.
 __Now supports the go-to-definition and go-to-declaration builtin LSP functions 🥳🎉.__
 
 ```lua
--- LSP jump-to-definition.
+-- LSP go-to-definition.
 keymap('n', 'gd', "<Cmd>lua Cinnamon.Scroll('definition')<CR>", opts)
--- LSP jump-to-declaration.
+-- LSP go-to-declaration.
 keymap('n', 'gD', "<Cmd>lua Cinnamon.Scroll('declaration')<CR>", opts)
 ```
 
@@ -58,7 +58,7 @@ The default settings are:
 
 ```lua
 require('cinnamon').setup {
-  default_keymaps = true    -- Enable default keymaps.
+  default_keymaps = true,   -- Enable default keymaps.
   extra_keymaps = false,    -- Enable extra keymaps.
   extended_keymaps = false, -- Enable extended keymaps.
   centered = true,    -- Keep cursor centered in window when using window scrolling (arg2):
@@ -109,16 +109,16 @@ keymap('n', '}', "<Cmd>lua Cinnamon.Scroll('}', 0)<CR>", opts)
 keymap('x', '}', "<Cmd>lua Cinnamon.Scroll('}', 0)<CR>", opts)
 
 -- Previous/next search result:
-keymap('n', 'n', "<Cmd>lua Cinnamon.Scroll('n', 1, 0, 3)<CR>", opts)
-keymap('n', 'N', "<Cmd>lua Cinnamon.Scroll('N', 1, 0, 3)<CR>", opts)
-keymap('n', '*', "<Cmd>lua Cinnamon.Scroll('*', 1, 0, 3)<CR>", opts)
-keymap('n', '#', "<Cmd>lua Cinnamon.Scroll('#', 1, 0, 3)<CR>", opts)
-keymap('n', 'g*', "<Cmd>lua Cinnamon.Scroll('g*', 1, 0, 3)<CR>", opts)
-keymap('n', 'g#', "<Cmd>lua Cinnamon.Scroll('g#', 1, 0, 3)<CR>", opts)
+keymap('n', 'n', "<Cmd>lua Cinnamon.Scroll('n')<CR>", opts)
+keymap('n', 'N', "<Cmd>lua Cinnamon.Scroll('N')<CR>", opts)
+keymap('n', '*', "<Cmd>lua Cinnamon.Scroll('*')<CR>", opts)
+keymap('n', '#', "<Cmd>lua Cinnamon.Scroll('#')<CR>", opts)
+keymap('n', 'g*', "<Cmd>lua Cinnamon.Scroll('g*')<CR>", opts)
+keymap('n', 'g#', "<Cmd>lua Cinnamon.Scroll('g#')<CR>", opts)
 
 -- Previous/next cursor location:
-keymap('n', '<C-o>', "<Cmd>lua Cinnamon.Scroll('<C-o>', 1, 0, 3)<CR>", opts)
-keymap('n', '<C-i>', "<Cmd>lua Cinnamon.Scroll('1<C-i>', 1, 0, 3)<CR>", opts)
+keymap('n', '<C-o>', "<Cmd>lua Cinnamon.Scroll('<C-o>')<CR>", opts)
+keymap('n', '<C-i>', "<Cmd>lua Cinnamon.Scroll('1<C-i>')<CR>", opts)
 ```
 
 _Note: `1<C-i>` has to be used instead of `<C-i>` to prevent it from being
@@ -131,14 +131,14 @@ local opts = { noremap = true, silent = true }
 local keymap = vim.api.nvim_set_keymap
 
 -- Up/down movements:
-keymap('n', 'k', "<Cmd>lua Cinnamon.Scroll('k', 0, 1, 2, 0)<CR>", opts)
-keymap('x', 'k', "<Cmd>lua Cinnamon.Scroll('k', 0, 1, 2, 0)<CR>", opts)
-keymap('n', 'j', "<Cmd>lua Cinnamon.Scroll('j', 0, 1, 2, 0)<CR>", opts)
-keymap('x', 'j', "<Cmd>lua Cinnamon.Scroll('j', 0, 1, 2, 0)<CR>", opts)
-keymap('n', '<Up>', "<Cmd>lua Cinnamon.Scroll('k', 0, 1, 2, 0)<CR>", opts)
-keymap('x', '<Up>', "<Cmd>lua Cinnamon.Scroll('k', 0, 1, 2, 0)<CR>", opts)
-keymap('n', '<Down>', "<Cmd>lua Cinnamon.Scroll('j', 0, 1, 2, 0)<CR>", opts)
-keymap('x', '<Down>', "<Cmd>lua Cinnamon.Scroll('j', 0, 1, 2, 0)<CR>", opts)
+keymap('n', 'k', "<Cmd>lua Cinnamon.Scroll('k', 0, 1, 3, 0)<CR>", opts)
+keymap('x', 'k', "<Cmd>lua Cinnamon.Scroll('k', 0, 1, 3, 0)<CR>", opts)
+keymap('n', 'j', "<Cmd>lua Cinnamon.Scroll('j', 0, 1, 3, 0)<CR>", opts)
+keymap('x', 'j', "<Cmd>lua Cinnamon.Scroll('j', 0, 1, 3, 0)<CR>", opts)
+keymap('n', '<Up>', "<Cmd>lua Cinnamon.Scroll('k', 0, 1, 3, 0)<CR>", opts)
+keymap('x', '<Up>', "<Cmd>lua Cinnamon.Scroll('k', 0, 1, 3, 0)<CR>", opts)
+keymap('n', '<Down>', "<Cmd>lua Cinnamon.Scroll('j', 0, 1, 3, 0)<CR>", opts)
+keymap('x', '<Down>', "<Cmd>lua Cinnamon.Scroll('j', 0, 1, 3, 0)<CR>", opts)
 ```
 ## Custom Keymaps
 

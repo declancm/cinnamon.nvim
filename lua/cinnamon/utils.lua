@@ -107,18 +107,18 @@ local function LspFunctionWait(command)
     require('vim.lsp.buf').definition()
   end
   -- The tagstack is still pushed even if the location isn't being changed so monitor it.
-  local count = 0
+  local counter = 0
   while true do
-    count = count + 1
     -- Break if the tagstack changes.
     if vim.fn.gettagstack() ~= originalTagStack then
       break
     end
     -- Break if the count gets too high.
-    if count > 500 then
+    if counter > 500 then
       vim.cmd([[echohl ErrorMsg | echo "Cinnamon: An error occurred with the LSP function call." | echohl None]])
       break
     end
+    counter = counter + 1
   end
   -- The tagstack is set before location is changed so use a delay before getting location.
   vim.cmd('sleep 100m')
@@ -145,8 +145,8 @@ function M.GetScrollDistance(command, useCount)
     vim.cmd('norm! ' .. command)
   end
   -- If searching within a fold, open the fold.
-  for _, searchCommands in pairs { 'n', 'N', '*', '#', 'g*', 'g#' } do
-    if command == searchCommands and vim.fn.foldclosed('.') ~= -1 then
+  for _, item in pairs { 'n', 'N', '*', '#', 'g*', 'g#' } do
+    if command == item and vim.fn.foldclosed('.') ~= -1 then
       vim.cmd('norm! zo')
     end
   end

@@ -46,6 +46,7 @@ M.setup = function(options)
   local opts = { noremap = true, silent = true }
   local keymap = vim.api.nvim_set_keymap
 
+  -- Global variable used to simplify the keymaps:
   Cinnamon = require('cinnamon.scroll')
 
   -- Variables:
@@ -81,28 +82,28 @@ M.setup = function(options)
     keymap('x', '}', "<Cmd>lua Cinnamon.Scroll('}', 0)<CR>", opts)
 
     -- Previous/next search result:
-    keymap('n', 'n', "<Cmd>lua Cinnamon.Scroll('n', 1, 0, 3)<CR>", opts)
-    keymap('n', 'N', "<Cmd>lua Cinnamon.Scroll('N', 1, 0, 3)<CR>", opts)
-    keymap('n', '*', "<Cmd>lua Cinnamon.Scroll('*', 1, 0, 3)<CR>", opts)
-    keymap('n', '#', "<Cmd>lua Cinnamon.Scroll('#', 1, 0, 3)<CR>", opts)
-    keymap('n', 'g*', "<Cmd>lua Cinnamon.Scroll('g*', 1, 0, 3)<CR>", opts)
-    keymap('n', 'g#', "<Cmd>lua Cinnamon.Scroll('g#', 1, 0, 3)<CR>", opts)
+    keymap('n', 'n', "<Cmd>lua Cinnamon.Scroll('n')<CR>", opts)
+    keymap('n', 'N', "<Cmd>lua Cinnamon.Scroll('N')<CR>", opts)
+    keymap('n', '*', "<Cmd>lua Cinnamon.Scroll('*')<CR>", opts)
+    keymap('n', '#', "<Cmd>lua Cinnamon.Scroll('#')<CR>", opts)
+    keymap('n', 'g*', "<Cmd>lua Cinnamon.Scroll('g*')<CR>", opts)
+    keymap('n', 'g#', "<Cmd>lua Cinnamon.Scroll('g#')<CR>", opts)
 
     -- Previous/next cursor location:
-    keymap('n', '<C-o>', "<Cmd>lua Cinnamon.Scroll('<C-o>', 1, 0, 3)<CR>", opts)
-    keymap('n', '<C-i>', "<Cmd>lua Cinnamon.Scroll('1<C-i>', 1, 0, 3)<CR>", opts)
+    keymap('n', '<C-o>', "<Cmd>lua Cinnamon.Scroll('<C-o>')<CR>", opts)
+    keymap('n', '<C-i>', "<Cmd>lua Cinnamon.Scroll('1<C-i>')<CR>", opts)
   end
 
   if options.extended_keymaps == true then
     -- Up/down movements:
-    keymap('n', 'k', "<Cmd>lua Cinnamon.Scroll('k', 0, 1, 2, 0)<CR>", opts)
-    keymap('x', 'k', "<Cmd>lua Cinnamon.Scroll('k', 0, 1, 2, 0)<CR>", opts)
-    keymap('n', 'j', "<Cmd>lua Cinnamon.Scroll('j', 0, 1, 2, 0)<CR>", opts)
-    keymap('x', 'j', "<Cmd>lua Cinnamon.Scroll('j', 0, 1, 2, 0)<CR>", opts)
-    keymap('n', '<Up>', "<Cmd>lua Cinnamon.Scroll('k', 0, 1, 2, 0)<CR>", opts)
-    keymap('x', '<Up>', "<Cmd>lua Cinnamon.Scroll('k', 0, 1, 2, 0)<CR>", opts)
-    keymap('n', '<Down>', "<Cmd>lua Cinnamon.Scroll('j', 0, 1, 2, 0)<CR>", opts)
-    keymap('x', '<Down>', "<Cmd>lua Cinnamon.Scroll('j', 0, 1, 2, 0)<CR>", opts)
+    keymap('n', 'k', "<Cmd>lua Cinnamon.Scroll('k', 0, 1, 3, 0)<CR>", opts)
+    keymap('x', 'k', "<Cmd>lua Cinnamon.Scroll('k', 0, 1, 3, 0)<CR>", opts)
+    keymap('n', 'j', "<Cmd>lua Cinnamon.Scroll('j', 0, 1, 3, 0)<CR>", opts)
+    keymap('x', 'j', "<Cmd>lua Cinnamon.Scroll('j', 0, 1, 3, 0)<CR>", opts)
+    keymap('n', '<Up>', "<Cmd>lua Cinnamon.Scroll('k', 0, 1, 3, 0)<CR>", opts)
+    keymap('x', '<Up>', "<Cmd>lua Cinnamon.Scroll('k', 0, 1, 3, 0)<CR>", opts)
+    keymap('n', '<Down>', "<Cmd>lua Cinnamon.Scroll('j', 0, 1, 3, 0)<CR>", opts)
+    keymap('x', '<Down>', "<Cmd>lua Cinnamon.Scroll('j', 0, 1, 3, 0)<CR>", opts)
   end
 end
 
