@@ -26,7 +26,7 @@ function M.Scroll(command, scrollWin, useCount, delay, slowdown)
   end
   -- Check if command argument exists.
   if not command then
-    vim.cmd([[echohl ErrorMsg | echo "Cinnamon: The command argument cannot be nil." | echohl None]])
+    utils.ErrorMsg('The command argument cannot be nil')
     return
   end
   -- Setting defaults:

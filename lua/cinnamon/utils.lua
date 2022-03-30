@@ -2,17 +2,21 @@ local M = {}
 
 -- TODO: add a proper wait for lua functions instead of using a delay
 
+function M.ErrorMsg(message)
+  vim.cmd([[echohl ErrorMsg | echom 'Error: ]] .. message .. [[' | echohl None]])
+end
+
 function M.CheckMovementErrors(command)
   -- If no search pattern, return an error if using a search command.
   for _, item in pairs { 'n', 'N' } do
     if item == command then
       local pattern = vim.fn.getreg('/')
       if pattern == '' then
-        vim.cmd([[echohl ErrorMsg | echo "Cinnamon: The search pattern is empty." | echohl None]])
+        require('cinnamon.utils').ErrorMsg('The search pattern is empty')
         return true
       end
       if vim.fn.search(pattern, 'nw') == 0 then
-        vim.cmd([[echohl ErrorMsg | echo "Cinnamon: Pattern not found: " . getreg('/') | echohl None ]]) -- E486
+        require('cinnamon.utils').ErrorMsg('Pattern not found: ' .. vim.fn.getreg('/')) -- E486
         return true
       end
     end
@@ -22,7 +26,7 @@ function M.CheckMovementErrors(command)
     if item == command then
       -- Check if string is empty or only whitespace.
       if vim.fn.getline('.'):match('^%s*$') then
-        vim.cmd([[echohl ErrorMsg | echo "Cinnamon: No string under cursor." | echohl None]]) -- E348
+        require('cinnamon.utils').ErrorMsg('No string under cursor') -- E348
         return true
       end
     end
@@ -111,17 +115,16 @@ local function LspFunctionWait(command)
   while true do
     -- Break if the tagstack changes.
     if vim.fn.gettagstack() ~= originalTagStack then
+      -- The tagstack is set before location is changed so use a delay before getting location.
+      vim.cmd('sleep 100m')
       break
     end
     -- Break if the count gets too high.
     if counter > 500 then
-      vim.cmd([[echohl ErrorMsg | echo "Cinnamon: An error occurred with the LSP function call." | echohl None]])
       break
     end
     counter = counter + 1
   end
-  -- The tagstack is set before location is changed so use a delay before getting location.
-  vim.cmd('sleep 100m')
 end
 
 function M.GetScrollDistance(command, useCount)
