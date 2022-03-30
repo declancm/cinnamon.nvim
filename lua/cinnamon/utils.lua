@@ -2,8 +2,9 @@ local M = {}
 
 -- TODO: add a proper wait for lua functions instead of using a delay
 
-function M.ErrorMsg(message)
-  vim.cmd([[echohl ErrorMsg | echom 'Error: ]] .. message .. [[' | echohl None]])
+function M.ErrorMsg(message, code)
+  code = code or 'Error'
+  vim.cmd("echohl ErrorMsg | echom '" .. code .. ': ' .. message .. "' | echohl None")
 end
 
 function M.CheckMovementErrors(command)
@@ -16,7 +17,7 @@ function M.CheckMovementErrors(command)
         return true
       end
       if vim.fn.search(pattern, 'nw') == 0 then
-        require('cinnamon.utils').ErrorMsg('Pattern not found: ' .. vim.fn.getreg('/')) -- E486
+        require('cinnamon.utils').ErrorMsg('Pattern not found: ' .. vim.fn.getreg('/'), 'E486')
         return true
       end
     end
@@ -26,7 +27,7 @@ function M.CheckMovementErrors(command)
     if item == command then
       -- Check if string is empty or only whitespace.
       if vim.fn.getline('.'):match('^%s*$') then
-        require('cinnamon.utils').ErrorMsg('No string under cursor') -- E348
+        require('cinnamon.utils').ErrorMsg('No string under cursor', 'E348')
         return true
       end
     end

@@ -21,7 +21,7 @@ Note: Each argument is a string separated by a comma.
 
 function M.Scroll(command, scrollWin, useCount, delay, slowdown)
   if vim.g.__cinnamon_disabled then
-    print('Cinnamon is disabled.')
+    utils.ErrorMsg('Cinnamon is disabled')
     return
   end
   -- Check if command argument exists.
