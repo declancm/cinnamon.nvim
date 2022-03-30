@@ -1,5 +1,6 @@
 local M = {}
 
+local options = require('cinnamon').options
 local utils = require('cinnamon.utils')
 
 -- TODO: get the scroll to work for g commands such as gj and gk.
@@ -20,7 +21,7 @@ Note: Each argument is a string separated by a comma.
 ]]
 
 function M.Scroll(command, scrollWin, useCount, delay, slowdown)
-  if vim.g.__cinnamon_disabled then
+  if options['disable'] then
     utils.ErrorMsg('Cinnamon is disabled')
     return
   end

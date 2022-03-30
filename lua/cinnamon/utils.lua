@@ -1,5 +1,7 @@
 local M = {}
 
+local options = require('cinnamon').options
+
 -- TODO: add a proper wait for lua functions instead of using a delay
 
 function M.ErrorMsg(message, code)
@@ -55,15 +57,15 @@ function M.ScrollDown(distance, scrollWin, delay, slowdown)
     counter = CheckForFold(counter)
     vim.cmd('norm! j')
     if scrollWin == 1 then
-      if vim.g.__cinnamon_centered == true then
+      if options['centered'] then
         -- Stay at the center of the screen.
         if vim.fn.winline() > halfHeight then
-          vim.cmd([[silent exec "norm! \<C-E>"]])
+          vim.cmd([[silent exe "norm! \<C-E>"]])
         end
       else
         -- Scroll the window if the current line is not within 'scrolloff'.
         if not (vim.fn.winline() <= vim.o.so + 1 or vim.fn.winline() >= vim.fn.winheight('%') - vim.o.so) then
-          vim.cmd([[silent exec "norm! \<C-E>"]])
+          vim.cmd([[silent exe "norm! \<C-E>"]])
         end
       end
     end
@@ -84,15 +86,15 @@ function M.ScrollUp(distance, scrollWin, delay, slowdown)
     counter = CheckForFold(counter)
     vim.cmd('norm! k')
     if scrollWin == 1 then
-      if vim.g.__cinnamon_centered == true then
+      if options['centered'] then
         -- Stay at the center of the screen.
         if vim.fn.winline() < halfHeight then
-          vim.cmd([[silent exec "norm! \<C-Y>"]])
+          vim.cmd([[silent exe "norm! \<C-Y>"]])
         end
       else
         -- Scroll the window if the current line is not within 'scrolloff'.
         if not (vim.fn.winline() <= vim.o.so + 1 or vim.fn.winline() >= vim.fn.winheight('%') - vim.o.so) then
-          vim.cmd([[silent exec "norm! \<C-Y>"]])
+          vim.cmd([[silent exe "norm! \<C-Y>"]])
         end
       end
     end
@@ -129,13 +131,10 @@ local function LspFunctionWait(command)
 end
 
 function M.GetScrollDistance(command, useCount)
-  local newColumn = -1
   -- Create a backup for the current window view.
   local viewSaved = vim.fn.winsaveview()
-  -- Calculate distance by subtracting the original position from the new
-  -- position after performing the command.
-  local row = vim.fn.getcurpos()[2]
-  local curswant = vim.fn.getcurpos()[5]
+  -- Get the cursor position.
+  local _, row, _, _, curswant = unpack(vim.fn.getcurpos())
   local prevFile = vim.fn.getreg('%')
   -- Perform the command.
   if command == 'definition' or command == 'declaration' then
@@ -154,7 +153,8 @@ function M.GetScrollDistance(command, useCount)
       vim.cmd('norm! zo')
     end
   end
-  local newRow = vim.fn.getcurpos()[2]
+  -- Get the new cursor position.
+  local _, newRow, newColumn, _, newCurswant = unpack(vim.fn.getcurpos())
   local newFile = vim.fn.getreg('%')
   -- Check if the file has changed.
   if prevFile ~= newFile then
@@ -165,13 +165,13 @@ function M.GetScrollDistance(command, useCount)
   -- Calculate the movement distance.
   local distance = newRow - row
   -- Check if the distance is too long.
-  local scrollLimit = vim.g.__cinnamon_scroll_limit
+  local scrollLimit = options['scroll_limit']
   if distance > scrollLimit or distance < -scrollLimit then
     return 0, -1, false, true
   end
   -- Get the new column position if 'curswant' has changed.
-  if curswant ~= vim.fn.getcurpos()[5] then
-    newColumn = vim.fn.getcurpos()[3]
+  if curswant == newCurswant then
+    newColumn = -1
   end
   -- Restore the window view.
   vim.fn.winrestview(viewSaved)
@@ -195,10 +195,10 @@ end
 
 function M.CenterScreen(remaining, scrollWin, delay, slowdown)
   local halfHeight = math.ceil(vim.fn.winheight(0) / 2)
-  if scrollWin == 1 and vim.g.__cinnamon_centered == true then
+  if scrollWin == 1 and options['centered'] then
     local prevLine = vim.fn.winline()
     while vim.fn.winline() > halfHeight do
-      vim.cmd([[silent exec "norm! \<C-E>"]])
+      vim.cmd([[silent exe "norm! \<C-E>"]])
       local newLine = vim.fn.winline()
       require('cinnamon.utils').SleepDelay(newLine - halfHeight + remaining, delay, slowdown)
       -- If line isn't changing, break the endless loop.
@@ -208,7 +208,7 @@ function M.CenterScreen(remaining, scrollWin, delay, slowdown)
       prevLine = newLine
     end
     while vim.fn.winline() < halfHeight do
-      vim.cmd([[silent exec "norm! \<C-Y>"]])
+      vim.cmd([[silent exe "norm! \<C-Y>"]])
       local newLine = vim.fn.winline()
       require('cinnamon.utils').SleepDelay(halfHeight - newLine + remaining, delay, slowdown)
       -- If line isn't changing, break the endless loop.

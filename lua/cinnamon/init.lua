@@ -23,9 +23,10 @@ M.setup = function(options)
     end
   end
 
+  M.options = options
+
   -- Disable plugin:
   if options.disable then
-    vim.g.__cinnamon_disabled = true
     return
   end
 
@@ -43,15 +44,11 @@ M.setup = function(options)
     options['cinnamon_extras'] = true
   end
 
-  local opts = { noremap = true, silent = true }
-  local keymap = vim.api.nvim_set_keymap
-
   -- Global variable used to simplify the keymaps:
   Cinnamon = require('cinnamon.scroll')
 
-  -- Variables:
-  vim.g.__cinnamon_centered = options.centered
-  vim.g.__cinnamon_scroll_limit = options.scroll_limit
+  local opts = { noremap = true, silent = true }
+  local keymap = vim.api.nvim_set_keymap
 
   -- Keymaps:
   if options.default_keymaps == true then
