@@ -1,7 +1,8 @@
-local M = {}
+local S = {}
 
 local options = require('cinnamon').options
-local utils = require('cinnamon.utils')
+local U = require('cinnamon.utils')
+local F = require('cinnamon.functions')
 
 -- TODO: get the scroll to work for g commands such as gj and gk.
 
@@ -20,34 +21,39 @@ Note: Each argument is a string separated by a comma.
 
 ]]
 
-function M.Scroll(command, scrollWin, useCount, delay, slowdown)
+function S.Scroll(command, scrollWin, useCount, delay, slowdown)
   if options['disable'] then
-    utils.ErrorMsg('Cinnamon is disabled')
+    U.ErrorMsg('Cinnamon is disabled')
     return
   end
+
   -- Check if command argument exists.
   if not command then
-    utils.ErrorMsg('The command argument cannot be nil')
+    U.ErrorMsg('The command argument cannot be nil')
     return
   end
-  -- Setting defaults:
-  scrollWin = scrollWin or 1
-  useCount = useCount or 0
-  delay = delay or 5
-  slowdown = slowdown or 1
-  -- Execute command if just moving one line.
+
+  -- Execute command if only moving one line.
   for _, item in pairs { 'j', 'k' } do
     if item == command and vim.v.count1 == 1 then
       vim.cmd('norm! ' .. command)
       return
     end
   end
+
+  -- Setting argument defaults:
+  scrollWin = scrollWin or 1
+  useCount = useCount or 0
+  delay = delay or 5
+  slowdown = slowdown or 1
+
   -- Check for any errors with the command.
-  if utils.CheckMovementErrors(command) == true then
+  if F.CheckMovementErrors(command) == true then
     return
   end
+
   -- Get the scroll distance and the column position.
-  local distance, newColumn, fileChanged, limitExceeded = utils.GetScrollDistance(command, useCount)
+  local distance, newColumn, fileChanged, limitExceeded = F.GetScrollDistance(command, useCount)
   if fileChanged then
     return
   elseif limitExceeded then
@@ -56,16 +62,18 @@ function M.Scroll(command, scrollWin, useCount, delay, slowdown)
     end
     return
   end
+
   -- Perform the scroll.
   if distance > 0 then
-    utils.ScrollDown(distance, scrollWin, delay, slowdown)
+    F.ScrollDown(distance, scrollWin, delay, slowdown)
   elseif distance < 0 then
-    utils.ScrollUp(distance, scrollWin, delay, slowdown)
+    F.ScrollUp(distance, scrollWin, delay, slowdown)
   end
+
   -- Change the cursor column position if required.
   if newColumn ~= -1 then
     vim.fn.cursor(vim.fn.line('.'), newColumn)
   end
 end
 
-return M
+return S

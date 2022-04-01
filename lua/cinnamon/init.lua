@@ -32,14 +32,18 @@ M.setup = function(options)
 
   -- Deprecated settings:
   if vim.g.cinnamon_no_defaults == 1 then
-    print(
-      "Using 'vim.g.cinnamon_no_defaults' is now deprecated :(. Please use \"require('cinnamon').setup { default_keymaps = false }\" instead."
+    require('cinnamon.utils').ErrorMsg(
+      "Using 'vim.g.cinnamon_no_defaults' is deprecated. Please use \"require('cinnamon').setup { default_keymaps = false }\" instead",
+      'Warning',
+      'WarningMsg'
     )
     options['default_keymaps'] = false
   end
   if vim.g.cinnamon_extras == 1 then
-    print(
-      "Using 'vim.g.cinnamon_extras' is now deprecated :(. Please use \"require('cinnamon').setup { extra_keymaps = true }\" instead."
+    require('cinnamon.utils').ErrorMsg(
+      "Using 'vim.g.cinnamon_extras' is deprecated. Please use \"require('cinnamon').setup { extra_keymaps = true }\" instead",
+      'Warning',
+      'WarningMsg'
     )
     options['cinnamon_extras'] = true
   end
