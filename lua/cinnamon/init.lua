@@ -22,7 +22,6 @@ M.setup = function(options)
       end
     end
   end
-
   M.options = options
 
   -- Disable plugin:
@@ -37,7 +36,7 @@ M.setup = function(options)
       'Warning',
       'WarningMsg'
     )
-    options['default_keymaps'] = false
+    options.default_keymaps = false
   end
   if vim.g.cinnamon_extras == 1 then
     require('cinnamon.utils').ErrorMsg(
@@ -45,7 +44,7 @@ M.setup = function(options)
       'Warning',
       'WarningMsg'
     )
-    options['cinnamon_extras'] = true
+    options.cinnamon_extras = true
   end
 
   -- Global variable used to simplify the keymaps:

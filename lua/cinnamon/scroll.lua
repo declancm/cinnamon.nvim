@@ -22,7 +22,7 @@ Note: Each argument is a string separated by a comma.
 ]]
 
 function S.Scroll(command, scrollWin, useCount, delay, slowdown)
-  if options['disable'] then
+  if options.disable then
     U.ErrorMsg('Cinnamon is disabled')
     return
   end
@@ -35,7 +35,7 @@ function S.Scroll(command, scrollWin, useCount, delay, slowdown)
 
   -- Execute command if only moving one line.
   for _, item in pairs { 'j', 'k' } do
-    if item == command and vim.v.count1 == 1 then
+    if item == command and vim.v.count == 0 then
       vim.cmd('norm! ' .. command)
       return
     end
