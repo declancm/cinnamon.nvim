@@ -58,17 +58,17 @@ function F.ScrollDown(distance, scrollWin, delay, slowdown)
       if options.centered then
         -- Stay at the center of the screen.
         if vim.fn.winline() > halfHeight then
-          vim.cmd([[silent exe "norm! \<C-E>"]])
+          vim.cmd('silent exe "norm! \\<C-E>"')
         end
       else
         -- Scroll the window if the current line is not within 'scrolloff'.
         if not (vim.fn.winline() <= vim.o.so + 1 or vim.fn.winline() >= vim.fn.winheight('%') - vim.o.so) then
-          vim.cmd([[silent exe "norm! \<C-E>"]])
+          vim.cmd('silent exe "norm! \\<C-E>"')
         end
       end
     end
     counter = counter + 1
-    F.SleepDelay(distance - counter, delay, slowdown)
+    F.Delay(distance - counter, delay, slowdown)
   end
 
   -- Center the screen.
@@ -91,17 +91,17 @@ function F.ScrollUp(distance, scrollWin, delay, slowdown)
       if options.centered then
         -- Stay at the center of the screen.
         if vim.fn.winline() < halfHeight then
-          vim.cmd([[silent exe "norm! \<C-Y>"]])
+          vim.cmd('silent exe "norm! \\<C-Y>"')
         end
       else
         -- Scroll the window if the current line is not within 'scrolloff'.
         if not (vim.fn.winline() <= vim.o.so + 1 or vim.fn.winline() >= vim.fn.winheight('%') - vim.o.so) then
-          vim.cmd([[silent exe "norm! \<C-Y>"]])
+          vim.cmd('silent exe "norm! \\<C-Y>"')
         end
       end
     end
     counter = counter + 1
-    F.SleepDelay(-distance + counter, delay, slowdown)
+    F.Delay(-distance + counter, delay, slowdown)
   end
 
   -- Center the screen.
@@ -171,7 +171,7 @@ function F.GetScrollDistance(command, useCount)
   return distance, newColumn, false, false
 end
 
-function F.SleepDelay(remaining, delay, slowdown)
+function F.Delay(remaining, delay, slowdown)
   vim.cmd('redraw')
 
   -- Don't create a delay when scrolling comleted.
@@ -194,9 +194,9 @@ function F.CenterScreen(remaining, scrollWin, delay, slowdown)
     local prevLine = vim.fn.winline()
 
     while vim.fn.winline() > halfHeight do
-      vim.cmd([[silent exe "norm! \<C-E>"]])
+      vim.cmd('silent exe "norm! \\<C-E>"')
       local newLine = vim.fn.winline()
-      F.SleepDelay(newLine - halfHeight + remaining, delay, slowdown)
+      F.Delay(newLine - halfHeight + remaining, delay, slowdown)
       -- If line isn't changing, break the endless loop.
       if newLine == prevLine then
         break
@@ -205,9 +205,9 @@ function F.CenterScreen(remaining, scrollWin, delay, slowdown)
     end
 
     while vim.fn.winline() < halfHeight do
-      vim.cmd([[silent exe "norm! \<C-Y>"]])
+      vim.cmd('silent exe "norm! \\<C-Y>"')
       local newLine = vim.fn.winline()
-      F.SleepDelay(halfHeight - newLine + remaining, delay, slowdown)
+      F.Delay(halfHeight - newLine + remaining, delay, slowdown)
       -- If line isn't changing, break the endless loop.
       if newLine == prevLine then
         break
