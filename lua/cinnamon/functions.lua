@@ -121,11 +121,11 @@ function F.GetScrollDistance(command, useCount)
   local prevFile = vim.fn.getreg('%')
 
   -- Perform the command.
-  if command == 'declaration' then
-    require('vim.lsp.buf').declaration()
-    vim.cmd('sleep 100m')
-  elseif command == 'definition' then
+  if command == 'definition' then
     require('vim.lsp.buf').definition()
+    vim.cmd('sleep 100m')
+  elseif command == 'declaration' then
+    require('vim.lsp.buf').declaration()
     vim.cmd('sleep 100m')
   elseif useCount ~= 0 and vim.v.count > 0 then
     vim.cmd('norm! ' .. vim.v.count .. command)

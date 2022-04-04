@@ -47,6 +47,10 @@ function S.Scroll(command, scrollWin, useCount, delay, slowdown)
   delay = delay or 5
   slowdown = slowdown or 1
 
+  -- Save the lazyredraw option:
+  local savedLazyredraw = vim.opt.lazyredraw
+  vim.opt.lazyredraw = false
+
   -- Check for any errors with the command.
   if F.CheckMovementErrors(command) == true then
     return
@@ -57,7 +61,7 @@ function S.Scroll(command, scrollWin, useCount, delay, slowdown)
   if fileChanged then
     return
   elseif limitExceeded then
-    if scrollWin == 1 and vim.g.__cinnamon_centered == true then
+    if scrollWin == 1 and options.centered then
       vim.cmd('norm! zz')
     end
     return
@@ -74,6 +78,9 @@ function S.Scroll(command, scrollWin, useCount, delay, slowdown)
   if newColumn ~= -1 then
     vim.fn.cursor(vim.fn.line('.'), newColumn)
   end
+
+  -- Restore lazyredraw.
+  vim.opt.lazyredraw = savedLazyredraw
 end
 
 return S

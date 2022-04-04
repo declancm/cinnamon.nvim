@@ -54,7 +54,7 @@ M.setup = function(options)
   local keymap = vim.api.nvim_set_keymap
 
   -- Keymaps:
-  if options.default_keymaps == true then
+  if options.default_keymaps then
     -- Half-window movements:
     keymap('', '<C-u>', "<Cmd>lua Cinnamon.Scroll('<C-u>')<CR>", opts)
     keymap('i', '<C-u>', "<Cmd>lua Cinnamon.Scroll('<C-u>')<CR>", opts)
@@ -68,7 +68,7 @@ M.setup = function(options)
     keymap('n', '<PageDown>', "<Cmd>lua Cinnamon.Scroll('<C-f>', 1, 1)<CR>", opts)
   end
 
-  if options.extra_keymaps == true then
+  if options.extra_keymaps then
     -- Start/end of file and line number movements:
     keymap('n', 'gg', "<Cmd>lua Cinnamon.Scroll('gg', 0, 0, 3)<CR>", opts)
     keymap('x', 'gg', "<Cmd>lua Cinnamon.Scroll('gg', 0, 0, 3)<CR>", opts)
@@ -94,7 +94,7 @@ M.setup = function(options)
     keymap('n', '<C-i>', "<Cmd>lua Cinnamon.Scroll('1<C-i>')<CR>", opts)
   end
 
-  if options.extended_keymaps == true then
+  if options.extended_keymaps then
     -- Up/down movements:
     keymap('n', 'k', "<Cmd>lua Cinnamon.Scroll('k', 0, 1, 3, 0)<CR>", opts)
     keymap('x', 'k', "<Cmd>lua Cinnamon.Scroll('k', 0, 1, 3, 0)<CR>", opts)
