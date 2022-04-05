@@ -44,7 +44,7 @@ M.setup = function(options)
       'Warning',
       'WarningMsg'
     )
-    options.cinnamon_extras = true
+    options.extra_keymaps = true
   end
 
   -- Global variable used to simplify the keymaps:

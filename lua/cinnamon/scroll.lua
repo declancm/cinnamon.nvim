@@ -47,8 +47,11 @@ function S.Scroll(command, scrollWin, useCount, delay, slowdown)
   delay = delay or 5
   slowdown = slowdown or 1
 
-  -- Save the lazyredraw option:
-  local savedLazyredraw = vim.opt.lazyredraw
+  -- Save options.
+  local saved = {}
+  saved.lazyredraw = vim.opt.lazyredraw:get()
+
+  -- Set options.
   vim.opt.lazyredraw = false
 
   -- Check for any errors with the command.
@@ -79,8 +82,8 @@ function S.Scroll(command, scrollWin, useCount, delay, slowdown)
     vim.fn.cursor(vim.fn.line('.'), newColumn)
   end
 
-  -- Restore lazyredraw.
-  vim.opt.lazyredraw = savedLazyredraw
+  -- Restore options.
+  vim.opt.lazyredraw = saved.lazyredraw
 end
 
 return S

@@ -113,7 +113,7 @@ function F.GetScrollDistance(command, useCount)
   local cmdline, newRow, newColumn, newCurswant
 
   -- Create a backup for the current window view.
-  local viewSaved = vim.fn.winsaveview()
+  local savedView = vim.fn.winsaveview()
 
   -- Get the cursor position.
   local prevPosition = vim.fn.getcurpos()
@@ -167,7 +167,7 @@ function F.GetScrollDistance(command, useCount)
   end
 
   -- Restore the window view.
-  vim.fn.winrestview(viewSaved)
+  vim.fn.winrestview(savedView)
   return distance, newColumn, false, false
 end
 
