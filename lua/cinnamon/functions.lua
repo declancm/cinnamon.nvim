@@ -3,7 +3,7 @@ local F = {}
 local options = require('cinnamon').options
 local U = require('cinnamon.utils')
 
-function F.CheckMovementErrors(command)
+function F.CheckCommandErrors(command)
   -- If no search pattern, return an error if using a repeat search command.
   for _, item in pairs { 'n', 'N' } do
     if item == command then
@@ -29,6 +29,19 @@ function F.CheckMovementErrors(command)
       end
     end
   end
+
+  -- If no word under cursor, return an error if using a goto command.
+  for _, item in pairs { 'gd', 'gD', '1gd', '1gD' } do
+    if item == command then
+      -- Check if string is empty or only whitespace.
+      if vim.fn.getline('.'):match('^%s*$') then
+        U.ErrorMsg('No identifier under cursor', 'E349')
+        return true
+      end
+    end
+  end
+
+  -- If no errors, return false.
   return false
 end
 

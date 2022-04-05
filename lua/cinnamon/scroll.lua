@@ -4,7 +4,7 @@ local options = require('cinnamon').options
 local U = require('cinnamon.utils')
 local F = require('cinnamon.functions')
 
--- TODO: get the scroll to work for g commands such as gj and gk.
+-- TODO: add doc files.
 
 --[[
 
@@ -55,7 +55,7 @@ function S.Scroll(command, scrollWin, useCount, delay, slowdown)
   vim.opt.lazyredraw = false
 
   -- Check for any errors with the command.
-  if F.CheckMovementErrors(command) == true then
+  if F.CheckCommandErrors(command) then
     return
   end
 
