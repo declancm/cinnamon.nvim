@@ -1,4 +1,4 @@
-# Cinnamon Scroll (Neovim) 🌀
+# Cinnamon Scroll 🌀
 
 Smooth scrolling for __ANY__ movement command 🤯. A highly customizable Neovim
 plugin written in Lua which doesn't break the single-repeat "." command (unlike
@@ -15,7 +15,7 @@ keymap('n', 'gD', "<Cmd>lua Cinnamon.Scroll('declaration')<CR>", opts)
 
 _Petition for a cinnamon roll emoji:_ <https://www.change.org/p/apple-cinnamon-roll-emoji>
 
-## Installation
+## 📦 Installation
 
 Install with your favorite package manager. No configuration is required to get
 started with the default keymaps. I highly recommend trying the extra keymaps as
@@ -27,7 +27,7 @@ the are what set this plugin apart.
 use 'declancm/cinnamon.nvim'
 ```
 
-## Configuration
+## ⚙️ Configuration
 
 A settings table can be passed into the setup function for custom options.
 
@@ -73,7 +73,7 @@ Smooth scrolling for ...
 Up/down movements:          [count]j, [count]k, [count]<Up> and [count]<Down>
 ```
 
-## API
+## ℹ️ API
 
 ```lua
 Cinnamon.Scroll(arg1, arg2, arg3, arg4, arg5)
@@ -88,6 +88,8 @@ Cinnamon.Scroll(arg1, arg2, arg3, arg4, arg5)
 * __arg5__ = Slowdown at the end of the movement (1 for on, 0 for off). Default is 1.
 
 _Note: arg1 is a string while the others are integers._
+
+## ⌨️ Keymaps
 
 ### Default Keymaps
 

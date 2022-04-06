@@ -122,7 +122,6 @@ function F.ScrollUp(distance, scrollWin, delay, slowdown)
 end
 
 function F.GetScrollDistance(command, useCount)
-  -- Variables.
   local cmdline, newRow, newColumn, newCurswant
 
   -- Create a backup for the current window view.
@@ -160,7 +159,6 @@ function F.GetScrollDistance(command, useCount)
 
   -- Check if the file has changed.
   if prevFile ~= vim.fn.getreg('%') then
-    -- Center the screen.
     vim.cmd('norm! zz')
     return 0, -1, true, false
   end
@@ -174,7 +172,7 @@ function F.GetScrollDistance(command, useCount)
     return 0, -1, false, true
   end
 
-  -- Get the new column position if 'prevCurswant' has changed.
+  -- Check if curswant has changed.
   if prevCurswant == newCurswant then
     newColumn = -1
   end
@@ -206,22 +204,22 @@ function F.CenterScreen(remaining, scrollWin, delay, slowdown)
   if scrollWin == 1 and options.centered then
     local prevLine = vim.fn.winline()
 
+    -- Scroll up the screen.
     while vim.fn.winline() > halfHeight do
       vim.cmd('silent exe "norm! \\<C-E>"')
       local newLine = vim.fn.winline()
       F.Delay(newLine - halfHeight + remaining, delay, slowdown)
-      -- If line isn't changing, break the endless loop.
       if newLine == prevLine then
         break
       end
       prevLine = newLine
     end
 
+    -- Scroll down the screen.
     while vim.fn.winline() < halfHeight do
       vim.cmd('silent exe "norm! \\<C-Y>"')
       local newLine = vim.fn.winline()
       F.Delay(halfHeight - newLine + remaining, delay, slowdown)
-      -- If line isn't changing, break the endless loop.
       if newLine == prevLine then
         break
       end
