@@ -27,34 +27,11 @@ the are what set this plugin apart.
 use 'declancm/cinnamon.nvim'
 ```
 
-## The Function
-
-```lua
-Cinnamon.Scroll(arg1, arg2, arg3, arg4, arg5)
-```
-
-<!-- * __arg1__ = The movement command or function call. To use a function call, make -->
-<!--   sure to prepend ':' to the argument value. This argument is required as -->
-<!--   there's no default value. -->
-<!--   * Example movement: `'ggVG'` (highlight file) -->
-<!--   * Example function call: `':lua vim.lsp.buf.definition()'` (go to definition) -->
-* __arg1__ = A string containing the movement command. To use the go-to-definition LSP
-  function, use 'definition' (or 'declaration' for go-to-declaration, but this is not
-  supported by many language servers). This argument is required as there's no default
-  value.
-  * Example movement: 'ggVG' (highlight file)
-* __arg2__ = Scroll the window with the cursor. (1 for on, 0 for off). Default is 1.
-* __arg3__ = Accept a count before the command (1 for on, 0 for off). Default is 0.
-* __arg4__ = Length of delay between lines (in ms). Default is 5.
-* __arg5__ = Slowdown at the end of the movement (1 for on, 0 for off). Default is 1.
-
-_Note: arg1 is a string while the others are integers._
-
 ## Configuration
 
 A settings table can be passed into the setup function for custom options.
 
-The default settings are:
+__Default Settings:__
 
 ```lua
 require('cinnamon').setup {
@@ -67,10 +44,52 @@ require('cinnamon').setup {
 }
 ```
 
-There is no need to call `require('cinnamon').setup()` if you do not wish to set
-custom settings.
+__Default Keymaps:__
 
-## Default Keymaps
+```
+Smooth scrolling for ...
+
+Half-window movements:      <C-U> and <C-D>
+Page movements:             <C-B>, <C-F>, <PageUp> and <PageDown>
+```
+
+__Extra Keymaps:__
+
+```
+Smooth scrolling for ...
+
+Start/end of file:          gg and G
+Line number:                [count]G
+Paragraph movements:        { and }
+Prev/next search result:    n, N, *, #, g* and g#
+Prev/next cursor location:  <C-O> and <C-I>
+```
+
+__Extended Keymaps:__
+
+```
+Smooth scrolling for ...
+
+Up/down movements:          [count]j, [count]k, [count]<Up> and [count]<Down>
+```
+
+## API
+
+```lua
+Cinnamon.Scroll(arg1, arg2, arg3, arg4, arg5)
+```
+
+* __arg1__ = A string containing the normal mode movement command. To use the
+  go-to-definition LSP function, use 'definition' (or 'declaration' for
+  go-to-declaration). This argument is required as there's no default value.
+* __arg2__ = Scroll the window with the cursor. (1 for on, 0 for off). Default is 1.
+* __arg3__ = Accept a count before the command (1 for on, 0 for off). Default is 0.
+* __arg4__ = Length of delay between lines (in ms). Default is 5.
+* __arg5__ = Slowdown at the end of the movement (1 for on, 0 for off). Default is 1.
+
+_Note: arg1 is a string while the others are integers._
+
+### Default Keymaps
 
 ```lua
 local opts = { noremap = true, silent = true }
@@ -89,10 +108,9 @@ keymap('n', '<PageUp>', "<Cmd>lua Cinnamon.Scroll('<C-b>', 1, 1)<CR>", opts)
 keymap('n', '<PageDown>', "<Cmd>lua Cinnamon.Scroll('<C-f>', 1, 1)<CR>", opts)
 ```
 
-## Extra Keymaps
+### Extra Keymaps
 
 ```lua
--- Line number movements:
 local opts = { noremap = true, silent = true }
 local keymap = vim.api.nvim_set_keymap
 
@@ -124,7 +142,7 @@ keymap('n', '<C-i>', "<Cmd>lua Cinnamon.Scroll('1<C-i>')<CR>", opts)
 _Note: `1<C-i>` has to be used instead of `<C-i>` to prevent it from being
 expanded into a literal tab, as `<Tab>` and `<C-i>` are equivalent for vim._
 
-## Extended Keymaps
+### Extended Keymaps
 
 ```lua
 local opts = { noremap = true, silent = true }
@@ -140,7 +158,7 @@ keymap('x', '<Up>', "<Cmd>lua Cinnamon.Scroll('k', 0, 1, 3, 0)<CR>", opts)
 keymap('n', '<Down>', "<Cmd>lua Cinnamon.Scroll('j', 0, 1, 3, 0)<CR>", opts)
 keymap('x', '<Down>', "<Cmd>lua Cinnamon.Scroll('j', 0, 1, 3, 0)<CR>", opts)
 ```
-## Custom Keymaps
+### Custom Keymaps
 
 If creating a custom keymap which is within the preset keymaps, make sure they 
 are disabled so yours isn't overridden.
