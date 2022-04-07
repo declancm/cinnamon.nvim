@@ -68,14 +68,14 @@ function F.ScrollDown(distance, scrollWin, delay, slowdown)
     counter = CheckForFold(counter)
     vim.cmd('norm! j')
     if scrollWin == 1 then
+      local screenLine = vim.fn.winline()
       if options.centered then
-        -- Stay at the center of the screen.
-        if vim.fn.winline() > halfHeight then
+        if screenLine > halfHeight then
           vim.cmd('silent exe "norm! \\<C-E>"')
         end
       else
         -- Scroll the window if the current line is not within 'scrolloff'.
-        if not (vim.fn.winline() <= vim.o.so + 1 or vim.fn.winline() >= vim.fn.winheight('%') - vim.o.so) then
+        if not (screenLine <= vim.opt.so:get() + 1 or screenLine >= vim.fn.winheight('%') - vim.opt.so:get()) then
           vim.cmd('silent exe "norm! \\<C-E>"')
         end
       end
@@ -101,14 +101,14 @@ function F.ScrollUp(distance, scrollWin, delay, slowdown)
     counter = CheckForFold(counter)
     vim.cmd('norm! k')
     if scrollWin == 1 then
+      local screenLine = vim.fn.winline()
       if options.centered then
-        -- Stay at the center of the screen.
-        if vim.fn.winline() < halfHeight then
+        if screenLine < halfHeight then
           vim.cmd('silent exe "norm! \\<C-Y>"')
         end
       else
         -- Scroll the window if the current line is not within 'scrolloff'.
-        if not (vim.fn.winline() <= vim.o.so + 1 or vim.fn.winline() >= vim.fn.winheight('%') - vim.o.so) then
+        if not (screenLine <= vim.opt.so:get() + 1 or screenLine >= vim.fn.winheight('%') - vim.opt.so:get()) then
           vim.cmd('silent exe "norm! \\<C-Y>"')
         end
       end
@@ -122,14 +122,9 @@ function F.ScrollUp(distance, scrollWin, delay, slowdown)
 end
 
 function F.GetScrollDistance(command, useCount)
-  local cmdline, newRow, newColumn, newCurswant
-
-  -- Create a backup for the current window view.
   local savedView = vim.fn.winsaveview()
 
-  -- Get the cursor position.
-  local prevPosition = vim.fn.getcurpos()
-  local _, prevRow, _, _, prevCurswant = unpack(prevPosition)
+  local _, prevRow, _, _, prevCurswant = unpack(vim.fn.getcurpos())
   local prevFile = vim.fn.getreg('%')
 
   -- Perform the command.
@@ -146,16 +141,14 @@ function F.GetScrollDistance(command, useCount)
   end
 
   -- If searching within a fold, open the fold.
-  for _, item in pairs { 'n', 'N', '*', '#', 'g*', 'g#' } do
+  local searchCommands = { 'n', 'N', '*', '#', 'g*', 'g#', 'gd', 'gD', '1gd', '1gD', 'definition', 'declaration' }
+  for _, item in pairs(searchCommands) do
     if command == item and vim.fn.foldclosed('.') ~= -1 then
       vim.cmd('norm! zo')
     end
   end
 
-  -- Get the new cursor position.
-  if not cmdline then
-    _, newRow, newColumn, _, newCurswant = unpack(vim.fn.getcurpos())
-  end
+  local _, newRow, newColumn, _, newCurswant = unpack(vim.fn.getcurpos())
 
   -- Check if the file has changed.
   if prevFile ~= vim.fn.getreg('%') then
@@ -163,12 +156,10 @@ function F.GetScrollDistance(command, useCount)
     return 0, -1, true, false
   end
 
-  -- Calculate the vertical movement distance.
   local distance = newRow - prevRow
 
-  -- Check if the distance is too long.
-  local scrollLimit = options.scroll_limit
-  if distance > scrollLimit or distance < -scrollLimit then
+  -- Check if scroll limit has been exceeded.
+  if distance > options.scroll_limit or distance < -options.scroll_limit then
     return 0, -1, false, true
   end
 
@@ -177,7 +168,7 @@ function F.GetScrollDistance(command, useCount)
     newColumn = -1
   end
 
-  -- Restore the window view.
+  -- Restore the view to before the command was executed.
   vim.fn.winrestview(savedView)
   return distance, newColumn, false, false
 end
@@ -187,7 +178,6 @@ function F.Delay(remaining, delay, slowdown)
 
   -- Don't create a delay when scrolling comleted.
   if remaining <= 0 then
-    vim.cmd('redraw')
     return
   end
 
