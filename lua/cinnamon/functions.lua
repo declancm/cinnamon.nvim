@@ -147,9 +147,9 @@ function F.Scroll(command, delay, slowdown)
     elseif command == "zb" then
         lines = -(windowHeight - vim.fn.winline() - 3)
     end
-    if lines > 0 then
+    if lines ~= nil and lines > 0 then
         up(lines)
-    elseif lines < 0 then
+    elseif lines ~= nil and lines < 0 then
         down(lines)
     end
 end
