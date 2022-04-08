@@ -4,7 +4,7 @@ local M = {
   extended_keymaps = false,
   centered = true,
   disable = false,
-  scroll_limit = 10,
+  scroll_limit = 150,
 }
 
 return M
