@@ -123,34 +123,39 @@ end
 
 function F.Scroll(command, delay, slowdown)
   local windowHeight = vim.api.nvim_win_get_height(0)
-  local function up(lines)
+  local lines = 0
+  local scrolloff = vim.opt.so:get()
+
+  if command == 'zz' then
+    lines = vim.fn.winline() - math.floor(windowHeight / 2 + 1)
+  elseif command == 'zt' then
+    if scrolloff < math.ceil(vim.fn.winheight(0) / 2) then
+      lines = vim.fn.winline() - scrolloff - 1
+    else
+      lines = vim.fn.winline() - math.floor(windowHeight / 2 + 1)
+    end
+  elseif command == 'zb' then
+    if scrolloff < math.ceil(vim.fn.winheight(0) / 2) then
+      lines = -(windowHeight - vim.fn.winline() - scrolloff)
+    else
+      lines = vim.fn.winline() - math.floor(windowHeight / 2 + 1)
+    end
+  end
+
+  if lines > 0 then
     local counter = 0
     while counter < lines do
       vim.cmd('silent exe "norm! \\<C-E>"')
       counter = counter + 1
       F.Delay(counter, delay, slowdown)
     end
-  end
-  local function down(lines)
+  elseif lines < 0 then
     local counter = 0
     while counter > lines do
       vim.cmd('silent exe "norm! \\<C-Y>"')
       counter = counter - 1
       F.Delay(-counter, delay, slowdown)
     end
-  end
-  local lines
-  if command == 'zz' then
-    lines = vim.fn.winline() - math.floor(windowHeight / 2 + 1)
-  elseif command == 'zt' then
-    lines = vim.fn.winline() - 3
-  elseif command == 'zb' then
-    lines = -(windowHeight - vim.fn.winline() - 3)
-  end
-  if lines ~= nil and lines > 0 then
-    up(lines)
-  elseif lines ~= nil and lines < 0 then
-    down(lines)
   end
 end
 

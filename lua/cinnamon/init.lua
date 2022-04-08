@@ -41,11 +41,6 @@ M.setup = function(user_config)
 
   -- Keymaps:
   if config.default_keymaps then
-    -- zz, zt, zb
-    keymap('n', 'zz', "<Cmd>lua Cinnamon.Scroll('zz')<CR>", opts)
-    keymap('n', 'zt', "<Cmd>lua Cinnamon.Scroll('zt')<CR>", opts)
-    keymap('n', 'zb', "<Cmd>lua Cinnamon.Scroll('zb')<CR>", opts)
-
     -- Half-window movements:
     keymap('', '<C-u>', "<Cmd>lua Cinnamon.Scroll('<C-u>')<CR>", opts)
     keymap('i', '<C-u>', "<Cmd>lua Cinnamon.Scroll('<C-u>')<CR>", opts)
@@ -72,10 +67,6 @@ M.setup = function(user_config)
     keymap('n', '}', "<Cmd>lua Cinnamon.Scroll('}', 0)<CR>", opts)
     keymap('x', '}', "<Cmd>lua Cinnamon.Scroll('}', 0)<CR>", opts)
 
-    -- keymap("n", "zz", "<Cmd>lua Cinnamon.Scroll('zz')<CR>", opts)
-    -- keymap("n", "zt", "<Cmd>lua Cinnamon.Scroll('zt', 1, 30)<CR>", opts)
-    -- keymap("n", "zb", "<Cmd>lua Cinnamon.Scroll('zb', 1, 30)<CR>", opts)
-
     -- Previous/next search result:
     keymap('n', 'n', "<Cmd>lua Cinnamon.Scroll('n')<CR>", opts)
     keymap('n', 'N', "<Cmd>lua Cinnamon.Scroll('N')<CR>", opts)
@@ -87,6 +78,11 @@ M.setup = function(user_config)
     -- Previous/next cursor location:
     keymap('n', '<C-o>', "<Cmd>lua Cinnamon.Scroll('<C-o>')<CR>", opts)
     keymap('n', '<C-i>', "<Cmd>lua Cinnamon.Scroll('1<C-i>')<CR>", opts)
+
+    -- Redraw screen:
+    keymap('n', 'zz', "<Cmd>lua Cinnamon.Scroll('zz')<CR>", opts)
+    keymap('n', 'zt', "<Cmd>lua Cinnamon.Scroll('zt')<CR>", opts)
+    keymap('n', 'zb', "<Cmd>lua Cinnamon.Scroll('zb')<CR>", opts)
   end
 
   if config.extended_keymaps then

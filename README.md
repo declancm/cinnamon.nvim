@@ -71,6 +71,7 @@ __Extended Keymaps:__
 Smooth scrolling for ...
 
 Up/down movements:          [count]j, [count]k, [count]<Up> and [count]<Down>
+Redraw screen:              zz, zt and zb
 ```
 
 ## ℹ️ API
@@ -139,6 +140,11 @@ keymap('n', 'g#', "<Cmd>lua Cinnamon.Scroll('g#')<CR>", opts)
 -- Previous/next cursor location:
 keymap('n', '<C-o>', "<Cmd>lua Cinnamon.Scroll('<C-o>')<CR>", opts)
 keymap('n', '<C-i>', "<Cmd>lua Cinnamon.Scroll('1<C-i>')<CR>", opts)
+
+-- Redraw screen:
+keymap('n', 'zz', "<Cmd>lua Cinnamon.Scroll('zz')<CR>", opts)
+keymap('n', 'zt', "<Cmd>lua Cinnamon.Scroll('zt')<CR>", opts)
+keymap('n', 'zb', "<Cmd>lua Cinnamon.Scroll('zb')<CR>", opts)
 ```
 
 _Note: `1<C-i>` has to be used instead of `<C-i>` to prevent it from being
