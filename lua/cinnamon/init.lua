@@ -1,31 +1,16 @@
 local M = {}
+local config = require('cinnamon.config')
+local utils = require('cinnamon.utils')
 
-M.setup = function(options)
+M.setup = function(user_config)
   vim.g.__cinnamon_setup_loaded = 1
 
-  -- Default values:
-  local defaults = {
-    default_keymaps = true,
-    extra_keymaps = false,
-    extended_keymaps = false,
-    centered = true,
-    disable = false,
-    scroll_limit = 150,
-  }
-
-  if options == nil then
-    options = defaults
-  else
-    for key, value in pairs(defaults) do
-      if options[key] == nil then
-        options[key] = value
-      end
-    end
+  if user_config ~= nil then
+    utils.merge(config, user_config)
   end
-  M.options = options
 
   -- Disable plugin:
-  if options.disable then
+  if config.disable then
     return
   end
 
@@ -36,15 +21,16 @@ M.setup = function(options)
       'Warning',
       'WarningMsg'
     )
-    options.default_keymaps = false
+    config.default_keymaps = false
   end
+
   if vim.g.cinnamon_extras == 1 then
     require('cinnamon.utils').ErrorMsg(
       "Using 'vim.g.cinnamon_extras' is deprecated. Please use \"require('cinnamon').setup { extra_keymaps = true }\" instead",
       'Warning',
       'WarningMsg'
     )
-    options.extra_keymaps = true
+    config.extra_keymaps = true
   end
 
   -- Global variable used to simplify the keymaps:
@@ -54,7 +40,12 @@ M.setup = function(options)
   local keymap = vim.api.nvim_set_keymap
 
   -- Keymaps:
-  if options.default_keymaps then
+  if config.default_keymaps then
+    -- zz, zt, zb
+    keymap('n', 'zz', "<Cmd>lua Cinnamon.Scroll('zz')<CR>", opts)
+    keymap('n', 'zt', "<Cmd>lua Cinnamon.Scroll('zt')<CR>", opts)
+    keymap('n', 'zb', "<Cmd>lua Cinnamon.Scroll('zb')<CR>", opts)
+
     -- Half-window movements:
     keymap('', '<C-u>', "<Cmd>lua Cinnamon.Scroll('<C-u>')<CR>", opts)
     keymap('i', '<C-u>', "<Cmd>lua Cinnamon.Scroll('<C-u>')<CR>", opts)
@@ -68,7 +59,7 @@ M.setup = function(options)
     keymap('n', '<PageDown>', "<Cmd>lua Cinnamon.Scroll('<C-f>', 1, 1)<CR>", opts)
   end
 
-  if options.extra_keymaps then
+  if config.extra_keymaps then
     -- Start/end of file and line number movements:
     keymap('n', 'gg', "<Cmd>lua Cinnamon.Scroll('gg', 0, 0, 3)<CR>", opts)
     keymap('x', 'gg', "<Cmd>lua Cinnamon.Scroll('gg', 0, 0, 3)<CR>", opts)
@@ -80,6 +71,10 @@ M.setup = function(options)
     keymap('x', '{', "<Cmd>lua Cinnamon.Scroll('{', 0)<CR>", opts)
     keymap('n', '}', "<Cmd>lua Cinnamon.Scroll('}', 0)<CR>", opts)
     keymap('x', '}', "<Cmd>lua Cinnamon.Scroll('}', 0)<CR>", opts)
+
+    -- keymap("n", "zz", "<Cmd>lua Cinnamon.Scroll('zz')<CR>", opts)
+    -- keymap("n", "zt", "<Cmd>lua Cinnamon.Scroll('zt', 1, 30)<CR>", opts)
+    -- keymap("n", "zb", "<Cmd>lua Cinnamon.Scroll('zb', 1, 30)<CR>", opts)
 
     -- Previous/next search result:
     keymap('n', 'n', "<Cmd>lua Cinnamon.Scroll('n')<CR>", opts)
@@ -94,7 +89,7 @@ M.setup = function(options)
     keymap('n', '<C-i>', "<Cmd>lua Cinnamon.Scroll('1<C-i>')<CR>", opts)
   end
 
-  if options.extended_keymaps then
+  if config.extended_keymaps then
     -- Up/down movements:
     keymap('n', 'k', "<Cmd>lua Cinnamon.Scroll('k', 0, 1, 3, 0)<CR>", opts)
     keymap('x', 'k', "<Cmd>lua Cinnamon.Scroll('k', 0, 1, 3, 0)<CR>", opts)

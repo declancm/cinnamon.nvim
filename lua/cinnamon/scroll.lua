@@ -1,6 +1,6 @@
 local S = {}
 
-local options = require('cinnamon').options
+local config = require('cinnamon.config')
 local U = require('cinnamon.utils')
 local F = require('cinnamon.functions')
 
@@ -20,9 +20,8 @@ arg5 = Slowdown at the end of the movement (1 for on, 0 for off). Default is 1.
 Note: Each argument is a string separated by a comma.
 
 ]]
-
 function S.Scroll(command, scrollWin, useCount, delay, slowdown)
-  if options.disable then
+  if config.disable then
     U.ErrorMsg('Cinnamon is disabled')
     return
   end
@@ -61,10 +60,11 @@ function S.Scroll(command, scrollWin, useCount, delay, slowdown)
 
   -- Get the scroll distance and the column position.
   local distance, newColumn, fileChanged, limitExceeded = F.GetScrollDistance(command, useCount)
+
   if fileChanged then
     return
   elseif limitExceeded then
-    if scrollWin == 1 and options.centered then
+    if scrollWin == 1 and config.centered then
       vim.cmd('norm! zz')
     end
     return
@@ -75,6 +75,8 @@ function S.Scroll(command, scrollWin, useCount, delay, slowdown)
     F.ScrollDown(distance, scrollWin, delay, slowdown)
   elseif distance < 0 then
     F.ScrollUp(distance, scrollWin, delay, slowdown)
+  else
+    F.Scroll(command, delay, slowdown)
   end
 
   -- Change the cursor column position if required.

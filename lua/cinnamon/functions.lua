@@ -1,6 +1,6 @@
 local F = {}
 
-local options = require('cinnamon').options
+local config = require('cinnamon.config')
 local U = require('cinnamon.utils')
 
 function F.CheckCommandErrors(command)
@@ -69,7 +69,7 @@ function F.ScrollDown(distance, scrollWin, delay, slowdown)
     vim.cmd('norm! j')
     if scrollWin == 1 then
       local screenLine = vim.fn.winline()
-      if options.centered then
+      if config.centered then
         if screenLine > halfHeight then
           vim.cmd('silent exe "norm! \\<C-E>"')
         end
@@ -102,7 +102,7 @@ function F.ScrollUp(distance, scrollWin, delay, slowdown)
     vim.cmd('norm! k')
     if scrollWin == 1 then
       local screenLine = vim.fn.winline()
-      if options.centered then
+      if config.centered then
         if screenLine < halfHeight then
           vim.cmd('silent exe "norm! \\<C-Y>"')
         end
@@ -119,6 +119,39 @@ function F.ScrollUp(distance, scrollWin, delay, slowdown)
 
   -- Center the screen.
   F.CenterScreen(0, scrollWin, delay, slowdown)
+end
+
+function F.Scroll(command, delay, slowdown)
+  local windowHeight = vim.api.nvim_win_get_height(0)
+  local function up(lines)
+    local counter = 0
+    while counter < lines do
+      vim.cmd('silent exe "norm! \\<C-E>"')
+      counter = counter + 1
+      F.Delay(counter, delay, slowdown)
+    end
+  end
+  local function down(lines)
+    local counter = 0
+    while counter > lines do
+      vim.cmd('silent exe "norm! \\<C-Y>"')
+      counter = counter - 1
+      F.Delay(-counter, delay, slowdown)
+    end
+  end
+  local lines
+  if command == 'zz' then
+    lines = vim.fn.winline() - math.floor(windowHeight / 2 + 1)
+  elseif command == 'zt' then
+    lines = vim.fn.winline() - 3
+  elseif command == 'zb' then
+    lines = -(windowHeight - vim.fn.winline() - 3)
+  end
+  if lines ~= nil and lines > 0 then
+    up(lines)
+  elseif lines ~= nil and lines < 0 then
+    down(lines)
+  end
 end
 
 function F.GetScrollDistance(command, useCount)
@@ -141,7 +174,20 @@ function F.GetScrollDistance(command, useCount)
   end
 
   -- If searching within a fold, open the fold.
-  local searchCommands = { 'n', 'N', '*', '#', 'g*', 'g#', 'gd', 'gD', '1gd', '1gD', 'definition', 'declaration' }
+  local searchCommands = {
+    'n',
+    'N',
+    '*',
+    '#',
+    'g*',
+    'g#',
+    'gd',
+    'gD',
+    '1gd',
+    '1gD',
+    'definition',
+    'declaration',
+  }
   for _, item in pairs(searchCommands) do
     if command == item and vim.fn.foldclosed('.') ~= -1 then
       vim.cmd('norm! zo')
@@ -159,7 +205,7 @@ function F.GetScrollDistance(command, useCount)
   local distance = newRow - prevRow
 
   -- Check if scroll limit has been exceeded.
-  if distance > options.scroll_limit or distance < -options.scroll_limit then
+  if distance > config.scroll_limit or distance < -config.scroll_limit then
     return 0, -1, false, true
   end
 
@@ -191,7 +237,7 @@ end
 
 function F.CenterScreen(remaining, scrollWin, delay, slowdown)
   local halfHeight = math.ceil(vim.fn.winheight(0) / 2)
-  if scrollWin == 1 and options.centered then
+  if scrollWin == 1 and config.centered then
     local prevLine = vim.fn.winline()
 
     -- Scroll up the screen.
