@@ -21,71 +21,71 @@ Note: Each argument is a string separated by a comma.
 
 ]]
 function S.Scroll(command, scrollWin, useCount, delay, slowdown)
-    if config.disable then
-        U.ErrorMsg("Cinnamon is disabled")
-        return
+  if config.disable then
+    U.ErrorMsg("Cinnamon is disabled")
+    return
+  end
+
+  -- Check if command argument exists.
+  if not command then
+    U.ErrorMsg("The command argument cannot be nil")
+    return
+  end
+
+  -- Execute command if only moving one line.
+  for _, item in pairs {"j", "k"} do
+    if item == command and vim.v.count == 0 then
+      vim.cmd("norm! " .. command)
+      return
     end
+  end
 
-    -- Check if command argument exists.
-    if not command then
-        U.ErrorMsg("The command argument cannot be nil")
-        return
+  -- Setting argument defaults:
+  scrollWin = scrollWin or 1
+  useCount = useCount or 0
+  delay = delay or 5
+  slowdown = slowdown or 1
+
+  -- Save options.
+  local saved = {}
+  saved.lazyredraw = vim.opt.lazyredraw:get()
+
+  -- Set options.
+  vim.opt.lazyredraw = false
+
+  -- Check for any errors with the command.
+  if F.CheckCommandErrors(command) then
+    return
+  end
+
+  -- Get the scroll distance and the column position.
+  local distance, newColumn, fileChanged, limitExceeded = F.GetScrollDistance(command, useCount)
+
+  if fileChanged then
+    return
+  elseif limitExceeded then
+    if scrollWin == 1 and config.centered then
+      vim.cmd("norm! zz")
     end
+    return
+  end
 
-    -- Execute command if only moving one line.
-    for _, item in pairs {"j", "k"} do
-        if item == command and vim.v.count == 0 then
-            vim.cmd("norm! " .. command)
-            return
-        end
-    end
+  -- Perform the scroll.
+  if distance > 0 then
+    F.ScrollDown(distance, scrollWin, delay, slowdown)
+  elseif distance < 0 then
+    F.ScrollUp(distance, scrollWin, delay, slowdown)
+  else
+    F.Scroll(command, delay, slowdown)
+  end
 
-    -- Setting argument defaults:
-    scrollWin = scrollWin or 1
-    useCount = useCount or 0
-    delay = delay or 5
-    slowdown = slowdown or 1
+  -- Change the cursor column position if required.
+  if newColumn ~= -1 then
+    vim.fn.cursor(vim.fn.line("."), newColumn)
+  end
 
-    -- Save options.
-    local saved = {}
-    saved.lazyredraw = vim.opt.lazyredraw:get()
-
-    -- Set options.
-    vim.opt.lazyredraw = false
-
-    -- Check for any errors with the command.
-    if F.CheckCommandErrors(command) then
-        return
-    end
-
-    -- Get the scroll distance and the column position.
-    local distance, newColumn, fileChanged, limitExceeded = F.GetScrollDistance(command, useCount)
-
-    if fileChanged then
-        return
-    elseif limitExceeded then
-        if scrollWin == 1 and config.centered then
-            vim.cmd("norm! zz")
-        end
-        return
-    end
-
-    -- Perform the scroll.
-    if distance > 0 then
-        F.ScrollDown(distance, scrollWin, delay, slowdown)
-    elseif distance < 0 then
-        F.ScrollUp(distance, scrollWin, delay, slowdown)
-    else
-        F.Scroll(command, delay, slowdown)
-    end
-
-    -- Change the cursor column position if required.
-    if newColumn ~= -1 then
-        vim.fn.cursor(vim.fn.line("."), newColumn)
-    end
-
-    -- Restore options.
-    vim.opt.lazyredraw = saved.lazyredraw
+  -- Restore options.
+  vim.opt.lazyredraw = saved.lazyredraw
 end
 
 return S
