@@ -79,10 +79,15 @@ M.setup = function(user_config)
     keymap('n', '<C-o>', "<Cmd>lua Cinnamon.Scroll('<C-o>')<CR>", opts)
     keymap('n', '<C-i>', "<Cmd>lua Cinnamon.Scroll('1<C-i>')<CR>", opts)
 
-    -- Redraw screen:
-    keymap('n', 'zz', "<Cmd>lua Cinnamon.Scroll('zz')<CR>", opts)
-    keymap('n', 'zt', "<Cmd>lua Cinnamon.Scroll('zt')<CR>", opts)
-    keymap('n', 'zb', "<Cmd>lua Cinnamon.Scroll('zb')<CR>", opts)
+    -- TODO: find a way for the z<CR> keymap to work
+
+    -- Window scrolling:
+    keymap('n', 'zz', "<Cmd>lua Cinnamon.Scroll('zz', 1, 1)<CR>", opts)
+    keymap('n', 'z.', "<Cmd>lua Cinnamon.Scroll('z.', 1, 1)<CR>", opts)
+    keymap('n', 'zt', "<Cmd>lua Cinnamon.Scroll('zt', 1, 1)<CR>", opts)
+    -- keymap('n', 'z<CR>', "<Cmd>lua Cinnamon.Scroll('z<CR>', 1, 1)<CR>", opts)
+    keymap('n', 'zb', "<Cmd>lua Cinnamon.Scroll('zb', 1, 1)<CR>", opts)
+    -- keymap('n', 'z-', "<Cmd>lua Cinnamon.Scroll('z-', 1, 1)<CR>", opts)
   end
 
   if config.extended_keymaps then

@@ -34,7 +34,7 @@ function S.Scroll(command, scrollWin, useCount, delay, slowdown)
 
   -- Execute command if only moving one line.
   for _, item in pairs { 'j', 'k' } do
-    if item == command and vim.v.count == 0 then
+    if item == command and vim.v.count1 == 1 then
       vim.cmd('norm! ' .. command)
       return
     end
@@ -45,6 +45,14 @@ function S.Scroll(command, scrollWin, useCount, delay, slowdown)
   useCount = useCount or 0
   delay = delay or 5
   slowdown = slowdown or 1
+
+  -- Execute command if using a scroll cursor command with a count.
+  for _, item in pairs { 'zz', 'z.', 'zt', 'z<CR>', 'zb', 'z-' } do
+    if item == command and useCount and vim.v.count > 0 then
+      vim.cmd('norm! ' .. vim.v.count .. command)
+      return
+    end
+  end
 
   -- Save options.
   local saved = {}

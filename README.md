@@ -63,6 +63,7 @@ Line number:                [count]G
 Paragraph movements:        { and }
 Prev/next search result:    n, N, *, #, g* and g#
 Prev/next cursor location:  <C-O> and <C-I>
+Window scrolling:           zz, z., zt, and zb
 ```
 
 __Extended Keymaps:__
@@ -71,7 +72,6 @@ __Extended Keymaps:__
 Smooth scrolling for ...
 
 Up/down movements:          [count]j, [count]k, [count]<Up> and [count]<Down>
-Redraw screen:              zz, zt and zb
 ```
 
 ## ℹ️ API
@@ -141,10 +141,11 @@ keymap('n', 'g#', "<Cmd>lua Cinnamon.Scroll('g#')<CR>", opts)
 keymap('n', '<C-o>', "<Cmd>lua Cinnamon.Scroll('<C-o>')<CR>", opts)
 keymap('n', '<C-i>', "<Cmd>lua Cinnamon.Scroll('1<C-i>')<CR>", opts)
 
--- Redraw screen:
-keymap('n', 'zz', "<Cmd>lua Cinnamon.Scroll('zz')<CR>", opts)
-keymap('n', 'zt', "<Cmd>lua Cinnamon.Scroll('zt')<CR>", opts)
-keymap('n', 'zb', "<Cmd>lua Cinnamon.Scroll('zb')<CR>", opts)
+-- Window scrolling:
+keymap('n', 'zz', "<Cmd>lua Cinnamon.Scroll('zz', 1, 1)<CR>", opts)
+keymap('n', 'z.', "<Cmd>lua Cinnamon.Scroll('z.', 1, 1)<CR>", opts)
+keymap('n', 'zt', "<Cmd>lua Cinnamon.Scroll('zt', 1, 1)<CR>", opts)
+keymap('n', 'zb', "<Cmd>lua Cinnamon.Scroll('zb', 1, 1)<CR>", opts)
 ```
 
 _Note: `1<C-i>` has to be used instead of `<C-i>` to prevent it from being

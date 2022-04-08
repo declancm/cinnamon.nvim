@@ -56,8 +56,10 @@ local function CheckForFold(counter)
 end
 
 function F.ScrollDown(distance, scrollWin, delay, slowdown)
+  local winHeight = vim.api.nvim_win_get_height(0)
+
   -- Center the screen.
-  local halfHeight = math.ceil(vim.fn.winheight(0) / 2)
+  local halfHeight = math.ceil(winHeight / 2)
   if vim.fn.winline() > halfHeight then
     F.CenterScreen(distance, scrollWin, delay, slowdown)
   end
@@ -75,7 +77,8 @@ function F.ScrollDown(distance, scrollWin, delay, slowdown)
         end
       else
         -- Scroll the window if the current line is not within 'scrolloff'.
-        if not (screenLine <= vim.opt.so:get() + 1 or screenLine >= vim.fn.winheight('%') - vim.opt.so:get()) then
+        local scrolloff = vim.opt.so:get()
+        if not (screenLine <= scrolloff + 1 or screenLine >= winHeight - scrolloff) then
           vim.cmd('silent exe "norm! \\<C-E>"')
         end
       end
@@ -89,8 +92,10 @@ function F.ScrollDown(distance, scrollWin, delay, slowdown)
 end
 
 function F.ScrollUp(distance, scrollWin, delay, slowdown)
+  local winHeight = vim.api.nvim_win_get_height(0)
+
   -- Center the screen.
-  local halfHeight = math.ceil(vim.fn.winheight(0) / 2)
+  local halfHeight = math.ceil(winHeight / 2)
   if vim.fn.winline() < halfHeight then
     F.CenterScreen(-distance, scrollWin, delay, slowdown)
   end
@@ -108,7 +113,8 @@ function F.ScrollUp(distance, scrollWin, delay, slowdown)
         end
       else
         -- Scroll the window if the current line is not within 'scrolloff'.
-        if not (screenLine <= vim.opt.so:get() + 1 or screenLine >= vim.fn.winheight('%') - vim.opt.so:get()) then
+        local scrolloff = vim.opt.so:get()
+        if not (screenLine <= scrolloff + 1 or screenLine >= winHeight - scrolloff) then
           vim.cmd('silent exe "norm! \\<C-Y>"')
         end
       end
@@ -123,22 +129,23 @@ end
 
 function F.Scroll(command, delay, slowdown)
   local windowHeight = vim.api.nvim_win_get_height(0)
+  local halfHeight = math.ceil(windowHeight / 2)
   local lines = 0
   local scrolloff = vim.opt.so:get()
 
-  if command == 'zz' then
-    lines = vim.fn.winline() - math.floor(windowHeight / 2 + 1)
-  elseif command == 'zt' then
-    if scrolloff < math.ceil(vim.fn.winheight(0) / 2) then
+  if command == 'zz' or command == 'z.' then
+    lines = vim.fn.winline() - halfHeight
+  elseif command == 'zt' or command == 'z<CR>' then
+    if scrolloff < halfHeight then
       lines = vim.fn.winline() - scrolloff - 1
     else
-      lines = vim.fn.winline() - math.floor(windowHeight / 2 + 1)
+      lines = vim.fn.winline() - halfHeight
     end
-  elseif command == 'zb' then
-    if scrolloff < math.ceil(vim.fn.winheight(0) / 2) then
+  elseif command == 'zb' or command == 'z-' then
+    if scrolloff < halfHeight then
       lines = -(windowHeight - vim.fn.winline() - scrolloff)
     else
-      lines = vim.fn.winline() - math.floor(windowHeight / 2 + 1)
+      lines = vim.fn.winline() - halfHeight
     end
   end
 
@@ -156,6 +163,10 @@ function F.Scroll(command, delay, slowdown)
       counter = counter - 1
       F.Delay(-counter, delay, slowdown)
     end
+  end
+
+  if command == 'z.' or command == 'z<CR>' or command == 'z-' then
+    vim.cmd('norm! ^')
   end
 end
 
@@ -241,7 +252,8 @@ function F.Delay(remaining, delay, slowdown)
 end
 
 function F.CenterScreen(remaining, scrollWin, delay, slowdown)
-  local halfHeight = math.ceil(vim.fn.winheight(0) / 2)
+  local halfHeight = math.ceil(vim.api.nvim_win_get_height(0) / 2)
+
   if scrollWin == 1 and config.centered then
     local prevLine = vim.fn.winline()
 
