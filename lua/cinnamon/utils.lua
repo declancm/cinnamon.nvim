@@ -2,14 +2,14 @@ local U = {}
 
 function U.ErrorMsg(message, code, color)
   message = vim.fn.escape(message, '"\\')
-  code = code or "Error"
-  color = color or "ErrorMsg"
+  code = code or 'Error'
+  color = color or 'ErrorMsg'
   vim.cmd(string.format('echohl %s | echom "%s: %s" | echohl None', color, code, message))
 end
 
 function U.merge(t1, t2)
   for k, v in pairs(t2) do
-    if (type(v) == "table") and (type(t1[k] or false) == "table") then
+    if (type(v) == 'table') and (type(t1[k] or false) == 'table') then
       if U.is_array(t1[k]) then
         t1[k] = U.concat(t1[k], v)
       else

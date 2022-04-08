@@ -1,8 +1,8 @@
 local S = {}
 
-local config = require("cinnamon.config")
-local U = require("cinnamon.utils")
-local F = require("cinnamon.functions")
+local config = require('cinnamon.config')
+local U = require('cinnamon.utils')
+local F = require('cinnamon.functions')
 
 -- TODO: add doc files.
 
@@ -22,20 +22,20 @@ Note: Each argument is a string separated by a comma.
 ]]
 function S.Scroll(command, scrollWin, useCount, delay, slowdown)
   if config.disable then
-    U.ErrorMsg("Cinnamon is disabled")
+    U.ErrorMsg('Cinnamon is disabled')
     return
   end
 
   -- Check if command argument exists.
   if not command then
-    U.ErrorMsg("The command argument cannot be nil")
+    U.ErrorMsg('The command argument cannot be nil')
     return
   end
 
   -- Execute command if only moving one line.
-  for _, item in pairs {"j", "k"} do
+  for _, item in pairs { 'j', 'k' } do
     if item == command and vim.v.count == 0 then
-      vim.cmd("norm! " .. command)
+      vim.cmd('norm! ' .. command)
       return
     end
   end
@@ -65,7 +65,7 @@ function S.Scroll(command, scrollWin, useCount, delay, slowdown)
     return
   elseif limitExceeded then
     if scrollWin == 1 and config.centered then
-      vim.cmd("norm! zz")
+      vim.cmd('norm! zz')
     end
     return
   end
@@ -81,7 +81,7 @@ function S.Scroll(command, scrollWin, useCount, delay, slowdown)
 
   -- Change the cursor column position if required.
   if newColumn ~= -1 then
-    vim.fn.cursor(vim.fn.line("."), newColumn)
+    vim.fn.cursor(vim.fn.line('.'), newColumn)
   end
 
   -- Restore options.

@@ -1,41 +1,41 @@
 local F = {}
 
-local config = require("cinnamon.config")
-local U = require("cinnamon.utils")
+local config = require('cinnamon.config')
+local U = require('cinnamon.utils')
 
 function F.CheckCommandErrors(command)
   -- If no search pattern, return an error if using a repeat search command.
-  for _, item in pairs {"n", "N"} do
+  for _, item in pairs { 'n', 'N' } do
     if item == command then
-      local pattern = vim.fn.getreg("/")
-      if pattern == "" then
-        U.ErrorMsg("The search pattern is empty")
+      local pattern = vim.fn.getreg('/')
+      if pattern == '' then
+        U.ErrorMsg('The search pattern is empty')
         return true
       end
-      if vim.fn.search(pattern, "nw") == 0 then
-        U.ErrorMsg("Pattern not found: " .. vim.fn.getreg("/"), "E486")
+      if vim.fn.search(pattern, 'nw') == 0 then
+        U.ErrorMsg('Pattern not found: ' .. vim.fn.getreg('/'), 'E486')
         return true
       end
     end
   end
 
   -- If no word under cursor, return an error if using a word-near-cursor search command.
-  for _, item in pairs {"*", "#", "g*", "g#"} do
+  for _, item in pairs { '*', '#', 'g*', 'g#' } do
     if item == command then
       -- Check if string is empty or only whitespace.
-      if vim.fn.getline("."):match("^%s*$") then
-        U.ErrorMsg("No string under cursor", "E348")
+      if vim.fn.getline('.'):match('^%s*$') then
+        U.ErrorMsg('No string under cursor', 'E348')
         return true
       end
     end
   end
 
   -- If no word under cursor, return an error if using a goto command.
-  for _, item in pairs {"gd", "gD", "1gd", "1gD"} do
+  for _, item in pairs { 'gd', 'gD', '1gd', '1gD' } do
     if item == command then
       -- Check if string is empty or only whitespace.
-      if vim.fn.getline("."):match("^%s*$") then
-        U.ErrorMsg("No identifier under cursor", "E349")
+      if vim.fn.getline('.'):match('^%s*$') then
+        U.ErrorMsg('No identifier under cursor', 'E349')
         return true
       end
     end
@@ -46,7 +46,7 @@ function F.CheckCommandErrors(command)
 end
 
 local function CheckForFold(counter)
-  local foldStart = vim.fn.foldclosed(".")
+  local foldStart = vim.fn.foldclosed('.')
   -- If a fold exists, add the length to the counter.
   if foldStart ~= -1 then
     local foldSize = vim.fn.foldclosedend(foldStart) - foldStart
@@ -66,7 +66,7 @@ function F.ScrollDown(distance, scrollWin, delay, slowdown)
   local counter = 1
   while counter <= distance do
     counter = CheckForFold(counter)
-    vim.cmd("norm! j")
+    vim.cmd('norm! j')
     if scrollWin == 1 then
       local screenLine = vim.fn.winline()
       if config.centered then
@@ -75,7 +75,7 @@ function F.ScrollDown(distance, scrollWin, delay, slowdown)
         end
       else
         -- Scroll the window if the current line is not within 'scrolloff'.
-        if not (screenLine <= vim.opt.so:get() + 1 or screenLine >= vim.fn.winheight("%") - vim.opt.so:get()) then
+        if not (screenLine <= vim.opt.so:get() + 1 or screenLine >= vim.fn.winheight('%') - vim.opt.so:get()) then
           vim.cmd('silent exe "norm! \\<C-E>"')
         end
       end
@@ -99,7 +99,7 @@ function F.ScrollUp(distance, scrollWin, delay, slowdown)
   local counter = 1
   while counter <= -distance do
     counter = CheckForFold(counter)
-    vim.cmd("norm! k")
+    vim.cmd('norm! k')
     if scrollWin == 1 then
       local screenLine = vim.fn.winline()
       if config.centered then
@@ -108,7 +108,7 @@ function F.ScrollUp(distance, scrollWin, delay, slowdown)
         end
       else
         -- Scroll the window if the current line is not within 'scrolloff'.
-        if not (screenLine <= vim.opt.so:get() + 1 or screenLine >= vim.fn.winheight("%") - vim.opt.so:get()) then
+        if not (screenLine <= vim.opt.so:get() + 1 or screenLine >= vim.fn.winheight('%') - vim.opt.so:get()) then
           vim.cmd('silent exe "norm! \\<C-Y>"')
         end
       end
@@ -140,11 +140,11 @@ function F.Scroll(command, delay, slowdown)
     end
   end
   local lines
-  if command == "zz" then
+  if command == 'zz' then
     lines = vim.fn.winline() - math.floor(windowHeight / 2 + 1)
-  elseif command == "zt" then
+  elseif command == 'zt' then
     lines = vim.fn.winline() - 3
-  elseif command == "zb" then
+  elseif command == 'zb' then
     lines = -(windowHeight - vim.fn.winline() - 3)
   end
   if lines ~= nil and lines > 0 then
@@ -158,47 +158,47 @@ function F.GetScrollDistance(command, useCount)
   local savedView = vim.fn.winsaveview()
 
   local _, prevRow, _, _, prevCurswant = unpack(vim.fn.getcurpos())
-  local prevFile = vim.fn.getreg("%")
+  local prevFile = vim.fn.getreg('%')
 
   -- Perform the command.
-  if command == "definition" then
-    require("vim.lsp.buf").definition()
-    vim.cmd("sleep 100m")
-  elseif command == "declaration" then
-    require("vim.lsp.buf").declaration()
-    vim.cmd("sleep 100m")
+  if command == 'definition' then
+    require('vim.lsp.buf').definition()
+    vim.cmd('sleep 100m')
+  elseif command == 'declaration' then
+    require('vim.lsp.buf').declaration()
+    vim.cmd('sleep 100m')
   elseif useCount ~= 0 and vim.v.count > 0 then
-    vim.cmd("norm! " .. vim.v.count .. command)
+    vim.cmd('norm! ' .. vim.v.count .. command)
   else
-    vim.cmd("norm! " .. command)
+    vim.cmd('norm! ' .. command)
   end
 
   -- If searching within a fold, open the fold.
   local searchCommands = {
-    "n",
-    "N",
-    "*",
-    "#",
-    "g*",
-    "g#",
-    "gd",
-    "gD",
-    "1gd",
-    "1gD",
-    "definition",
-    "declaration"
+    'n',
+    'N',
+    '*',
+    '#',
+    'g*',
+    'g#',
+    'gd',
+    'gD',
+    '1gd',
+    '1gD',
+    'definition',
+    'declaration',
   }
   for _, item in pairs(searchCommands) do
-    if command == item and vim.fn.foldclosed(".") ~= -1 then
-      vim.cmd("norm! zo")
+    if command == item and vim.fn.foldclosed('.') ~= -1 then
+      vim.cmd('norm! zo')
     end
   end
 
   local _, newRow, newColumn, _, newCurswant = unpack(vim.fn.getcurpos())
 
   -- Check if the file has changed.
-  if prevFile ~= vim.fn.getreg("%") then
-    vim.cmd("norm! zz")
+  if prevFile ~= vim.fn.getreg('%') then
+    vim.cmd('norm! zz')
     return 0, -1, true, false
   end
 
@@ -220,7 +220,7 @@ function F.GetScrollDistance(command, useCount)
 end
 
 function F.Delay(remaining, delay, slowdown)
-  vim.cmd("redraw")
+  vim.cmd('redraw')
 
   -- Don't create a delay when scrolling comleted.
   if remaining <= 0 then
@@ -229,9 +229,9 @@ function F.Delay(remaining, delay, slowdown)
 
   -- Increase the delay near the end of the scroll.
   if remaining <= 4 and slowdown == 1 then
-    vim.cmd("sleep " .. delay * (5 - remaining) .. "m")
+    vim.cmd('sleep ' .. delay * (5 - remaining) .. 'm')
   else
-    vim.cmd("sleep " .. delay .. "m")
+    vim.cmd('sleep ' .. delay .. 'm')
   end
 end
 
