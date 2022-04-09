@@ -1,19 +1,28 @@
-local U = {}
+local utils = {}
 
-U.error_msg = function(message, code, color)
+utils.error_msg = function(message, code, color)
   message = vim.fn.escape(message, '"\\')
   code = code or 'Error'
   color = color or 'ErrorMsg'
   vim.cmd(string.format('echohl %s | echom "%s: %s" | echohl None', color, code, message))
 end
 
-U.merge = function(t1, t2)
+utils.within = function(target, table)
+  for _, item in pairs(table) do
+    if item == target then
+      return true
+    end
+  end
+  return false
+end
+
+utils.merge = function(t1, t2)
   for k, v in pairs(t2) do
     if (type(v) == 'table') and (type(t1[k] or false) == 'table') then
-      if U.is_array(t1[k]) then
-        t1[k] = U.concat(t1[k], v)
+      if utils.is_array(t1[k]) then
+        t1[k] = utils.concat(t1[k], v)
       else
-        U.merge(t1[k], t2[k])
+        utils.merge(t1[k], t2[k])
       end
     else
       t1[k] = v
@@ -22,14 +31,14 @@ U.merge = function(t1, t2)
   return t1
 end
 
-U.concat = function(t1, t2)
+utils.concat = function(t1, t2)
   for i = 1, #t2 do
     table.insert(t1, t2[i])
   end
   return t1
 end
 
-U.is_array = function(t)
+utils.is_array = function(t)
   local i = 0
   for _ in pairs(t) do
     i = i + 1
@@ -40,4 +49,4 @@ U.is_array = function(t)
   return true
 end
 
-return U
+return utils

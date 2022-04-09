@@ -1,4 +1,4 @@
-local M = {
+return {
   default_keymaps = true,
   extra_keymaps = false,
   extended_keymaps = false,
@@ -6,5 +6,3 @@ local M = {
   disable = false,
   scroll_limit = 150,
 }
-
-return M

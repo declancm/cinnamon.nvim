@@ -1,14 +1,15 @@
-local S = {}
+local M = {}
 
 local config = require('cinnamon.config')
-local U = require('cinnamon.utils')
-local F = require('cinnamon.functions')
+local utils = require('cinnamon.utils')
+local fn = require('cinnamon.functions')
+local motions = require('cinnamon.motions')
 
 -- TODO: add doc files.
 
 --[[
 
-require('cinnamon.scroll').Scroll(arg1, arg2, arg3, arg4, arg5, arg6)
+require('cinnamon.scroll').scroll(arg1, arg2, arg3, arg4, arg5, arg6)
 
 arg1 = A string containing the normal mode movement command.
   * To use the go-to-definition LSP function, use 'definition' (or 'declaration'
@@ -22,24 +23,22 @@ Note: arg1 is a string while the others are integers.
 
 ]]
 
-S.scroll = function(command, scroll_win, use_count, delay, slowdown)
+M.scroll = function(command, scroll_win, use_count, delay, slowdown)
   if config.disable then
-    U.error_msg('Cinnamon is disabled')
+    utils.error_msg('Cinnamon is disabled')
     return
   end
 
   -- Check if command argument exists.
   if not command then
-    U.error_msg('The command argument cannot be nil')
+    utils.error_msg('The command argument cannot be nil')
     return
   end
 
   -- Execute command if only moving one line.
-  for _, item in pairs { 'j', 'k' } do
-    if item == command and vim.v.count1 == 1 then
-      vim.cmd('norm! ' .. command)
-      return
-    end
+  if utils.within(command, motions.up_down) then
+    vim.cmd('norm! ' .. command)
+    return
   end
 
   -- Setting argument defaults:
@@ -48,12 +47,10 @@ S.scroll = function(command, scroll_win, use_count, delay, slowdown)
   delay = delay or 5
   slowdown = slowdown or 1
 
-  -- Execute command if using a scroll cursor command with a count.
-  for _, item in pairs { 'zz', 'z.', 'zt', 'z<CR>', 'zb', 'z-' } do
-    if item == command and use_count and vim.v.count > 0 then
-      vim.cmd('norm! ' .. vim.v.count .. command)
-      return
-    end
+  -- Execute command if using a relative scroll command with a count.
+  if utils.within(command, motions.relative_scroll) and use_count and vim.v.count > 0 then
+    vim.cmd('norm! ' .. vim.v.count .. command)
+    return
   end
 
   -- Save options.
@@ -64,12 +61,12 @@ S.scroll = function(command, scroll_win, use_count, delay, slowdown)
   vim.opt.lazyredraw = false
 
   -- Check for any errors with the command.
-  if F.check_command_errors(command) then
+  if fn.check_command_errors(command) then
     return
   end
 
   -- Get the scroll distance and the column position.
-  local distance, new_column, file_changed, limit_exceeded = F.get_scroll_distance(command, use_count)
+  local distance, new_column, file_changed, limit_exceeded = fn.get_scroll_distance(command, use_count)
 
   if file_changed then
     return
@@ -82,20 +79,22 @@ S.scroll = function(command, scroll_win, use_count, delay, slowdown)
 
   -- Perform the scroll.
   if distance > 0 then
-    F.scroll_down(distance, scroll_win, delay, slowdown)
+    fn.scroll_down(distance, scroll_win, delay, slowdown)
   elseif distance < 0 then
-    F.scroll_up(distance, scroll_win, delay, slowdown)
+    fn.scroll_up(distance, scroll_win, delay, slowdown)
   else
-    F.relative_scroll(command, delay, slowdown)
+    fn.relative_scroll(command, delay, slowdown)
   end
 
   -- Change the cursor column position if required.
   if new_column ~= -1 then
     vim.fn.cursor(vim.fn.line('.'), new_column)
+  elseif utils.within(command, motions.relative_scroll_caret) then
+    vim.cmd('norm! ^')
   end
 
   -- Restore options.
   vim.opt.lazyredraw = saved.lazyredraw
 end
 
-return S
+return M

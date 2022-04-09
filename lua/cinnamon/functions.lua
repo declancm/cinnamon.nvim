@@ -1,7 +1,8 @@
-local F = {}
+local fn = {}
 
 local config = require('cinnamon.config')
-local U = require('cinnamon.utils')
+local utils = require('cinnamon.utils')
+local motions = require('cinnamon.motions')
 
 local check_for_fold = function(counter)
   local fold_start = vim.fn.foldclosed('.')
@@ -58,41 +59,35 @@ local scroll_screen = function(remaining, delay, slowdown, target_line)
   end
 end
 
-F.check_command_errors = function(command)
+fn.check_command_errors = function(command)
   -- If no search pattern, return an error if using a repeat search command.
-  for _, item in pairs { 'n', 'N' } do
-    if item == command then
-      local pattern = vim.fn.getreg('/')
-      if pattern == '' then
-        U.error_msg('The search pattern is empty')
-        return true
-      end
-      if vim.fn.search(pattern, 'nw') == 0 then
-        U.error_msg('Pattern not found: ' .. vim.fn.getreg('/'), 'E486')
-        return true
-      end
+  if utils.within(command, motions.search_repeat) then
+    local pattern = vim.fn.getreg('/')
+    if pattern == '' then
+      utils.error_msg('The search pattern is empty')
+      return true
+    end
+    if vim.fn.search(pattern, 'nw') == 0 then
+      utils.error_msg('Pattern not found: ' .. vim.fn.getreg('/'), 'E486')
+      return true
     end
   end
 
   -- If no word under cursor, return an error if using a word-near-cursor search command.
-  for _, item in pairs { '*', '#', 'g*', 'g#' } do
-    if item == command then
-      -- Check if string is empty or only whitespace.
-      if vim.fn.getline('.'):match('^%s*$') then
-        U.error_msg('No string under cursor', 'E348')
-        return true
-      end
+  if utils.within(command, motions.search_cursor) then
+    -- Check if string is empty or only whitespace.
+    if vim.fn.getline('.'):match('^%s*$') then
+      utils.error_msg('No string under cursor', 'E348')
+      return true
     end
   end
 
-  -- If no word under cursor, return an error if using a goto command.
-  for _, item in pairs { 'gd', 'gD', '1gd', '1gD' } do
-    if item == command then
-      -- Check if string is empty or only whitespace.
-      if vim.fn.getline('.'):match('^%s*$') then
-        U.error_msg('No identifier under cursor', 'E349')
-        return true
-      end
+  -- If no word under cursor, return an error if using a goto declaration command.
+  if utils.within(command, motions.goto_declaration) then
+    -- Check if string is empty or only whitespace.
+    if vim.fn.getline('.'):match('^%s*$') then
+      utils.error_msg('No identifier under cursor', 'E349')
+      return true
     end
   end
 
@@ -100,7 +95,7 @@ F.check_command_errors = function(command)
   return false
 end
 
-F.scroll_down = function(distance, scroll_win, delay, slowdown)
+fn.scroll_down = function(distance, scroll_win, delay, slowdown)
   local win_height = vim.api.nvim_win_get_height(0)
 
   -- Center the screen.
@@ -138,7 +133,7 @@ F.scroll_down = function(distance, scroll_win, delay, slowdown)
   end
 end
 
-F.scroll_up = function(distance, scroll_win, delay, slowdown)
+fn.scroll_up = function(distance, scroll_win, delay, slowdown)
   local win_height = vim.api.nvim_win_get_height(0)
 
   -- Center the screen.
@@ -176,15 +171,8 @@ F.scroll_up = function(distance, scroll_win, delay, slowdown)
   end
 end
 
-F.relative_scroll = function(command, delay, slowdown)
-  local relative_scroll_cmd = false
-  for _, item in pairs { 'zz', 'z.', 'zt', 'z<CR>', 'zb', 'z-' } do
-    if item == command then
-      relative_scroll_cmd = true
-      break
-    end
-  end
-  if not relative_scroll_cmd then
+fn.relative_scroll = function(command, delay, slowdown)
+  if not utils.within(command, motions.relative_scroll) then
     return
   end
 
@@ -192,20 +180,16 @@ F.relative_scroll = function(command, delay, slowdown)
   local half_height = math.ceil(window_height / 2)
   local scrolloff = vim.opt.so:get()
 
-  if (command == 'zt' or command == 'z<CR>') and scrolloff < half_height then
+  if utils.within(command, motions.relative_scroll_top) and scrolloff < half_height then
     scroll_screen(0, delay, slowdown, scrolloff + 1)
-  elseif (command == 'zb' or command == 'z-') and scrolloff < half_height then
+  elseif utils.within(command, motions.relative_scroll_bottom) and scrolloff < half_height then
     scroll_screen(0, delay, slowdown, window_height - scrolloff)
   else
     scroll_screen(0, delay, slowdown)
   end
-
-  if command == 'z.' or command == 'z<CR>' or command == 'z-' then
-    vim.cmd('norm! ^')
-  end
 end
 
-F.get_scroll_distance = function(command, use_count)
+fn.get_scroll_distance = function(command, use_count)
   local saved_view = vim.fn.winsaveview()
 
   local _, prev_row, _, _, prev_curswant = unpack(vim.fn.getcurpos())
@@ -225,24 +209,8 @@ F.get_scroll_distance = function(command, use_count)
   end
 
   -- If searching within a fold, open the fold.
-  local search_commands = {
-    'n',
-    'N',
-    '*',
-    '#',
-    'g*',
-    'g#',
-    'gd',
-    'gD',
-    '1gd',
-    '1gD',
-    'definition',
-    'declaration',
-  }
-  for _, item in pairs(search_commands) do
-    if command == item and vim.fn.foldclosed('.') ~= -1 then
-      vim.cmd('norm! zo')
-    end
+  if utils.within(command, motions.search) and vim.fn.foldclosed('.') ~= -1 then
+    vim.cmd('norm! zo')
   end
 
   local _, new_row, new_column, _, new_curswant = unpack(vim.fn.getcurpos())
@@ -270,4 +238,4 @@ F.get_scroll_distance = function(command, use_count)
   return distance, new_column, false, false
 end
 
-return F
+return fn
