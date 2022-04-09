@@ -22,15 +22,15 @@ Note: arg1 is a string while the others are integers.
 
 ]]
 
-function S.Scroll(command, scrollWin, useCount, delay, slowdown)
+S.scroll = function(command, scroll_win, use_count, delay, slowdown)
   if config.disable then
-    U.ErrorMsg('Cinnamon is disabled')
+    U.error_msg('Cinnamon is disabled')
     return
   end
 
   -- Check if command argument exists.
   if not command then
-    U.ErrorMsg('The command argument cannot be nil')
+    U.error_msg('The command argument cannot be nil')
     return
   end
 
@@ -43,14 +43,14 @@ function S.Scroll(command, scrollWin, useCount, delay, slowdown)
   end
 
   -- Setting argument defaults:
-  scrollWin = scrollWin or 1
-  useCount = useCount or 0
+  scroll_win = scroll_win or 1
+  use_count = use_count or 0
   delay = delay or 5
   slowdown = slowdown or 1
 
   -- Execute command if using a scroll cursor command with a count.
   for _, item in pairs { 'zz', 'z.', 'zt', 'z<CR>', 'zb', 'z-' } do
-    if item == command and useCount and vim.v.count > 0 then
+    if item == command and use_count and vim.v.count > 0 then
       vim.cmd('norm! ' .. vim.v.count .. command)
       return
     end
@@ -64,17 +64,17 @@ function S.Scroll(command, scrollWin, useCount, delay, slowdown)
   vim.opt.lazyredraw = false
 
   -- Check for any errors with the command.
-  if F.CheckCommandErrors(command) then
+  if F.check_command_errors(command) then
     return
   end
 
   -- Get the scroll distance and the column position.
-  local distance, newColumn, fileChanged, limitExceeded = F.GetScrollDistance(command, useCount)
+  local distance, new_column, file_changed, limit_exceeded = F.get_scroll_distance(command, use_count)
 
-  if fileChanged then
+  if file_changed then
     return
-  elseif limitExceeded then
-    if scrollWin == 1 and config.centered then
+  elseif limit_exceeded then
+    if scroll_win == 1 and config.centered then
       vim.cmd('norm! zz')
     end
     return
@@ -82,16 +82,16 @@ function S.Scroll(command, scrollWin, useCount, delay, slowdown)
 
   -- Perform the scroll.
   if distance > 0 then
-    F.ScrollDown(distance, scrollWin, delay, slowdown)
+    F.scroll_down(distance, scroll_win, delay, slowdown)
   elseif distance < 0 then
-    F.ScrollUp(distance, scrollWin, delay, slowdown)
+    F.scroll_up(distance, scroll_win, delay, slowdown)
   else
-    F.RelativeScroll(command, delay, slowdown)
+    F.relative_scroll(command, delay, slowdown)
   end
 
   -- Change the cursor column position if required.
-  if newColumn ~= -1 then
-    vim.fn.cursor(vim.fn.line('.'), newColumn)
+  if new_column ~= -1 then
+    vim.fn.cursor(vim.fn.line('.'), new_column)
   end
 
   -- Restore options.
