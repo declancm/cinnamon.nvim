@@ -80,9 +80,9 @@ Up/down movements:          [count]j, [count]k, [count]<Up> and [count]<Down>
 Cinnamon.Scroll(arg1, arg2, arg3, arg4, arg5)
 ```
 
-* __arg1__ = A string containing the normal mode movement command. To use the
-  go-to-definition LSP function, use 'definition' (or 'declaration' for
-  go-to-declaration). This argument is required as there's no default value.
+* __arg1__ = A string containing the normal mode movement command.
+  * To use the go-to-definition LSP function, use 'definition' (or 'declaration'
+    for go-to-declaration).
 * __arg2__ = Scroll the window with the cursor. (1 for on, 0 for off). Default is 1.
 * __arg3__ = Accept a count before the command (1 for on, 0 for off). Default is 0.
 * __arg4__ = Length of delay between lines (in ms). Default is 5.

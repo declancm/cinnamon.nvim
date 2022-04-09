@@ -60,8 +60,8 @@ function F.ScrollDown(distance, scrollWin, delay, slowdown)
 
   -- Center the screen.
   local halfHeight = math.ceil(winHeight / 2)
-  if vim.fn.winline() > halfHeight then
-    F.CenterScreen(distance, scrollWin, delay, slowdown)
+  if vim.fn.winline() > halfHeight and scrollWin == 1 and config.centered then
+    F.ScrollScreen(distance, delay, slowdown)
   end
 
   -- Scroll.
@@ -88,7 +88,9 @@ function F.ScrollDown(distance, scrollWin, delay, slowdown)
   end
 
   -- Center the screen.
-  F.CenterScreen(0, scrollWin, delay, slowdown)
+  if scrollWin == 1 and config.centered then
+    F.ScrollScreen(0, delay, slowdown)
+  end
 end
 
 function F.ScrollUp(distance, scrollWin, delay, slowdown)
@@ -96,8 +98,8 @@ function F.ScrollUp(distance, scrollWin, delay, slowdown)
 
   -- Center the screen.
   local halfHeight = math.ceil(winHeight / 2)
-  if vim.fn.winline() < halfHeight then
-    F.CenterScreen(-distance, scrollWin, delay, slowdown)
+  if vim.fn.winline() < halfHeight and scrollWin == 1 and config.centered then
+    F.ScrollScreen(-distance, delay, slowdown)
   end
 
   -- Scroll.
@@ -124,45 +126,33 @@ function F.ScrollUp(distance, scrollWin, delay, slowdown)
   end
 
   -- Center the screen.
-  F.CenterScreen(0, scrollWin, delay, slowdown)
+  if scrollWin == 1 and config.centered then
+    F.ScrollScreen(0, delay, slowdown)
+  end
 end
 
-function F.Scroll(command, delay, slowdown)
-  local windowHeight = vim.api.nvim_win_get_height(0)
-  local halfHeight = math.ceil(windowHeight / 2)
-  local lines = 0
-  local scrolloff = vim.opt.so:get()
-
-  if command == 'zz' or command == 'z.' then
-    lines = vim.fn.winline() - halfHeight
-  elseif command == 'zt' or command == 'z<CR>' then
-    if scrolloff < halfHeight then
-      lines = vim.fn.winline() - scrolloff - 1
-    else
-      lines = vim.fn.winline() - halfHeight
-    end
-  elseif command == 'zb' or command == 'z-' then
-    if scrolloff < halfHeight then
-      lines = -(windowHeight - vim.fn.winline() - scrolloff)
-    else
-      lines = vim.fn.winline() - halfHeight
+function F.RelativeScroll(command, delay, slowdown)
+  local relativeScrollCommand = false
+  for _, item in pairs { 'zz', 'z.', 'zt', 'z<CR>', 'zb', 'z-' } do
+    if item == command then
+      relativeScrollCommand = true
+      break
     end
   end
+  if not relativeScrollCommand then
+    return
+  end
 
-  if lines > 0 then
-    local counter = 0
-    while counter < lines do
-      vim.cmd('silent exe "norm! \\<C-E>"')
-      counter = counter + 1
-      F.Delay(counter, delay, slowdown)
-    end
-  elseif lines < 0 then
-    local counter = 0
-    while counter > lines do
-      vim.cmd('silent exe "norm! \\<C-Y>"')
-      counter = counter - 1
-      F.Delay(-counter, delay, slowdown)
-    end
+  local windowHeight = vim.api.nvim_win_get_height(0)
+  local halfHeight = math.ceil(windowHeight / 2)
+  local scrolloff = vim.opt.so:get()
+
+  if (command == 'zt' or command == 'z<CR>') and scrolloff < halfHeight then
+    F.ScrollScreen(0, delay, slowdown, scrolloff + 1)
+  elseif (command == 'zb' or command == 'z-') and scrolloff < halfHeight then
+    F.ScrollScreen(0, delay, slowdown, windowHeight - scrolloff)
+  else
+    F.ScrollScreen(0, delay, slowdown)
   end
 
   if command == 'z.' or command == 'z<CR>' or command == 'z-' then
@@ -251,33 +241,31 @@ function F.Delay(remaining, delay, slowdown)
   end
 end
 
-function F.CenterScreen(remaining, scrollWin, delay, slowdown)
-  local halfHeight = math.ceil(vim.api.nvim_win_get_height(0) / 2)
+function F.ScrollScreen(remaining, delay, slowdown, targetLine)
+  targetLine = targetLine or math.ceil(vim.api.nvim_win_get_height(0) / 2)
 
-  if scrollWin == 1 and config.centered then
-    local prevLine = vim.fn.winline()
+  local prevLine = vim.fn.winline()
 
-    -- Scroll up the screen.
-    while vim.fn.winline() > halfHeight do
-      vim.cmd('silent exe "norm! \\<C-E>"')
-      local newLine = vim.fn.winline()
-      F.Delay(newLine - halfHeight + remaining, delay, slowdown)
-      if newLine == prevLine then
-        break
-      end
-      prevLine = newLine
+  -- Scroll up the screen.
+  while vim.fn.winline() > targetLine do
+    vim.cmd('silent exe "norm! \\<C-E>"')
+    local newLine = vim.fn.winline()
+    F.Delay(newLine - targetLine + remaining, delay, slowdown)
+    if newLine == prevLine then
+      break
     end
+    prevLine = newLine
+  end
 
-    -- Scroll down the screen.
-    while vim.fn.winline() < halfHeight do
-      vim.cmd('silent exe "norm! \\<C-Y>"')
-      local newLine = vim.fn.winline()
-      F.Delay(halfHeight - newLine + remaining, delay, slowdown)
-      if newLine == prevLine then
-        break
-      end
-      prevLine = newLine
+  -- Scroll down the screen.
+  while vim.fn.winline() < targetLine do
+    vim.cmd('silent exe "norm! \\<C-Y>"')
+    local newLine = vim.fn.winline()
+    F.Delay(targetLine - newLine + remaining, delay, slowdown)
+    if newLine == prevLine then
+      break
     end
+    prevLine = newLine
   end
 end
 

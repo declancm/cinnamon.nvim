@@ -8,18 +8,20 @@ local F = require('cinnamon.functions')
 
 --[[
 
-require('cinnamon.scroll').Scroll('arg1', 'arg2', 'arg3', 'arg4', 'arg5', 'arg6')
+require('cinnamon.scroll').Scroll(arg1, arg2, arg3, arg4, arg5, arg6)
 
-arg1 = The movement command (eg. 'ggVG' to highlight the file). This argument
-       is required as there's no default value.
+arg1 = A string containing the normal mode movement command.
+  * To use the go-to-definition LSP function, use 'definition' (or 'declaration'
+    for go-to-declaration).
 arg2 = Scroll the window with the cursor. (1 for on, 0 for off). Default is 1.
 arg3 = Accept a count before the command (1 for on, 0 for off). Default is 0.
 arg4 = Length of delay between lines (in ms). Default is 5.
 arg5 = Slowdown at the end of the movement (1 for on, 0 for off). Default is 1.
 
-Note: Each argument is a string separated by a comma.
+Note: arg1 is a string while the others are integers.
 
 ]]
+
 function S.Scroll(command, scrollWin, useCount, delay, slowdown)
   if config.disable then
     U.ErrorMsg('Cinnamon is disabled')
@@ -84,7 +86,7 @@ function S.Scroll(command, scrollWin, useCount, delay, slowdown)
   elseif distance < 0 then
     F.ScrollUp(distance, scrollWin, delay, slowdown)
   else
-    F.Scroll(command, delay, slowdown)
+    F.RelativeScroll(command, delay, slowdown)
   end
 
   -- Change the cursor column position if required.
