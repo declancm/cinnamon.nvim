@@ -7,7 +7,7 @@ utils.error_msg = function(message, code, color)
   vim.cmd(string.format('echohl %s | echom "%s: %s" | echohl None', color, code, message))
 end
 
-utils.within = function(target, table)
+utils.contains = function(table, target)
   for _, item in pairs(table) do
     if item == target then
       return true

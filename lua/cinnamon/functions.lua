@@ -61,7 +61,7 @@ end
 
 fn.check_command_errors = function(command)
   -- If no search pattern, return an error if using a repeat search command.
-  if utils.within(command, motions.search_repeat) then
+  if utils.contains(motions.search_repeat, command) then
     local pattern = vim.fn.getreg('/')
     if pattern == '' then
       utils.error_msg('The search pattern is empty')
@@ -74,7 +74,7 @@ fn.check_command_errors = function(command)
   end
 
   -- If no word under cursor, return an error if using a word-near-cursor search command.
-  if utils.within(command, motions.search_cursor) then
+  if utils.contains(motions.search_cursor, command) then
     -- Check if string is empty or only whitespace.
     if vim.fn.getline('.'):match('^%s*$') then
       utils.error_msg('No string under cursor', 'E348')
@@ -83,7 +83,7 @@ fn.check_command_errors = function(command)
   end
 
   -- If no word under cursor, return an error if using a goto declaration command.
-  if utils.within(command, motions.goto_declaration) then
+  if utils.contains(motions.goto_declaration, command) then
     -- Check if string is empty or only whitespace.
     if vim.fn.getline('.'):match('^%s*$') then
       utils.error_msg('No identifier under cursor', 'E349')
@@ -116,7 +116,7 @@ fn.scroll_down = function(distance, scroll_win, delay, slowdown)
           vim.cmd('silent exe "norm! \\<C-E>"')
         end
       else
-        -- Scroll the window if the current line is not within 'scrolloff'.
+        -- Scroll the window if the current line is not contains 'scrolloff'.
         local scrolloff = vim.opt.so:get()
         if not (screen_line <= scrolloff + 1 or screen_line >= win_height - scrolloff) then
           vim.cmd('silent exe "norm! \\<C-E>"')
@@ -154,7 +154,7 @@ fn.scroll_up = function(distance, scroll_win, delay, slowdown)
           vim.cmd('silent exe "norm! \\<C-Y>"')
         end
       else
-        -- Scroll the window if the current line is not within 'scrolloff'.
+        -- Scroll the window if the current line is not contains 'scrolloff'.
         local scrolloff = vim.opt.so:get()
         if not (screen_line <= scrolloff + 1 or screen_line >= win_height - scrolloff) then
           vim.cmd('silent exe "norm! \\<C-Y>"')
@@ -172,24 +172,20 @@ fn.scroll_up = function(distance, scroll_win, delay, slowdown)
 end
 
 fn.relative_scroll = function(command, delay, slowdown)
-  if not utils.within(command, motions.relative_scroll) then
-    return
-  end
-
   local window_height = vim.api.nvim_win_get_height(0)
   local half_height = math.ceil(window_height / 2)
   local scrolloff = vim.opt.so:get()
 
-  if utils.within(command, motions.relative_scroll_top) and scrolloff < half_height then
+  if utils.contains(motions.relative_scroll_top, command) and scrolloff < half_height then
     scroll_screen(0, delay, slowdown, scrolloff + 1)
-  elseif utils.within(command, motions.relative_scroll_bottom) and scrolloff < half_height then
+  elseif utils.contains(motions.relative_scroll_bottom, command) and scrolloff < half_height then
     scroll_screen(0, delay, slowdown, window_height - scrolloff)
   else
     scroll_screen(0, delay, slowdown)
   end
 end
 
-fn.get_scroll_distance = function(command, use_count)
+fn.get_scroll_distance = function(command, use_count, scroll_win)
   local saved_view = vim.fn.winsaveview()
 
   local _, prev_row, _, _, prev_curswant = unpack(vim.fn.getcurpos())
@@ -208,8 +204,8 @@ fn.get_scroll_distance = function(command, use_count)
     vim.cmd('norm! ' .. command)
   end
 
-  -- If searching within a fold, open the fold.
-  if utils.within(command, motions.search) and vim.fn.foldclosed('.') ~= -1 then
+  -- If searching contains a fold, open the fold.
+  if utils.contains(motions.search, command) and vim.fn.foldclosed('.') ~= -1 then
     vim.cmd('norm! zo')
   end
 
@@ -225,6 +221,9 @@ fn.get_scroll_distance = function(command, use_count)
 
   -- Check if scroll limit has been exceeded.
   if distance > config.scroll_limit or distance < -config.scroll_limit then
+    if scroll_win == 1 and config.centered then
+      vim.cmd('norm! zz')
+    end
     return 0, -1, false, true
   end
 
