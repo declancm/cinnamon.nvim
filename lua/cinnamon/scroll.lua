@@ -53,13 +53,6 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
     vim.opt.lazyredraw = saved.lazyredraw
   end
 
-  -- Execute relative scroll command if used with a count.
-  if utils.contains(motions.window_scroll, command) and use_count and vim.v.count > 0 then
-    vim.cmd('norm! ' .. vim.v.count .. command)
-    restore_options()
-    return
-  end
-
   -- Check for any errors with the command.
   if fn.check_command_errors(command) then
     restore_options()
@@ -81,7 +74,9 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
   end
 
   -- Scroll the window.
-  fn.window_scroll(command, delay, slowdown)
+  if utils.contains(motions.window_scroll, command) then
+    fn.window_scroll(command, delay, slowdown)
+  end
 
   -- Change the cursor column position if required.
   if utils.contains(motions.relative_scroll_caret, command) then
