@@ -18,7 +18,6 @@ M.search = utils.add(M.search_repeat, M.search_cursor, M.goto_declaration)
 M.relative_scroll_top = { 'zt', 'z<CR>' }
 M.relative_scroll_center = { 'zz', 'z.' }
 M.relative_scroll_bottom = { 'zb', 'z-' }
-M.relative_scroll_caret = { 'z.', 'z<CR>', 'z-' }
 M.relative_scroll = utils.add(M.relative_scroll_top, M.relative_scroll_center, M.relative_scroll_bottom)
 
 -- Window Scroll:

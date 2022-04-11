@@ -95,8 +95,13 @@ fn.check_command_errors = function(command)
   return false
 end
 
-fn.scroll_down = function(distance, scroll_win, delay, slowdown)
+fn.scroll_down = function(distance, command, scroll_win, delay, slowdown)
   local win_height = vim.api.nvim_win_get_height(0)
+
+  -- Disable slowdown for window scrolling movements.
+  if utils.contains(motions.window_scroll, command) then
+    slowdown = 0
+  end
 
   -- Center the screen.
   local half_height = math.ceil(win_height / 2)
@@ -133,8 +138,13 @@ fn.scroll_down = function(distance, scroll_win, delay, slowdown)
   end
 end
 
-fn.scroll_up = function(distance, scroll_win, delay, slowdown)
+fn.scroll_up = function(distance, command, scroll_win, delay, slowdown)
   local win_height = vim.api.nvim_win_get_height(0)
+
+  -- Disable slowdown for window scrolling movements.
+  if utils.contains(motions.window_scroll, command) then
+    slowdown = 0
+  end
 
   -- Center the screen.
   local half_height = math.ceil(win_height / 2)

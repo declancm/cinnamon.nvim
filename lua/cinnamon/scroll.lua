@@ -38,8 +38,13 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
   slowdown = slowdown or 1
 
   -- Execute command if only moving one line.
-  if utils.contains(motions.up_down, command) then
+  if utils.contains(motions.up_down, command) and use_count and vim.v.count1 == 1 then
     vim.cmd('norm! ' .. command)
+    return
+  end
+
+  -- Check for any errors with the command.
+  if fn.check_command_errors(command) then
     return
   end
 
@@ -48,15 +53,8 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
   saved.lazyredraw = vim.opt.lazyredraw:get()
   vim.opt.lazyredraw = false
 
-  -- Restore options.
   local restore_options = function()
     vim.opt.lazyredraw = saved.lazyredraw
-  end
-
-  -- Check for any errors with the command.
-  if fn.check_command_errors(command) then
-    restore_options()
-    return
   end
 
   -- Get the scroll distance and the final column position.
@@ -68,9 +66,9 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
 
   -- Scroll the cursor.
   if distance > 0 then
-    fn.scroll_down(distance, scroll_win, delay, slowdown)
+    fn.scroll_down(distance, command, scroll_win, delay, slowdown)
   elseif distance < 0 then
-    fn.scroll_up(distance, scroll_win, delay, slowdown)
+    fn.scroll_up(distance, command, scroll_win, delay, slowdown)
   end
 
   -- Scroll the window.
@@ -79,9 +77,7 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
   end
 
   -- Change the cursor column position if required.
-  if utils.contains(motions.relative_scroll_caret, command) then
-    vim.cmd('norm! ^')
-  elseif new_column ~= -1 then
+  if new_column ~= -1 then
     vim.fn.cursor(vim.fn.line('.'), new_column)
   end
 
