@@ -53,47 +53,41 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
     vim.opt.lazyredraw = saved.lazyredraw
   end
 
-  -- Check if scroll is for a vertical movement or just window scrolling.
-  if utils.contains(motions.relative_scroll, command) then
-    -- Execute command if used with a count.
-    if use_count and vim.v.count > 0 then
-      vim.cmd('norm! ' .. vim.v.count .. command)
-      restore_options()
-      return
-    end
+  -- Execute relative scroll command if used with a count.
+  if utils.contains(motions.window_scroll, command) and use_count and vim.v.count > 0 then
+    vim.cmd('norm! ' .. vim.v.count .. command)
+    restore_options()
+    return
+  end
 
-    -- Scroll the window.
-    fn.relative_scroll(command, delay, slowdown)
+  -- Check for any errors with the command.
+  if fn.check_command_errors(command) then
+    restore_options()
+    return
+  end
 
-    -- Change the cursor column position if required.
-    if utils.contains(motions.relative_scroll_caret, command) then
-      vim.cmd('norm! ^')
-    end
-  else
-    -- Check for any errors with the command.
-    if fn.check_command_errors(command) then
-      restore_options()
-      return
-    end
+  -- Get the scroll distance and the final column position.
+  local distance, new_column, file_changed, limit_exceeded = fn.get_scroll_distance(command, use_count, scroll_win)
+  if file_changed or limit_exceeded then
+    restore_options()
+    return
+  end
 
-    -- Get the scroll distance and the final column position.
-    local distance, new_column, file_changed, limit_exceeded = fn.get_scroll_distance(command, use_count, scroll_win)
-    if file_changed or limit_exceeded then
-      restore_options()
-      return
-    end
+  -- Scroll the cursor.
+  if distance > 0 then
+    fn.scroll_down(distance, scroll_win, delay, slowdown)
+  elseif distance < 0 then
+    fn.scroll_up(distance, scroll_win, delay, slowdown)
+  end
 
-    -- Scroll the cursor.
-    if distance > 0 then
-      fn.scroll_down(distance, scroll_win, delay, slowdown)
-    elseif distance < 0 then
-      fn.scroll_up(distance, scroll_win, delay, slowdown)
-    end
+  -- Scroll the window.
+  fn.window_scroll(command, delay, slowdown)
 
-    -- Change the cursor column position if required.
-    if new_column ~= -1 then
-      vim.fn.cursor(vim.fn.line('.'), new_column)
-    end
+  -- Change the cursor column position if required.
+  if utils.contains(motions.relative_scroll_caret, command) then
+    vim.cmd('norm! ^')
+  elseif new_column ~= -1 then
+    vim.fn.cursor(vim.fn.line('.'), new_column)
   end
 
   restore_options()

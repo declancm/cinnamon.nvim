@@ -171,14 +171,19 @@ fn.scroll_up = function(distance, scroll_win, delay, slowdown)
   end
 end
 
-fn.relative_scroll = function(command, delay, slowdown)
+fn.window_scroll = function(command, delay, slowdown)
   local window_height = vim.api.nvim_win_get_height(0)
   local half_height = math.ceil(window_height / 2)
   local scrolloff = vim.opt.so:get()
 
-  if utils.contains(motions.relative_scroll_top, command) and scrolloff < half_height then
+  if scrolloff >= half_height then
+    scroll_screen(0, delay, slowdown)
+    return
+  end
+
+  if utils.contains(motions.window_scroll_top, command) then
     scroll_screen(0, delay, slowdown, scrolloff + 1)
-  elseif utils.contains(motions.relative_scroll_bottom, command) and scrolloff < half_height then
+  elseif utils.contains(motions.window_scroll_bottom, command) then
     scroll_screen(0, delay, slowdown, window_height - scrolloff)
   else
     scroll_screen(0, delay, slowdown)

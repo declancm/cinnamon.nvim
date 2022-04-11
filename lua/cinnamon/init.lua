@@ -84,12 +84,14 @@ M.setup = function(user_config)
     -- TODO: find a way for the z<CR> keymap to work
 
     -- Window scrolling:
-    keymap('n', 'zz', "<Cmd>lua Scroll('zz', 1, 1)<CR>", opts)
-    keymap('n', 'z.', "<Cmd>lua Scroll('z.', 1, 1)<CR>", opts)
-    keymap('n', 'zt', "<Cmd>lua Scroll('zt', 1, 1)<CR>", opts)
-    -- keymap('n', 'z<CR>', "<Cmd>lua Scroll('z<CR>', 1, 1)<CR>", opts)
-    keymap('n', 'zb', "<Cmd>lua Scroll('zb', 1, 1)<CR>", opts)
-    -- keymap('n', 'z-', "<Cmd>lua Scroll('z-', 1, 1)<CR>", opts)
+    keymap('n', 'zz', "<Cmd>lua Scroll('zz', 0, 1)<CR>", opts)
+    keymap('n', 'z.', "<Cmd>lua Scroll('z.', 0, 1)<CR>", opts)
+    keymap('n', 'zt', "<Cmd>lua Scroll('zt', 0, 1)<CR>", opts)
+    -- keymap('n', 'z<CR>', "<Cmd>lua Scroll('z<CR>', 0, 1)<CR>", opts)
+    keymap('n', 'zb', "<Cmd>lua Scroll('zb', 0, 1)<CR>", opts)
+    -- keymap('n', 'z-', "<Cmd>lua Scroll('z-', 0, 1)<CR>", opts)
+    keymap('n', 'z+', "<Cmd>lua Scroll('z+', 0, 1)<CR>", opts)
+    keymap('n', 'z^', "<Cmd>lua Scroll('z^', 0, 1)<CR>", opts)
   end
 
   if config.extended_keymaps then

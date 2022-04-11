@@ -63,7 +63,7 @@ Line number:                [count]G
 Paragraph movements:        { and }
 Prev/next search result:    n, N, *, #, g* and g#
 Prev/next cursor location:  <C-O> and <C-I>
-Cursor relative scrolling:  zz, z., zt, and zb
+Window scrolling:           zz, z., zt, zb, z+ and z^
 ```
 
 __Extended Keymaps:__
@@ -141,11 +141,13 @@ keymap('n', 'g#', "<Cmd>lua Scroll('g#')<CR>", opts)
 keymap('n', '<C-o>', "<Cmd>lua Scroll('<C-o>')<CR>", opts)
 keymap('n', '<C-i>', "<Cmd>lua Scroll('1<C-i>')<CR>", opts)
 
--- Cursor relative scrolling:
-keymap('n', 'zz', "<Cmd>lua Scroll('zz', 1, 1)<CR>", opts)
-keymap('n', 'z.', "<Cmd>lua Scroll('z.', 1, 1)<CR>", opts)
-keymap('n', 'zt', "<Cmd>lua Scroll('zt', 1, 1)<CR>", opts)
-keymap('n', 'zb', "<Cmd>lua Scroll('zb', 1, 1)<CR>", opts)
+-- Window scrolling:
+keymap('n', 'zz', "<Cmd>lua Scroll('zz', 0, 1)<CR>", opts)
+keymap('n', 'z.', "<Cmd>lua Scroll('z.', 0, 1)<CR>", opts)
+keymap('n', 'zt', "<Cmd>lua Scroll('zt', 0, 1)<CR>", opts)
+keymap('n', 'zb', "<Cmd>lua Scroll('zb', 0, 1)<CR>", opts)
+keymap('n', 'z^', "<Cmd>lua Scroll('z^', 0, 1)<CR>", opts)
+keymap('n', 'z+', "<Cmd>lua Scroll('z+', 0, 1)<CR>", opts)
 ```
 
 _Note: `1<C-i>` has to be used instead of `<C-i>` to prevent it from being
