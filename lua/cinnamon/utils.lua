@@ -16,7 +16,7 @@ utils.contains = function(table, target)
   return false
 end
 
-utils.add = function(...)
+utils.append = function(...)
   local new_table = {}
   for _, current_table in pairs { ... } do
     for _, item in pairs(current_table) do

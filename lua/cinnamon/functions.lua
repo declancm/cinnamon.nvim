@@ -24,38 +24,10 @@ local create_delay = function(remaining, delay, slowdown)
   end
 
   -- Increase the delay near the end of the scroll.
-  if remaining <= 4 and slowdown == 1 then
+  if remaining <= 4 and slowdown then
     vim.cmd('sleep ' .. delay * (5 - remaining) .. 'm')
   else
     vim.cmd('sleep ' .. delay .. 'm')
-  end
-end
-
-local scroll_screen = function(remaining, delay, slowdown, target_line)
-  target_line = target_line or math.ceil(vim.api.nvim_win_get_height(0) / 2)
-
-  local prev_line = vim.fn.winline()
-
-  -- Scroll up the screen.
-  while vim.fn.winline() > target_line do
-    vim.cmd('silent exe "norm! \\<C-E>"')
-    local new_line = vim.fn.winline()
-    create_delay(new_line - target_line + remaining, delay, slowdown)
-    if new_line == prev_line then
-      break
-    end
-    prev_line = new_line
-  end
-
-  -- Scroll down the screen.
-  while vim.fn.winline() < target_line do
-    vim.cmd('silent exe "norm! \\<C-Y>"')
-    local new_line = vim.fn.winline()
-    create_delay(target_line - new_line + remaining, delay, slowdown)
-    if new_line == prev_line then
-      break
-    end
-    prev_line = new_line
   end
 end
 
@@ -95,18 +67,44 @@ fn.check_command_errors = function(command)
   return false
 end
 
-fn.scroll_down = function(distance, command, scroll_win, delay, slowdown)
-  local win_height = vim.api.nvim_win_get_height(0)
-
-  -- Disable slowdown for window scrolling movements.
-  if utils.contains(motions.window_scroll, command) then
-    slowdown = 0
+fn.scroll_screen = function(remaining, delay, slowdown, target_line)
+  target_line = target_line or math.ceil(vim.api.nvim_win_get_height(0) / 2)
+  if target_line == -1 then
+    return
   end
+
+  local prev_line = vim.fn.winline()
+
+  -- Scroll up the screen.
+  while vim.fn.winline() > target_line do
+    vim.cmd('silent exe "norm! \\<C-E>"')
+    local new_line = vim.fn.winline()
+    create_delay(new_line - target_line + remaining, delay, slowdown)
+    if new_line == prev_line then
+      break
+    end
+    prev_line = new_line
+  end
+
+  -- Scroll down the screen.
+  while vim.fn.winline() < target_line do
+    vim.cmd('silent exe "norm! \\<C-Y>"')
+    local new_line = vim.fn.winline()
+    create_delay(target_line - new_line + remaining, delay, slowdown)
+    if new_line == prev_line then
+      break
+    end
+    prev_line = new_line
+  end
+end
+
+fn.scroll_down = function(distance, scroll_win, delay, slowdown)
+  local win_height = vim.api.nvim_win_get_height(0)
 
   -- Center the screen.
   local half_height = math.ceil(win_height / 2)
-  if vim.fn.winline() > half_height and scroll_win == 1 and config.centered then
-    scroll_screen(distance, delay, slowdown)
+  if vim.fn.winline() > half_height and scroll_win and config.centered then
+    fn.scroll_screen(distance, delay, slowdown)
   end
 
   -- Scroll.
@@ -114,7 +112,7 @@ fn.scroll_down = function(distance, command, scroll_win, delay, slowdown)
   while counter <= distance do
     counter = check_for_fold(counter)
     vim.cmd('norm! j')
-    if scroll_win == 1 then
+    if scroll_win then
       local screen_line = vim.fn.winline()
       if config.centered then
         if screen_line > half_height then
@@ -131,25 +129,15 @@ fn.scroll_down = function(distance, command, scroll_win, delay, slowdown)
     counter = counter + 1
     create_delay(distance - counter, delay, slowdown)
   end
-
-  -- Center the screen.
-  if scroll_win == 1 and config.centered then
-    scroll_screen(0, delay, slowdown)
-  end
 end
 
-fn.scroll_up = function(distance, command, scroll_win, delay, slowdown)
+fn.scroll_up = function(distance, scroll_win, delay, slowdown)
   local win_height = vim.api.nvim_win_get_height(0)
-
-  -- Disable slowdown for window scrolling movements.
-  if utils.contains(motions.window_scroll, command) then
-    slowdown = 0
-  end
 
   -- Center the screen.
   local half_height = math.ceil(win_height / 2)
-  if vim.fn.winline() < half_height and scroll_win == 1 and config.centered then
-    scroll_screen(-distance, delay, slowdown)
+  if vim.fn.winline() < half_height and scroll_win and config.centered then
+    fn.scroll_screen(-distance, delay, slowdown)
   end
 
   -- Scroll.
@@ -157,7 +145,7 @@ fn.scroll_up = function(distance, command, scroll_win, delay, slowdown)
   while counter <= -distance do
     counter = check_for_fold(counter)
     vim.cmd('norm! k')
-    if scroll_win == 1 then
+    if scroll_win then
       local screen_line = vim.fn.winline()
       if config.centered then
         if screen_line < half_height then
@@ -174,37 +162,14 @@ fn.scroll_up = function(distance, command, scroll_win, delay, slowdown)
     counter = counter + 1
     create_delay(-distance + counter, delay, slowdown)
   end
-
-  -- Center the screen.
-  if scroll_win == 1 and config.centered then
-    scroll_screen(0, delay, slowdown)
-  end
-end
-
-fn.window_scroll = function(command, delay, slowdown)
-  local window_height = vim.api.nvim_win_get_height(0)
-  local half_height = math.ceil(window_height / 2)
-  local scrolloff = vim.opt.so:get()
-
-  if scrolloff >= half_height then
-    scroll_screen(0, delay, slowdown)
-    return
-  end
-
-  if utils.contains(motions.window_scroll_top, command) then
-    scroll_screen(0, delay, slowdown, scrolloff + 1)
-  elseif utils.contains(motions.window_scroll_bottom, command) then
-    scroll_screen(0, delay, slowdown, window_height - scrolloff)
-  else
-    scroll_screen(0, delay, slowdown)
-  end
 end
 
 fn.get_scroll_distance = function(command, use_count, scroll_win)
   local saved_view = vim.fn.winsaveview()
 
   local _, prev_row, _, _, prev_curswant = unpack(vim.fn.getcurpos())
-  local prevFile = vim.fn.getreg('%')
+  local prev_file = vim.fn.getreg('%')
+  local prev_winline = vim.fn.winline()
 
   -- Perform the command.
   if command == 'definition' then
@@ -213,7 +178,7 @@ fn.get_scroll_distance = function(command, use_count, scroll_win)
   elseif command == 'declaration' then
     require('vim.lsp.buf').declaration()
     vim.cmd('sleep 100m')
-  elseif use_count ~= 0 and vim.v.count > 0 then
+  elseif use_count and vim.v.count > 0 then
     vim.cmd('norm! ' .. vim.v.count .. command)
   else
     vim.cmd('norm! ' .. command)
@@ -224,22 +189,21 @@ fn.get_scroll_distance = function(command, use_count, scroll_win)
     vim.cmd('norm! zo')
   end
 
-  local _, new_row, new_column, _, new_curswant = unpack(vim.fn.getcurpos())
-
   -- Check if the file has changed.
-  if prevFile ~= vim.fn.getreg('%') then
+  if prev_file ~= vim.fn.getreg('%') then
     vim.cmd('norm! zz')
-    return 0, -1, true, false
+    return 0, -1, -1, true, false
   end
 
+  local _, new_row, new_column, _, new_curswant = unpack(vim.fn.getcurpos())
   local distance = new_row - prev_row
 
   -- Check if scroll limit has been exceeded.
   if distance > config.scroll_limit or distance < -config.scroll_limit then
-    if scroll_win == 1 and config.centered then
+    if scroll_win and config.centered then
       vim.cmd('norm! zz')
     end
-    return 0, -1, false, true
+    return 0, -1, -1, false, true
   end
 
   -- Check if curswant has changed.
@@ -247,9 +211,16 @@ fn.get_scroll_distance = function(command, use_count, scroll_win)
     new_column = -1
   end
 
+  local new_winline = vim.fn.winline()
+
+  -- Check if winline has changed.
+  if prev_winline == new_winline then
+    new_winline = -1
+  end
+
   -- Restore the view to before the command was executed.
   vim.fn.winrestview(saved_view)
-  return distance, new_column, false, false
+  return distance, new_column, new_winline, false, false
 end
 
 return fn

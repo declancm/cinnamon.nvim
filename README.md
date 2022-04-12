@@ -63,7 +63,7 @@ Line number:                [count]G
 Paragraph movements:        { and }
 Prev/next search result:    n, N, *, #, g* and g#
 Prev/next cursor location:  <C-O> and <C-I>
-Window scrolling:           zz, z., zt, zb, z+ and z^
+Window scrolling:           zz, zt, zb, z., z<CR>, z-, z^ and z+
 ```
 
 __Extended Keymaps:__
@@ -80,7 +80,7 @@ Up/down movements:          [count]j, [count]k, [count]<Up> and [count]<Down>
 Scroll(arg1, arg2, arg3, arg4, arg5)
 ```
 
-* __arg1__ = A string containing the normal mode movement command.
+* __arg1__ = A string containing the normal mode movement commands.
   * To use the go-to-definition LSP function, use 'definition' (or 'declaration'
     for go-to-declaration).
 * __arg2__ = Scroll the window with the cursor. (1 for on, 0 for off). Default is 1.
@@ -143,15 +143,18 @@ keymap('n', '<C-i>', "<Cmd>lua Scroll('1<C-i>')<CR>", opts)
 
 -- Window scrolling:
 keymap('n', 'zz', "<Cmd>lua Scroll('zz', 0, 1)<CR>", opts)
-keymap('n', 'z.', "<Cmd>lua Scroll('z.', 0, 1)<CR>", opts)
 keymap('n', 'zt', "<Cmd>lua Scroll('zt', 0, 1)<CR>", opts)
 keymap('n', 'zb', "<Cmd>lua Scroll('zb', 0, 1)<CR>", opts)
-keymap('n', 'z^', "<Cmd>lua Scroll('z^', 0, 1)<CR>", opts)
+keymap('n', 'z.', "<Cmd>lua Scroll('z.', 0, 1)<CR>", opts)
+keymap('n', 'z<CR>', "<Cmd>lua Scroll('zt^', 0, 1)<CR>", opts)
+keymap('n', 'z-', "<Cmd>lua Scroll('z-', 0, 1)<CR>", opts)
 keymap('n', 'z+', "<Cmd>lua Scroll('z+', 0, 1)<CR>", opts)
+keymap('n', 'z^', "<Cmd>lua Scroll('z^', 0, 1)<CR>", opts)
 ```
 
-_Note: `1<C-i>` has to be used instead of `<C-i>` to prevent it from being
-expanded into a literal tab, as `<Tab>` and `<C-i>` are equivalent for vim._
+_Note: `1<C-i>` is used instead of `<C-i>` to prevent it from being expanded
+into a literal tab. `zt^` is used instead of `z<CR>` to prevent `<CR>` from being expanded
+into a literal new line._
 
 ### Extended Keymaps
 
