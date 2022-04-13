@@ -1,17 +1,11 @@
 # Cinnamon Scroll 🌀
 
-Smooth scrolling for __ANY__ movement command 🤯. A highly customizable Neovim
-plugin written in Lua which doesn't break the single-repeat "." command (unlike
-some other plugins) and supports scrolling over folds.
+Smooth scrolling for __ANY__ movement command (or string of commands) 🤯. A
+highly customizable Neovim plugin written in Lua which doesn't break the
+single-repeat "." command (unlike some other plugins) and supports scrolling
+over folds.
 
 __Now supports the go-to-definition and go-to-declaration builtin LSP functions 🥳🎉.__
-
-```lua
--- LSP go-to-definition.
-keymap('n', 'gd', "<Cmd>lua Scroll('definition')<CR>", opts)
--- LSP go-to-declaration.
-keymap('n', 'gD', "<Cmd>lua Scroll('declaration')<CR>", opts)
-```
 
 _Petition for a cinnamon roll emoji:_ <https://www.change.org/p/apple-cinnamon-roll-emoji>
 
@@ -164,7 +158,16 @@ keymap('n', '<Up>', "<Cmd>lua Scroll('k', 0, 1, 3, 0)<CR>", opts)
 keymap('x', '<Up>', "<Cmd>lua Scroll('k', 0, 1, 3, 0)<CR>", opts)
 keymap('n', '<Down>', "<Cmd>lua Scroll('j', 0, 1, 3, 0)<CR>", opts)
 keymap('x', '<Down>', "<Cmd>lua Scroll('j', 0, 1, 3, 0)<CR>", opts)
+
+-- LSP_KEYMAPS:
+
+-- LSP go-to-definition:
+keymap('n', 'gd', "<Cmd>lua Scroll('definition')<CR>", opts)
+
+-- LSP go-to-declaration:
+keymap('n', 'gD', "<Cmd>lua Scroll('declaration')<CR>", opts)
 ```
+
 ### Custom Keymaps
 
 If creating a custom keymap which is within the preset keymaps, make sure they 
