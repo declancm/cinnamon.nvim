@@ -17,9 +17,7 @@ _Petition for a cinnamon roll emoji:_ <https://www.change.org/p/apple-cinnamon-r
 
 ## 📦 Installation
 
-Install with your favorite package manager. No configuration is required to get
-started with the default keymaps. I highly recommend trying the extra keymaps as
-the are what set this plugin apart.
+Just install with your favorite package manager.
 
 ### Packer
 
@@ -31,20 +29,29 @@ use 'declancm/cinnamon.nvim'
 
 A settings table can be passed into the setup function for custom options.
 
-__Default Settings:__
+### Default Settings
+
+```lua
+default_keymaps = true,   -- Enable default keymaps.
+extra_keymaps = false,    -- Enable extra keymaps.
+extended_keymaps = false, -- Enable extended keymaps.
+centered = true,    -- Keep cursor centered in window when using window scrolling.
+disable = false,    -- Disable the plugin.
+scroll_limit = 150, -- Max number of lines moved before scrolling is skipped.
+```
+
+### Example Configuration
 
 ```lua
 require('cinnamon').setup {
-  default_keymaps = true,   -- Enable default keymaps.
-  extra_keymaps = false,    -- Enable extra keymaps.
-  extended_keymaps = false, -- Enable extended keymaps.
-  centered = true,    -- Keep cursor centered in window when using window scrolling.
-  disable = false,    -- Disable the plugin.
-  scroll_limit = 150, -- Max number of lines moved before scrolling is skipped.
+  extra_keymaps = true,
+  scroll_limit = 100,
 }
 ```
 
-__Default Keymaps:__
+## ⌨️ Keymaps
+
+### Default Keymaps
 
 ```
 Smooth scrolling for ...
@@ -53,7 +60,7 @@ Half-window movements:      <C-U> and <C-D>
 Page movements:             <C-B>, <C-F>, <PageUp> and <PageDown>
 ```
 
-__Extra Keymaps:__
+### Extra Keymaps
 
 ```
 Smooth scrolling for ...
@@ -66,7 +73,7 @@ Prev/next cursor location:  <C-O> and <C-I>
 Window scrolling:           zz, zt, zb, z., z<CR>, z-, z^ and z+
 ```
 
-__Extended Keymaps:__
+### Extended Keymaps
 
 ```
 Smooth scrolling for ...
@@ -88,15 +95,15 @@ Scroll(arg1, arg2, arg3, arg4, arg5)
 * __arg4__ = Length of delay between lines (in ms). Default is 5.
 * __arg5__ = Slowdown at the end of the movement (1 for on, 0 for off). Default is 1.
 
-_Note: arg1 is a string while the others are integers._
+_Note: arg1 is a string while the others are ints._
 
-## ⌨️ Keymaps
-
-### Default Keymaps
+### Keymaps
 
 ```lua
 local opts = { noremap = true, silent = true }
 local keymap = vim.api.nvim_set_keymap
+
+-- DEFAULT_KEYMAPS:
 
 -- Half-window movements:
 keymap('', '<C-u>', "<Cmd>lua Scroll('<C-u>')<CR>", opts)
@@ -109,13 +116,8 @@ keymap('n', '<C-b>', "<Cmd>lua Scroll('<C-b>', 1, 1)<CR>", opts)
 keymap('n', '<C-f>', "<Cmd>lua Scroll('<C-f>', 1, 1)<CR>", opts)
 keymap('n', '<PageUp>', "<Cmd>lua Scroll('<C-b>', 1, 1)<CR>", opts)
 keymap('n', '<PageDown>', "<Cmd>lua Scroll('<C-f>', 1, 1)<CR>", opts)
-```
 
-### Extra Keymaps
-
-```lua
-local opts = { noremap = true, silent = true }
-local keymap = vim.api.nvim_set_keymap
+-- EXTRA_KEYMAPS:
 
 -- Start/end of file and line number movements:
 keymap('n', 'gg', "<Cmd>lua Scroll('gg', 0, 0, 3)<CR>", opts)
@@ -150,17 +152,8 @@ keymap('n', 'z<CR>', "<Cmd>lua Scroll('zt^', 0, 1)<CR>", opts)
 keymap('n', 'z-', "<Cmd>lua Scroll('z-', 0, 1)<CR>", opts)
 keymap('n', 'z+', "<Cmd>lua Scroll('z+', 0, 1)<CR>", opts)
 keymap('n', 'z^', "<Cmd>lua Scroll('z^', 0, 1)<CR>", opts)
-```
 
-_Note: `1<C-i>` is used instead of `<C-i>` to prevent it from being expanded
-into a literal tab. `zt^` is used instead of `z<CR>` to prevent `<CR>` from being expanded
-into a literal new line._
-
-### Extended Keymaps
-
-```lua
-local opts = { noremap = true, silent = true }
-local keymap = vim.api.nvim_set_keymap
+-- EXTENDED_KEYMAPS:
 
 -- Up/down movements:
 keymap('n', 'k', "<Cmd>lua Scroll('k', 0, 1, 3, 0)<CR>", opts)
