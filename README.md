@@ -5,9 +5,9 @@ highly customizable Neovim plugin written in Lua which doesn't break the
 single-repeat "." command (unlike some other plugins) and supports scrolling
 over folds.
 
-__Now supports the go-to-definition and go-to-declaration builtin LSP functions 🥳🎉.__
+Now supports the go-to-definition and go-to-declaration builtin LSP functions 🥳🎉.
 
-_Petition for a cinnamon roll emoji:_ <https://www.change.org/p/apple-cinnamon-roll-emoji>
+__Petition for a cinnamon roll emoji:__<https://www.change.org/p/apple-cinnamon-roll-emoji>
 
 ## 📦 Installation
 
@@ -181,6 +181,6 @@ local opts = { noremap = true, silent = true }
 local keymap = vim.api.nvim_set_keymap
 
 -- Customizing keymaps that are part of the default mappings.
-keymap('', '<C-u>', "<Cmd>lua Scroll('<C-u>', 1, 0, 3)<CR>", opts)
-keymap('', '<C-d>', "<Cmd>lua Scroll('<C-d>', 1, 0, 3)<CR>", opts)
+keymap('', '<C-u>', "<Cmd>lua Scroll('<C-u>', 1, 0, 7)<CR>", opts)
+keymap('', '<C-d>', "<Cmd>lua Scroll('<C-d>', 1, 0, 7)<CR>", opts)
 ```

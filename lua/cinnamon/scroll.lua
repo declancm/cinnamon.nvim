@@ -81,7 +81,7 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
   end
 
   -- Scroll the window.
-  if not scroll_win or not config.centered then
+  if not scroll_win then
     fn.scroll_screen(0, delay, slowdown, winline)
   end
 
