@@ -90,6 +90,8 @@ M.setup = function(user_config)
     keymap('n', 'z-', "<Cmd>lua Scroll('z-', 0, 1)<CR>", opts)
     keymap('n', 'z^', "<Cmd>lua Scroll('z^', 0, 1)<CR>", opts)
     keymap('n', 'z+', "<Cmd>lua Scroll('z+', 0, 1)<CR>", opts)
+    keymap('n', '<C-y>', "<Cmd>lua Scroll('<C-y>', 0, 1)<CR>", opts)
+    keymap('n', '<C-e>', "<Cmd>lua Scroll('<C-e>', 0, 1)<CR>", opts)
   end
 
   if config.extended_keymaps then

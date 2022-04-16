@@ -64,7 +64,7 @@ Line number:                [count]G
 Paragraph movements:        { and }
 Prev/next search result:    n, N, *, #, g* and g#
 Prev/next cursor location:  <C-O> and <C-I>
-Window scrolling:           zz, zt, zb, z., z<CR>, z-, z^ and z+
+Window scrolling:           zz, zt, zb, z., z<CR>, z-, z^, z+, [count]<C-Y> and [count]<C-E>
 ```
 
 ### Extended Keymaps
@@ -146,6 +146,8 @@ keymap('n', 'z<CR>', "<Cmd>lua Scroll('zt^', 0, 1)<CR>", opts)
 keymap('n', 'z-', "<Cmd>lua Scroll('z-', 0, 1)<CR>", opts)
 keymap('n', 'z+', "<Cmd>lua Scroll('z+', 0, 1)<CR>", opts)
 keymap('n', 'z^', "<Cmd>lua Scroll('z^', 0, 1)<CR>", opts)
+keymap('n', '<C-y>', "<Cmd>lua Scroll('<C-y>', 0, 1)<CR>", opts)
+keymap('n', '<C-e>', "<Cmd>lua Scroll('<C-e>', 0, 1)<CR>", opts)
 
 -- EXTENDED_KEYMAPS:
 

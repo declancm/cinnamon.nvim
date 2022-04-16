@@ -47,7 +47,7 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
   slowdown = int_to_bool(slowdown or 1)
 
   -- Execute command if only moving one line.
-  if utils.contains(motions.up_down, command) and use_count and vim.v.count1 == 1 then
+  if utils.contains(motions.single_line, command) and vim.v.count1 == 1 then
     vim.cmd('norm! ' .. command)
     return
   end
