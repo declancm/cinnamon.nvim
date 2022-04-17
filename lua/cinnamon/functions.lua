@@ -119,8 +119,13 @@ fn.scroll_down = function(distance, scroll_win, delay, slowdown)
           vim.cmd('silent exe "norm! \\<C-E>"')
         end
       else
-        -- Scroll the window if the current line is not contains 'scrolloff'.
-        local scrolloff = vim.opt.so:get()
+        -- Scroll the window if the current line is not within 'scrolloff'.
+        local scrolloff
+        if vim.opt_local.so:get() ~= -1 then
+          scrolloff = vim.opt_local.so:get()
+        else
+          scrolloff = vim.opt.so:get()
+        end
         if not (screen_line <= scrolloff + 1 or screen_line >= win_height - scrolloff) then
           vim.cmd('silent exe "norm! \\<C-E>"')
         end
@@ -152,8 +157,13 @@ fn.scroll_up = function(distance, scroll_win, delay, slowdown)
           vim.cmd('silent exe "norm! \\<C-Y>"')
         end
       else
-        -- Scroll the window if the current line is not contains 'scrolloff'.
-        local scrolloff = vim.opt.so:get()
+        -- Scroll the window if the current line is not within 'scrolloff'.
+        local scrolloff
+        if vim.opt_local.so:get() ~= -1 then
+          scrolloff = vim.opt_local.so:get()
+        else
+          scrolloff = vim.opt.so:get()
+        end
         if not (screen_line <= scrolloff + 1 or screen_line >= win_height - scrolloff) then
           vim.cmd('silent exe "norm! \\<C-Y>"')
         end
