@@ -4,6 +4,8 @@ local config = require('cinnamon.config')
 local utils = require('cinnamon.utils')
 local motions = require('cinnamon.motions')
 
+local debugging = false
+
 local check_for_fold = function(counter)
   local fold_start = vim.fn.foldclosed('.')
 
@@ -226,6 +228,10 @@ fn.get_scroll_distance = function(command, use_count, scroll_win)
   -- Check if winline has changed.
   if prev_winline == new_winline then
     new_winline = -1
+  end
+
+  if debugging then
+    print('distance: ' .. distance .. ', column: ' .. new_column .. ', winline: ' .. new_winline)
   end
 
   -- Restore the view to before the command was executed.

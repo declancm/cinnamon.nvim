@@ -14,7 +14,7 @@ arg1 = A string containing the normal mode movement commands.
     for go-to-declaration).
 arg2 = Scroll the window with the cursor. (1 for on, 0 for off). Default is 1.
 arg3 = Accept a count before the command (1 for on, 0 for off). Default is 0.
-arg4 = Length of delay between lines (in ms). Default is 5.
+arg4 = Length of delay between lines (in ms). Default is the 'default_delay' config value.
 arg5 = Slowdown at the end of the movement (1 for on, 0 for off). Default is 1.
 
 Note: arg1 is a string while the others are integers.
@@ -43,7 +43,7 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
   end
   scroll_win = int_to_bool(scroll_win or 1)
   use_count = int_to_bool(use_count or 0)
-  delay = delay or 5
+  delay = delay or config.default_delay
   slowdown = int_to_bool(slowdown or 1)
 
   -- Execute command if only moving one line.

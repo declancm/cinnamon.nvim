@@ -30,6 +30,7 @@ default_keymaps = true,   -- Enable default keymaps.
 extra_keymaps = false,    -- Enable extra keymaps.
 extended_keymaps = false, -- Enable extended keymaps.
 centered = true,    -- Keep cursor centered in window when using window scrolling.
+default_delay = 5,  -- The default delay (in ms) between lines when scrolling.
 disable = false,    -- Disable the plugin.
 scroll_limit = 150, -- Max number of lines moved before scrolling is skipped.
 ```
@@ -86,7 +87,7 @@ Scroll(arg1, arg2, arg3, arg4, arg5)
     for go-to-declaration).
 * __arg2__ = Scroll the window with the cursor. (1 for on, 0 for off). Default is 1.
 * __arg3__ = Accept a count before the command (1 for on, 0 for off). Default is 0.
-* __arg4__ = Length of delay between lines (in ms). Default is 5.
+* __arg4__ = Length of delay between lines (in ms). Default is the 'default_delay' config value.
 * __arg5__ = Slowdown at the end of the movement (1 for on, 0 for off). Default is 1.
 
 _Note: arg1 is a string while the others are ints._
@@ -94,80 +95,67 @@ _Note: arg1 is a string while the others are ints._
 ### Keymaps
 
 ```lua
-local opts = { noremap = true, silent = true }
-local keymap = vim.api.nvim_set_keymap
-
 -- DEFAULT_KEYMAPS:
 
 -- Half-window movements:
-keymap('', '<C-u>', "<Cmd>lua Scroll('<C-u>')<CR>", opts)
-keymap('i', '<C-u>', "<Cmd>lua Scroll('<C-u>')<CR>", opts)
-keymap('', '<C-d>', "<Cmd>lua Scroll('<C-d>')<CR>", opts)
-keymap('i', '<C-d>', "<Cmd>lua Scroll('<C-d>')<CR>", opts)
+vim.keymap.set({ 'n', 'x', 'i' }, '<C-u>', "<Cmd>lua Scroll('<C-u>')<CR>")
+vim.keymap.set({ 'n', 'x', 'i' }, '<C-d>', "<Cmd>lua Scroll('<C-d>')<CR>")
 
 -- Page movements:
-keymap('n', '<C-b>', "<Cmd>lua Scroll('<C-b>', 1, 1)<CR>", opts)
-keymap('n', '<C-f>', "<Cmd>lua Scroll('<C-f>', 1, 1)<CR>", opts)
-keymap('n', '<PageUp>', "<Cmd>lua Scroll('<C-b>', 1, 1)<CR>", opts)
-keymap('n', '<PageDown>', "<Cmd>lua Scroll('<C-f>', 1, 1)<CR>", opts)
+vim.keymap.set('n', '<C-b>', "<Cmd>lua Scroll('<C-b>', 1, 1)<CR>")
+vim.keymap.set('n', '<C-f>', "<Cmd>lua Scroll('<C-f>', 1, 1)<CR>")
+vim.keymap.set('n', '<PageUp>', "<Cmd>lua Scroll('<C-b>', 1, 1)<CR>")
+vim.keymap.set('n', '<PageDown>', "<Cmd>lua Scroll('<C-f>', 1, 1)<CR>")
 
 -- EXTRA_KEYMAPS:
 
 -- Start/end of file and line number movements:
-keymap('n', 'gg', "<Cmd>lua Scroll('gg', 0, 0, 3)<CR>", opts)
-keymap('x', 'gg', "<Cmd>lua Scroll('gg', 0, 0, 3)<CR>", opts)
-keymap('n', 'G', "<Cmd>lua Scroll('G', 0, 1, 3)<CR>", opts)
-keymap('x', 'G', "<Cmd>lua Scroll('G', 0, 1, 3)<CR>", opts)
+vim.keymap.set({ 'n', 'x' }, 'gg', "<Cmd>lua Scroll('gg', 0, 0, 3)<CR>")
+vim.keymap.set({ 'n', 'x' }, 'G', "<Cmd>lua Scroll('G', 0, 1, 3)<CR>")
 
 -- Paragraph movements:
-keymap('n', '{', "<Cmd>lua Scroll('{', 0)<dCR>", opts)
-keymap('x', '{', "<Cmd>lua Scroll('{', 0)<CR>", opts)
-keymap('n', '}', "<Cmd>lua Scroll('}', 0)<CR>", opts)
-keymap('x', '}', "<Cmd>lua Scroll('}', 0)<CR>", opts)
+vim.keymap.set({ 'n', 'x' }, '{', "<Cmd>lua Scroll('{', 0)<CR>")
+vim.keymap.set({ 'n', 'x' }, '}', "<Cmd>lua Scroll('}', 0)<CR>")
 
 -- Previous/next search result:
-keymap('n', 'n', "<Cmd>lua Scroll('n')<CR>", opts)
-keymap('n', 'N', "<Cmd>lua Scroll('N')<CR>", opts)
-keymap('n', '*', "<Cmd>lua Scroll('*')<CR>", opts)
-keymap('n', '#', "<Cmd>lua Scroll('#')<CR>", opts)
-keymap('n', 'g*', "<Cmd>lua Scroll('g*')<CR>", opts)
-keymap('n', 'g#', "<Cmd>lua Scroll('g#')<CR>", opts)
+vim.keymap.set('n', 'n', "<Cmd>lua Scroll('n')<CR>")
+vim.keymap.set('n', 'N', "<Cmd>lua Scroll('N')<CR>")
+vim.keymap.set('n', '*', "<Cmd>lua Scroll('*')<CR>")
+vim.keymap.set('n', '#', "<Cmd>lua Scroll('#')<CR>")
+vim.keymap.set('n', 'g*', "<Cmd>lua Scroll('g*')<CR>")
+vim.keymap.set('n', 'g#', "<Cmd>lua Scroll('g#')<CR>")
 
 -- Previous/next cursor location:
-keymap('n', '<C-o>', "<Cmd>lua Scroll('<C-o>')<CR>", opts)
-keymap('n', '<C-i>', "<Cmd>lua Scroll('1<C-i>')<CR>", opts)
+vim.keymap.set('n', '<C-o>', "<Cmd>lua Scroll('<C-o>')<CR>")
+vim.keymap.set('n', '<C-i>', "<Cmd>lua Scroll('1<C-i>')<CR>")
 
 -- Window scrolling:
-keymap('n', 'zz', "<Cmd>lua Scroll('zz', 0, 1)<CR>", opts)
-keymap('n', 'zt', "<Cmd>lua Scroll('zt', 0, 1)<CR>", opts)
-keymap('n', 'zb', "<Cmd>lua Scroll('zb', 0, 1)<CR>", opts)
-keymap('n', 'z.', "<Cmd>lua Scroll('z.', 0, 1)<CR>", opts)
-keymap('n', 'z<CR>', "<Cmd>lua Scroll('zt^', 0, 1)<CR>", opts)
-keymap('n', 'z-', "<Cmd>lua Scroll('z-', 0, 1)<CR>", opts)
-keymap('n', 'z+', "<Cmd>lua Scroll('z+', 0, 1)<CR>", opts)
-keymap('n', 'z^', "<Cmd>lua Scroll('z^', 0, 1)<CR>", opts)
-keymap('n', '<C-y>', "<Cmd>lua Scroll('<C-y>', 0, 1)<CR>", opts)
-keymap('n', '<C-e>', "<Cmd>lua Scroll('<C-e>', 0, 1)<CR>", opts)
+vim.keymap.set('n', 'zz', "<Cmd>lua Scroll('zz', 0, 1)<CR>")
+vim.keymap.set('n', 'zt', "<Cmd>lua Scroll('zt', 0, 1)<CR>")
+vim.keymap.set('n', 'zb', "<Cmd>lua Scroll('zb', 0, 1)<CR>")
+vim.keymap.set('n', 'z.', "<Cmd>lua Scroll('z.', 0, 1)<CR>")
+vim.keymap.set('n', 'z<CR>', "<Cmd>lua Scroll('zt^', 0, 1)<CR>")
+vim.keymap.set('n', 'z-', "<Cmd>lua Scroll('z-', 0, 1)<CR>")
+vim.keymap.set('n', 'z^', "<Cmd>lua Scroll('z^', 0, 1)<CR>")
+vim.keymap.set('n', 'z+', "<Cmd>lua Scroll('z+', 0, 1)<CR>")
+vim.keymap.set('n', '<C-y>', "<Cmd>lua Scroll('<C-y>', 0, 1)<CR>")
+vim.keymap.set('n', '<C-e>', "<Cmd>lua Scroll('<C-e>', 0, 1)<CR>")
 
 -- EXTENDED_KEYMAPS:
 
 -- Up/down movements:
-keymap('n', 'k', "<Cmd>lua Scroll('k', 0, 1, 3, 0)<CR>", opts)
-keymap('x', 'k', "<Cmd>lua Scroll('k', 0, 1, 3, 0)<CR>", opts)
-keymap('n', 'j', "<Cmd>lua Scroll('j', 0, 1, 3, 0)<CR>", opts)
-keymap('x', 'j', "<Cmd>lua Scroll('j', 0, 1, 3, 0)<CR>", opts)
-keymap('n', '<Up>', "<Cmd>lua Scroll('k', 0, 1, 3, 0)<CR>", opts)
-keymap('x', '<Up>', "<Cmd>lua Scroll('k', 0, 1, 3, 0)<CR>", opts)
-keymap('n', '<Down>', "<Cmd>lua Scroll('j', 0, 1, 3, 0)<CR>", opts)
-keymap('x', '<Down>', "<Cmd>lua Scroll('j', 0, 1, 3, 0)<CR>", opts)
+vim.keymap.set({ 'n', 'x' }, 'k', "<Cmd>lua Scroll('k', 0, 1, 3, 0)<CR>")
+vim.keymap.set({ 'n', 'x' }, 'j', "<Cmd>lua Scroll('j', 0, 1, 3, 0)<CR>")
+vim.keymap.set({ 'n', 'x' }, '<Up>', "<Cmd>lua Scroll('k', 0, 1, 3, 0)<CR>")
+vim.keymap.set({ 'n', 'x' }, '<Down>', "<Cmd>lua Scroll('j', 0, 1, 3, 0)<CR>")
 
 -- LSP_KEYMAPS:
 
 -- LSP go-to-definition:
-keymap('n', 'gd', "<Cmd>lua Scroll('definition')<CR>", opts)
+vim.keymap.set('n', 'gd', "<Cmd>lua Scroll('definition')<CR>")
 
 -- LSP go-to-declaration:
-keymap('n', 'gD', "<Cmd>lua Scroll('declaration')<CR>", opts)
+vim.keymap.set('n', 'gD', "<Cmd>lua Scroll('declaration')<CR>")
 ```
 
 ### Custom Keymaps
@@ -179,10 +167,7 @@ are disabled so yours isn't overridden.
 -- Disabling the default keymaps.
 require('cinnamon').setup { default_keymaps = false }
 
-local opts = { noremap = true, silent = true }
-local keymap = vim.api.nvim_set_keymap
-
 -- Customizing keymaps that are part of the default mappings.
-keymap('', '<C-u>', "<Cmd>lua Scroll('<C-u>', 1, 0, 7)<CR>", opts)
-keymap('', '<C-d>', "<Cmd>lua Scroll('<C-d>', 1, 0, 7)<CR>", opts)
+vim.keymap.set({ 'n', 'x', 'i' }, '<C-u>', "<Cmd>lua Scroll('<C-u>', 1, 0, 7)<CR>")
+vim.keymap.set({ 'n', 'x', 'i' }, '<C-d>', "<Cmd>lua Scroll('<C-d>', 1, 0, 7)<CR>")
 ```
