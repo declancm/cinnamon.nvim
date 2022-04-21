@@ -11,12 +11,15 @@ __Petition for a cinnamon roll emoji:__<https://www.change.org/p/apple-cinnamon-
 
 ## 📦 Installation
 
-Just install with your favorite package manager.
+Just install with your favorite package manager and run the setup function.
 
 ### Packer
 
 ```lua
-use 'declancm/cinnamon.nvim'
+use {
+  'declancm/cinnamon.nvim',
+  config = function() require('cinnamon').setup() end
+}
 ```
 
 ## ⚙️ Configuration

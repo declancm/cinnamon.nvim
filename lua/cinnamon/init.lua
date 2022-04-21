@@ -1,11 +1,10 @@
 local M = {}
 
-local config = require('cinnamon.config')
-local utils = require('cinnamon.utils')
-
 M.setup = function(user_config)
-  vim.g.__cinnamon_setup_loaded = 1
+  local config = require('cinnamon.config')
+  local utils = require('cinnamon.utils')
 
+  -- Set the config:
   if user_config ~= nil then
     utils.merge(config, user_config)
   end
@@ -36,8 +35,10 @@ M.setup = function(user_config)
     config.extra_keymaps = true
   end
 
-  -- Global variable used to simplify the keymaps:
-  Scroll = require('cinnamon').Scroll
+  -- Global function used to simplify the keymaps:
+  function Scroll(...)
+    require('cinnamon.scroll').scroll(...)
+  end
 
   if vim.fn.has('nvim-0.7.0') == 1 then
     if config.default_keymaps then
@@ -165,6 +166,8 @@ end
 
 -- API:
 
-M.Scroll = require('cinnamon.scroll').scroll
+M.Scroll = function(...)
+  require('cinnamon.scroll').scroll(...)
+end
 
 return M

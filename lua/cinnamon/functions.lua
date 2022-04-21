@@ -114,8 +114,8 @@ fn.scroll_down = function(distance, scroll_win, delay, slowdown)
   while counter <= distance do
     counter = check_for_fold(counter)
     vim.cmd('norm! j')
+    local screen_line = vim.fn.winline()
     if scroll_win then
-      local screen_line = vim.fn.winline()
       if config.centered then
         if screen_line > half_height then
           vim.cmd('silent exe "norm! \\<C-E>"')
@@ -128,7 +128,7 @@ fn.scroll_down = function(distance, scroll_win, delay, slowdown)
         else
           scrolloff = vim.opt.so:get()
         end
-        if not (screen_line <= scrolloff + 1 or screen_line >= win_height - scrolloff) then
+        if screen_line > scrolloff + 1 and screen_line < win_height - scrolloff then
           vim.cmd('silent exe "norm! \\<C-E>"')
         end
       end
@@ -152,8 +152,8 @@ fn.scroll_up = function(distance, scroll_win, delay, slowdown)
   while counter <= -distance do
     counter = check_for_fold(counter)
     vim.cmd('norm! k')
+    local screen_line = vim.fn.winline()
     if scroll_win then
-      local screen_line = vim.fn.winline()
       if config.centered then
         if screen_line < half_height then
           vim.cmd('silent exe "norm! \\<C-Y>"')
@@ -166,7 +166,7 @@ fn.scroll_up = function(distance, scroll_win, delay, slowdown)
         else
           scrolloff = vim.opt.so:get()
         end
-        if not (screen_line <= scrolloff + 1 or screen_line >= win_height - scrolloff) then
+        if screen_line > scrolloff + 1 and screen_line < win_height - scrolloff then
           vim.cmd('silent exe "norm! \\<C-Y>"')
         end
       end
