@@ -46,8 +46,8 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
   delay = delay or config.default_delay
   slowdown = int_to_bool(slowdown or 1)
 
-  -- Execute command if only moving one line.
-  if utils.contains(motions.single_line, command) and vim.v.count1 == 1 then
+  -- Execute command if only moving one line/char.
+  if utils.contains(motions.no_scroll, command) and vim.v.count1 == 1 then
     vim.cmd('norm! ' .. command)
     return
   end
@@ -67,7 +67,11 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
   end
 
   -- Get the scroll distance and the final column position.
-  local distance, column, winline, file_changed, limit_exceeded = fn.get_scroll_distance(command, use_count, scroll_win)
+  local distance, column, winline, wincol, file_changed, limit_exceeded = fn.get_scroll_values(
+    command,
+    use_count,
+    scroll_win
+  )
   if file_changed or limit_exceeded then
     restore_options()
     return
@@ -75,19 +79,34 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
 
   -- Scroll the cursor.
   if distance > 0 then
-    fn.scroll_down(distance, scroll_win, delay, slowdown)
+    fn.scroll_down(distance, winline, scroll_win, delay, slowdown)
   elseif distance < 0 then
-    fn.scroll_up(distance, scroll_win, delay, slowdown)
+    fn.scroll_up(distance, winline, scroll_win, delay, slowdown)
   end
 
-  -- Scroll the window.
+  -- Scroll the screen.
   if not scroll_win then
     fn.scroll_screen(0, delay, slowdown, winline)
   end
 
-  -- Set the column position.
-  if column ~= -1 then
-    vim.fn.cursor(vim.fn.line('.'), column)
+  -- Scroll horizontally.
+  if distance == 0 then
+    fn.scroll_screen_horizontally(delay, slowdown, wincol, column)
+  else
+    -- Set column position.
+    if column ~= -1 then
+      vim.fn.cursor(vim.fn.line('.'), column)
+    end
+
+    -- -- Set wincol position.
+    -- if wincol ~= -1 then
+    --   local current_wincol = vim.fn.wincol()
+    --   if wincol > current_wincol then
+    --     vim.cmd('norm! ' .. wincol - current_wincol .. 'zh')
+    --   elseif wincol < current_wincol then
+    --     vim.cmd('norm! ' .. wincol - current_wincol .. 'zl')
+    --   end
+    -- end
   end
 
   restore_options()

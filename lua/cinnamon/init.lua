@@ -74,7 +74,7 @@ M.setup = function(user_config)
       vim.keymap.set('n', '<C-o>', "<Cmd>lua Scroll('<C-o>')<CR>")
       vim.keymap.set('n', '<C-i>', "<Cmd>lua Scroll('1<C-i>')<CR>")
 
-      -- Window scrolling:
+      -- Screen scrolling:
       vim.keymap.set('n', 'zz', "<Cmd>lua Scroll('zz', 0, 1)<CR>")
       vim.keymap.set('n', 'zt', "<Cmd>lua Scroll('zt', 0, 1)<CR>")
       vim.keymap.set('n', 'zb', "<Cmd>lua Scroll('zb', 0, 1)<CR>")
@@ -85,6 +85,14 @@ M.setup = function(user_config)
       vim.keymap.set('n', 'z+', "<Cmd>lua Scroll('z+', 0, 1)<CR>")
       vim.keymap.set('n', '<C-y>', "<Cmd>lua Scroll('<C-y>', 0, 1)<CR>")
       vim.keymap.set('n', '<C-e>', "<Cmd>lua Scroll('<C-e>', 0, 1)<CR>")
+
+      -- Horizontal screen scrolling:
+      vim.keymap.set('n', 'zh', "<Cmd>lua Scroll('zh', 0, 1, 2, 0)<CR>")
+      vim.keymap.set('n', 'zl', "<Cmd>lua Scroll('zl', 0, 1, 2, 0)<CR>")
+      vim.keymap.set('n', 'zH', "<Cmd>lua Scroll('zH', 0, 0, 2, 0)<CR>")
+      vim.keymap.set('n', 'zL', "<Cmd>lua Scroll('zL', 0, 0, 2, 0)<CR>")
+      vim.keymap.set('n', 'zs', "<Cmd>lua Scroll('zs', 0, 0, 2, 0)<CR>")
+      vim.keymap.set('n', 'ze', "<Cmd>lua Scroll('ze', 0, 0, 2, 0)<CR>")
     end
 
     if config.extended_keymaps then
@@ -93,6 +101,12 @@ M.setup = function(user_config)
       vim.keymap.set({ 'n', 'x' }, 'j', "<Cmd>lua Scroll('j', 0, 1, 3, 0)<CR>")
       vim.keymap.set({ 'n', 'x' }, '<Up>', "<Cmd>lua Scroll('k', 0, 1, 3, 0)<CR>")
       vim.keymap.set({ 'n', 'x' }, '<Down>', "<Cmd>lua Scroll('j', 0, 1, 3, 0)<CR>")
+
+      -- Left/right movements:
+      vim.keymap.set({ 'n', 'x' }, 'h', "<Cmd>lua Scroll('h', 0, 1, 2, 0)<CR>")
+      vim.keymap.set({ 'n', 'x' }, 'l', "<Cmd>lua Scroll('l', 0, 1, 2, 0)<CR>")
+      vim.keymap.set({ 'n', 'x' }, '<Left>', "<Cmd>lua Scroll('h', 0, 1, 2, 0)<CR>")
+      vim.keymap.set({ 'n', 'x' }, '<Right>', "<Cmd>lua Scroll('l', 0, 1, 2, 0)<CR>")
     end
   else
     local opts = { noremap = true, silent = true }
@@ -148,6 +162,14 @@ M.setup = function(user_config)
       keymap('n', 'z+', "<Cmd>lua Scroll('z+', 0, 1)<CR>", opts)
       keymap('n', '<C-y>', "<Cmd>lua Scroll('<C-y>', 0, 1)<CR>", opts)
       keymap('n', '<C-e>', "<Cmd>lua Scroll('<C-e>', 0, 1)<CR>", opts)
+
+      -- Horizontal screen scrolling:
+      keymap('n', 'zh', "<Cmd>lua Scroll('zh', 0, 1, 2, 0)<CR>", opts)
+      keymap('n', 'zl', "<Cmd>lua Scroll('zl', 0, 1, 2, 0)<CR>", opts)
+      keymap('n', 'zH', "<Cmd>lua Scroll('zH', 0, 0, 2, 0)<CR>", opts)
+      keymap('n', 'zL', "<Cmd>lua Scroll('zL', 0, 0, 2, 0)<CR>", opts)
+      keymap('n', 'zs', "<Cmd>lua Scroll('zs', 0, 0, 2, 0)<CR>", opts)
+      keymap('n', 'ze', "<Cmd>lua Scroll('ze', 0, 0, 2, 0)<CR>", opts)
     end
 
     if config.extended_keymaps then
@@ -160,6 +182,16 @@ M.setup = function(user_config)
       keymap('x', '<Up>', "<Cmd>lua Scroll('k', 0, 1, 3, 0)<CR>", opts)
       keymap('n', '<Down>', "<Cmd>lua Scroll('j', 0, 1, 3, 0)<CR>", opts)
       keymap('x', '<Down>', "<Cmd>lua Scroll('j', 0, 1, 3, 0)<CR>", opts)
+
+      -- Left/right movements:
+      keymap('n', 'h', "<Cmd>lua Scroll('h', 0, 1, 2, 0)<CR>", opts)
+      keymap('x', 'h', "<Cmd>lua Scroll('h', 0, 1, 2, 0)<CR>", opts)
+      keymap('n', 'l', "<Cmd>lua Scroll('l', 0, 1, 2, 0)<CR>", opts)
+      keymap('x', 'l', "<Cmd>lua Scroll('l', 0, 1, 2, 0)<CR>", opts)
+      keymap('n', '<Left>', "<Cmd>lua Scroll('h', 0, 1, 2, 0)<CR>", opts)
+      keymap('x', '<Left>', "<Cmd>lua Scroll('h', 0, 1, 2, 0)<CR>", opts)
+      keymap('n', '<Right>', "<Cmd>lua Scroll('l', 0, 1, 2, 0)<CR>", opts)
+      keymap('x', '<Right>', "<Cmd>lua Scroll('l', 0, 1, 2, 0)<CR>", opts)
     end
   end
 end

@@ -5,7 +5,9 @@ highly customizable Neovim plugin written in Lua which doesn't break the
 single-repeat "." command (unlike some other plugins) and supports scrolling
 over folds.
 
-Now supports the go-to-definition and go-to-declaration builtin LSP functions 🥳🎉.
+__New Features:__
+* Support for the go-to-definition and go-to-declaration builtin LSP functions 🥳🎉.
+* Horizontal scrolling for horizontal movements.
 
 __Petition for a cinnamon roll emoji:__<https://www.change.org/p/apple-cinnamon-roll-emoji>
 
@@ -29,12 +31,11 @@ A settings table can be passed into the setup function for custom options.
 ### Default Settings
 
 ```lua
-default_keymaps = true,   -- Enable default keymaps.
-extra_keymaps = false,    -- Enable extra keymaps.
-extended_keymaps = false, -- Enable extended keymaps.
+default_keymaps = true,   -- Create default keymaps.
+extra_keymaps = false,    -- Create extra keymaps.
+extended_keymaps = false, -- Create extended keymaps.
 centered = true,    -- Keep cursor centered in window when using window scrolling.
 default_delay = 5,  -- The default delay (in ms) between lines when scrolling.
-disable = false,    -- Disable the plugin.
 scroll_limit = 150, -- Max number of lines moved before scrolling is skipped.
 ```
 
@@ -68,7 +69,8 @@ Line number:                [count]G
 Paragraph movements:        { and }
 Prev/next search result:    n, N, *, #, g* and g#
 Prev/next cursor location:  <C-O> and <C-I>
-Window scrolling:           zz, zt, zb, z., z<CR>, z-, z^, z+, [count]<C-Y> and [count]<C-E>
+Screen scrolling:           zz, zt, zb, z., z<CR>, z-, z^, z+, [count]<C-Y> and [count]<C-E>
+Horizontal scrolling:       [count]zh, [count]zl, zH, zL, zs and ze  
 ```
 
 ### Extended Keymaps
@@ -77,6 +79,7 @@ Window scrolling:           zz, zt, zb, z., z<CR>, z-, z^, z+, [count]<C-Y> and 
 Smooth scrolling for ...
 
 Up/down movements:          [count]j, [count]k, [count]<Up> and [count]<Down>
+Left/right movements:       [count]h, [count]l, [count]<Left> and [count]<Right>
 ```
 
 ## ℹ️ API
@@ -132,7 +135,7 @@ vim.keymap.set('n', 'g#', "<Cmd>lua Scroll('g#')<CR>")
 vim.keymap.set('n', '<C-o>', "<Cmd>lua Scroll('<C-o>')<CR>")
 vim.keymap.set('n', '<C-i>', "<Cmd>lua Scroll('1<C-i>')<CR>")
 
--- Window scrolling:
+-- Screen scrolling:
 vim.keymap.set('n', 'zz', "<Cmd>lua Scroll('zz', 0, 1)<CR>")
 vim.keymap.set('n', 'zt', "<Cmd>lua Scroll('zt', 0, 1)<CR>")
 vim.keymap.set('n', 'zb', "<Cmd>lua Scroll('zb', 0, 1)<CR>")
@@ -144,6 +147,14 @@ vim.keymap.set('n', 'z+', "<Cmd>lua Scroll('z+', 0, 1)<CR>")
 vim.keymap.set('n', '<C-y>', "<Cmd>lua Scroll('<C-y>', 0, 1)<CR>")
 vim.keymap.set('n', '<C-e>', "<Cmd>lua Scroll('<C-e>', 0, 1)<CR>")
 
+-- Horizontal screen scrolling:
+vim.keymap.set('n', 'zh', "<Cmd>lua Scroll('zh', 0, 1, 2, 0)<CR>")
+vim.keymap.set('n', 'zl', "<Cmd>lua Scroll('zl', 0, 1, 2, 0)<CR>")
+vim.keymap.set('n', 'zH', "<Cmd>lua Scroll('zH', 0, 0, 2, 0)<CR>")
+vim.keymap.set('n', 'zL', "<Cmd>lua Scroll('zL', 0, 0, 2, 0)<CR>")
+vim.keymap.set('n', 'zs', "<Cmd>lua Scroll('zs', 0, 0, 2, 0)<CR>")
+vim.keymap.set('n', 'ze', "<Cmd>lua Scroll('ze', 0, 0, 2, 0)<CR>")
+
 -- EXTENDED_KEYMAPS:
 
 -- Up/down movements:
@@ -151,6 +162,12 @@ vim.keymap.set({ 'n', 'x' }, 'k', "<Cmd>lua Scroll('k', 0, 1, 3, 0)<CR>")
 vim.keymap.set({ 'n', 'x' }, 'j', "<Cmd>lua Scroll('j', 0, 1, 3, 0)<CR>")
 vim.keymap.set({ 'n', 'x' }, '<Up>', "<Cmd>lua Scroll('k', 0, 1, 3, 0)<CR>")
 vim.keymap.set({ 'n', 'x' }, '<Down>', "<Cmd>lua Scroll('j', 0, 1, 3, 0)<CR>")
+
+-- Left/right movements:
+vim.keymap.set({ 'n', 'x' }, 'h', "<Cmd>lua Scroll('h', 0, 1, 2, 0)<CR>")
+vim.keymap.set({ 'n', 'x' }, 'l', "<Cmd>lua Scroll('l', 0, 1, 2, 0)<CR>")
+vim.keymap.set({ 'n', 'x' }, '<Left>', "<Cmd>lua Scroll('h', 0, 1, 2, 0)<CR>")
+vim.keymap.set({ 'n', 'x' }, '<Right>', "<Cmd>lua Scroll('l', 0, 1, 2, 0)<CR>")
 
 -- LSP_KEYMAPS:
 

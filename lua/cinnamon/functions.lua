@@ -4,7 +4,7 @@ local config = require('cinnamon.config')
 local utils = require('cinnamon.utils')
 local motions = require('cinnamon.motions')
 
-local debugging = false
+local debugging = true
 
 local check_for_fold = function(counter)
   local fold_start = vim.fn.foldclosed('.')
@@ -100,7 +100,55 @@ fn.scroll_screen = function(remaining, delay, slowdown, target_line)
   end
 end
 
-fn.scroll_down = function(distance, scroll_win, delay, slowdown)
+fn.scroll_screen_horizontally = function(delay, slowdown, wincol, column)
+  if wincol == -1 and column == -1 then
+    return
+  end
+
+  if column ~= -1 then
+    local distance = column - vim.fn.getcurpos()[3]
+    local counter = 1
+    if distance > 0 then
+      while counter <= distance do
+        vim.cmd('norm! l')
+        counter = counter + 1
+        create_delay(distance - counter, delay, slowdown)
+      end
+    elseif distance < 0 then
+      while counter <= -distance do
+        vim.cmd('norm! h')
+        counter = counter + 1
+        create_delay(-distance + counter, delay, slowdown)
+      end
+    end
+  end
+
+  if wincol ~= -1 then
+    local prev_wincol = vim.fn.wincol()
+
+    while vim.fn.wincol() > wincol do
+      vim.cmd('norm! zl')
+      local new_wincol = vim.fn.wincol()
+      create_delay(new_wincol - wincol, delay, slowdown)
+      if new_wincol == prev_wincol then
+        break
+      end
+      prev_wincol = new_wincol
+    end
+
+    while vim.fn.wincol() < wincol do
+      vim.cmd('norm! zh')
+      local new_wincol = vim.fn.wincol()
+      create_delay(wincol - new_wincol, delay, slowdown)
+      if new_wincol == prev_wincol then
+        break
+      end
+      prev_wincol = new_wincol
+    end
+  end
+end
+
+fn.scroll_down = function(distance, winline, scroll_win, delay, slowdown)
   local win_height = vim.api.nvim_win_get_height(0)
 
   -- Center the screen.
@@ -114,10 +162,10 @@ fn.scroll_down = function(distance, scroll_win, delay, slowdown)
   while counter <= distance do
     counter = check_for_fold(counter)
     vim.cmd('norm! j')
-    local screen_line = vim.fn.winline()
+    local current_winline = vim.fn.winline()
     if scroll_win then
       if config.centered then
-        if screen_line > half_height then
+        if current_winline > half_height then
           vim.cmd('silent exe "norm! \\<C-E>"')
         end
       else
@@ -128,7 +176,7 @@ fn.scroll_down = function(distance, scroll_win, delay, slowdown)
         else
           scrolloff = vim.opt.so:get()
         end
-        if screen_line > scrolloff + 1 and screen_line < win_height - scrolloff then
+        if current_winline > scrolloff + 1 and current_winline < win_height - scrolloff then
           vim.cmd('silent exe "norm! \\<C-E>"')
         end
       end
@@ -138,7 +186,7 @@ fn.scroll_down = function(distance, scroll_win, delay, slowdown)
   end
 end
 
-fn.scroll_up = function(distance, scroll_win, delay, slowdown)
+fn.scroll_up = function(distance, winline, scroll_win, delay, slowdown)
   local win_height = vim.api.nvim_win_get_height(0)
 
   -- Center the screen.
@@ -152,10 +200,10 @@ fn.scroll_up = function(distance, scroll_win, delay, slowdown)
   while counter <= -distance do
     counter = check_for_fold(counter)
     vim.cmd('norm! k')
-    local screen_line = vim.fn.winline()
+    local current_winline = vim.fn.winline()
     if scroll_win then
       if config.centered then
-        if screen_line < half_height then
+        if current_winline < half_height then
           vim.cmd('silent exe "norm! \\<C-Y>"')
         end
       else
@@ -166,7 +214,7 @@ fn.scroll_up = function(distance, scroll_win, delay, slowdown)
         else
           scrolloff = vim.opt.so:get()
         end
-        if screen_line > scrolloff + 1 and screen_line < win_height - scrolloff then
+        if current_winline > scrolloff + 1 and current_winline < win_height - scrolloff then
           vim.cmd('silent exe "norm! \\<C-Y>"')
         end
       end
@@ -176,12 +224,13 @@ fn.scroll_up = function(distance, scroll_win, delay, slowdown)
   end
 end
 
-fn.get_scroll_distance = function(command, use_count, scroll_win)
+fn.get_scroll_values = function(command, use_count, scroll_win)
   local saved_view = vim.fn.winsaveview()
 
   local _, prev_row, _, _, prev_curswant = unpack(vim.fn.getcurpos())
   local prev_file = vim.fn.getreg('%')
   local prev_winline = vim.fn.winline()
+  local prev_wincol = vim.fn.wincol()
 
   -- Perform the command.
   if command == 'definition' then
@@ -204,7 +253,7 @@ fn.get_scroll_distance = function(command, use_count, scroll_win)
   -- Check if the file has changed.
   if prev_file ~= vim.fn.getreg('%') then
     vim.cmd('norm! zz')
-    return 0, -1, -1, true, false
+    return 0, -1, -1, -1, true, false
   end
 
   local _, new_row, new_column, _, new_curswant = unpack(vim.fn.getcurpos())
@@ -215,7 +264,7 @@ fn.get_scroll_distance = function(command, use_count, scroll_win)
     if scroll_win and config.centered then
       vim.cmd('norm! zz')
     end
-    return 0, -1, -1, false, true
+    return 0, -1, -1, -1, false, true
   end
 
   -- Check if curswant has changed.
@@ -223,20 +272,34 @@ fn.get_scroll_distance = function(command, use_count, scroll_win)
     new_column = -1
   end
 
-  local new_winline = vim.fn.winline()
-
   -- Check if winline has changed.
+  local new_winline = vim.fn.winline()
   if prev_winline == new_winline then
     new_winline = -1
   end
 
+  -- Check if wincol has changed.
+  local new_wincol = vim.fn.wincol()
+  if prev_wincol == new_winline then
+    new_wincol = -1
+  end
+
   if debugging then
-    print('distance: ' .. distance .. ', column: ' .. new_column .. ', winline: ' .. new_winline)
+    print(
+      'distance: '
+        .. distance
+        .. ', column: '
+        .. new_column
+        .. ', winline: '
+        .. new_winline
+        .. ', wincol: '
+        .. new_wincol
+    )
   end
 
   -- Restore the view to before the command was executed.
   vim.fn.winrestview(saved_view)
-  return distance, new_column, new_winline, false, false
+  return distance, new_column, new_winline, new_wincol, false, false
 end
 
 return fn
