@@ -4,7 +4,7 @@ local config = require('cinnamon.config')
 local utils = require('cinnamon.utils')
 local motions = require('cinnamon.motions')
 
-local debugging = true
+local debugging = false
 
 local check_for_fold = function(counter)
   local fold_start = vim.fn.foldclosed('.')
