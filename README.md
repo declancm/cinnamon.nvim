@@ -7,7 +7,7 @@ over folds.
 
 __New Features:__
 * Support for the go-to-definition and go-to-declaration builtin LSP functions 🥳🎉.
-* Horizontal scrolling for horizontal movements.
+* Horizontal scrolling when view has shifted left or right.
 
 __Petition for a cinnamon roll emoji:__<https://www.change.org/p/apple-cinnamon-roll-emoji>
 

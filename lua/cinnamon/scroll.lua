@@ -67,7 +67,7 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
   end
 
   -- Get the scroll distance and the final column position.
-  local distance, column, winline, wincol, file_changed, limit_exceeded = fn.get_scroll_values(
+  local distance, column, winline, wincol, file_changed, limit_exceeded, scrolled_horizontally = fn.get_scroll_values(
     command,
     use_count,
     scroll_win
@@ -90,8 +90,8 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
   end
 
   -- Scroll horizontally.
-  if distance == 0 then
-    fn.scroll_screen_horizontally(delay, slowdown, wincol, column)
+  if distance == 0 and scrolled_horizontally then
+    fn.scroll_horizontally(delay, slowdown, wincol, column)
   else
     -- Set column position.
     if column ~= -1 then

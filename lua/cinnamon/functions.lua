@@ -100,7 +100,7 @@ fn.scroll_screen = function(remaining, delay, slowdown, target_line)
   end
 end
 
-fn.scroll_screen_horizontally = function(delay, slowdown, wincol, column)
+fn.scroll_horizontally = function(delay, slowdown, wincol, column)
   if wincol == -1 and column == -1 then
     return
   end
@@ -227,7 +227,7 @@ end
 fn.get_scroll_values = function(command, use_count, scroll_win)
   local saved_view = vim.fn.winsaveview()
 
-  local _, prev_row, _, _, prev_curswant = unpack(vim.fn.getcurpos())
+  local _, prev_row, prev_column, _, prev_curswant = unpack(vim.fn.getcurpos())
   local prev_file = vim.fn.getreg('%')
   local prev_winline = vim.fn.winline()
   local prev_wincol = vim.fn.wincol()
@@ -253,10 +253,12 @@ fn.get_scroll_values = function(command, use_count, scroll_win)
   -- Check if the file has changed.
   if prev_file ~= vim.fn.getreg('%') then
     vim.cmd('norm! zz')
-    return 0, -1, -1, -1, true, false
+    return 0, -1, -1, -1, true, false, false
   end
 
   local _, new_row, new_column, _, new_curswant = unpack(vim.fn.getcurpos())
+  local new_winline = vim.fn.winline()
+  local new_wincol = vim.fn.wincol()
   local distance = new_row - prev_row
 
   -- Check if scroll limit has been exceeded.
@@ -264,7 +266,15 @@ fn.get_scroll_values = function(command, use_count, scroll_win)
     if scroll_win and config.centered then
       vim.cmd('norm! zz')
     end
-    return 0, -1, -1, -1, false, true
+    return 0, -1, -1, -1, false, true, false
+  end
+
+  -- Check if scrolled horizontally.
+  local scrolled_horizontally
+  if new_wincol - new_column ~= prev_wincol - prev_column then
+    scrolled_horizontally = true
+  else
+    scrolled_horizontally = false
   end
 
   -- Check if curswant has changed.
@@ -273,13 +283,11 @@ fn.get_scroll_values = function(command, use_count, scroll_win)
   end
 
   -- Check if winline has changed.
-  local new_winline = vim.fn.winline()
   if prev_winline == new_winline then
     new_winline = -1
   end
 
   -- Check if wincol has changed.
-  local new_wincol = vim.fn.wincol()
   if prev_wincol == new_winline then
     new_wincol = -1
   end
@@ -299,7 +307,7 @@ fn.get_scroll_values = function(command, use_count, scroll_win)
 
   -- Restore the view to before the command was executed.
   vim.fn.winrestview(saved_view)
-  return distance, new_column, new_winline, new_wincol, false, false
+  return distance, new_column, new_winline, new_wincol, false, false, scrolled_horizontally
 end
 
 return fn
