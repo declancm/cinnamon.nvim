@@ -7,7 +7,7 @@ over folds.
 
 __New Features:__
 * Support for the go-to-definition and go-to-declaration builtin LSP functions 🥳🎉.
-* Horizontal scrolling when view has shifted left or right.
+* Smooth horizontal scrolling when view has shifted left or right.
 
 __Petition for a cinnamon roll emoji:__<https://www.change.org/p/apple-cinnamon-roll-emoji>
 
@@ -34,9 +34,10 @@ A settings table can be passed into the setup function for custom options.
 default_keymaps = true,   -- Create default keymaps.
 extra_keymaps = false,    -- Create extra keymaps.
 extended_keymaps = false, -- Create extended keymaps.
-centered = true,    -- Keep cursor centered in window when using window scrolling.
-default_delay = 5,  -- The default delay (in ms) between lines when scrolling.
-scroll_limit = 150, -- Max number of lines moved before scrolling is skipped.
+centered = true,          -- Keep cursor centered in window when using window scrolling.
+default_delay = 5,        -- The default delay (in ms) between each line when scrolling.
+horizontal_scroll = true, -- Enable smooth horizontal scrolling when view shifts left or right.
+scroll_limit = 150,       -- Max number of lines moved before scrolling is skipped.
 ```
 
 ### Example Configuration
@@ -70,7 +71,7 @@ Paragraph movements:        { and }
 Prev/next search result:    n, N, *, #, g* and g#
 Prev/next cursor location:  <C-O> and <C-I>
 Screen scrolling:           zz, zt, zb, z., z<CR>, z-, z^, z+, [count]<C-Y> and [count]<C-E>
-Horizontal scrolling:       [count]zh, [count]zl, zH, zL, zs and ze  
+Horizontal scrolling:       zH, zL, zs, ze, [count]zh and [count]zl
 ```
 
 ### Extended Keymaps
@@ -93,10 +94,10 @@ Scroll(arg1, arg2, arg3, arg4, arg5)
     for go-to-declaration).
 * __arg2__ = Scroll the window with the cursor. (1 for on, 0 for off). Default is 1.
 * __arg3__ = Accept a count before the command (1 for on, 0 for off). Default is 0.
-* __arg4__ = Length of delay between lines (in ms). Default is the 'default_delay' config value.
+* __arg4__ = Length of delay between each line (in ms). Default is the 'default_delay' config value.
 * __arg5__ = Slowdown at the end of the movement (1 for on, 0 for off). Default is 1.
 
-_Note: arg1 is a string while the others are ints._
+_Note: When scrolling horizontally, the delay argument is halved so vertical and horizontal scrolling have similar speeds._
 
 ### Keymaps
 
@@ -148,12 +149,12 @@ vim.keymap.set('n', '<C-y>', "<Cmd>lua Scroll('<C-y>', 0, 1)<CR>")
 vim.keymap.set('n', '<C-e>', "<Cmd>lua Scroll('<C-e>', 0, 1)<CR>")
 
 -- Horizontal screen scrolling:
-vim.keymap.set('n', 'zh', "<Cmd>lua Scroll('zh', 0, 1, 2, 0)<CR>")
-vim.keymap.set('n', 'zl', "<Cmd>lua Scroll('zl', 0, 1, 2, 0)<CR>")
-vim.keymap.set('n', 'zH', "<Cmd>lua Scroll('zH', 0, 0, 2, 0)<CR>")
-vim.keymap.set('n', 'zL', "<Cmd>lua Scroll('zL', 0, 0, 2, 0)<CR>")
-vim.keymap.set('n', 'zs', "<Cmd>lua Scroll('zs', 0, 0, 2, 0)<CR>")
-vim.keymap.set('n', 'ze', "<Cmd>lua Scroll('ze', 0, 0, 2, 0)<CR>")
+vim.keymap.set('n', 'zh', "<Cmd>lua Scroll('zh', 0, 1)<CR>")
+vim.keymap.set('n', 'zl', "<Cmd>lua Scroll('zl', 0, 1)<CR>")
+vim.keymap.set('n', 'zH', "<Cmd>lua Scroll('zH', 0)<CR>")
+vim.keymap.set('n', 'zL', "<Cmd>lua Scroll('zL', 0)<CR>")
+vim.keymap.set('n', 'zs', "<Cmd>lua Scroll('zs', 0)<CR>")
+vim.keymap.set('n', 'ze', "<Cmd>lua Scroll('ze', 0)<CR>")
 
 -- EXTENDED_KEYMAPS:
 

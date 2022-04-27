@@ -87,12 +87,12 @@ M.setup = function(user_config)
       vim.keymap.set('n', '<C-e>', "<Cmd>lua Scroll('<C-e>', 0, 1)<CR>")
 
       -- Horizontal screen scrolling:
-      vim.keymap.set('n', 'zh', "<Cmd>lua Scroll('zh', 0, 1, 2, 0)<CR>")
-      vim.keymap.set('n', 'zl', "<Cmd>lua Scroll('zl', 0, 1, 2, 0)<CR>")
-      vim.keymap.set('n', 'zH', "<Cmd>lua Scroll('zH', 0, 0, 2, 0)<CR>")
-      vim.keymap.set('n', 'zL', "<Cmd>lua Scroll('zL', 0, 0, 2, 0)<CR>")
-      vim.keymap.set('n', 'zs', "<Cmd>lua Scroll('zs', 0, 0, 2, 0)<CR>")
-      vim.keymap.set('n', 'ze', "<Cmd>lua Scroll('ze', 0, 0, 2, 0)<CR>")
+      vim.keymap.set('n', 'zh', "<Cmd>lua Scroll('zh', 0, 1)<CR>")
+      vim.keymap.set('n', 'zl', "<Cmd>lua Scroll('zl', 0, 1)<CR>")
+      vim.keymap.set('n', 'zH', "<Cmd>lua Scroll('zH', 0)<CR>")
+      vim.keymap.set('n', 'zL', "<Cmd>lua Scroll('zL', 0)<CR>")
+      vim.keymap.set('n', 'zs', "<Cmd>lua Scroll('zs', 0)<CR>")
+      vim.keymap.set('n', 'ze', "<Cmd>lua Scroll('ze', 0)<CR>")
     end
 
     if config.extended_keymaps then
@@ -164,12 +164,12 @@ M.setup = function(user_config)
       keymap('n', '<C-e>', "<Cmd>lua Scroll('<C-e>', 0, 1)<CR>", opts)
 
       -- Horizontal screen scrolling:
-      keymap('n', 'zh', "<Cmd>lua Scroll('zh', 0, 1, 2, 0)<CR>", opts)
-      keymap('n', 'zl', "<Cmd>lua Scroll('zl', 0, 1, 2, 0)<CR>", opts)
-      keymap('n', 'zH', "<Cmd>lua Scroll('zH', 0, 0, 2, 0)<CR>", opts)
-      keymap('n', 'zL', "<Cmd>lua Scroll('zL', 0, 0, 2, 0)<CR>", opts)
-      keymap('n', 'zs', "<Cmd>lua Scroll('zs', 0, 0, 2, 0)<CR>", opts)
-      keymap('n', 'ze', "<Cmd>lua Scroll('ze', 0, 0, 2, 0)<CR>", opts)
+      keymap('n', 'zh', "<Cmd>lua Scroll('zh', 0, 1)<CR>", opts)
+      keymap('n', 'zl', "<Cmd>lua Scroll('zl', 0, 1)<CR>", opts)
+      keymap('n', 'zH', "<Cmd>lua Scroll('zH', 0)<CR>", opts)
+      keymap('n', 'zL', "<Cmd>lua Scroll('zL', 0)<CR>", opts)
+      keymap('n', 'zs', "<Cmd>lua Scroll('zs', 0)<CR>", opts)
+      keymap('n', 'ze', "<Cmd>lua Scroll('ze', 0)<CR>", opts)
     end
 
     if config.extended_keymaps then

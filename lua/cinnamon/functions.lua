@@ -18,12 +18,22 @@ local check_for_fold = function(counter)
 end
 
 local create_delay = function(remaining, delay, slowdown)
+  if delay == 0 then
+    return
+  end
+  delay = math.floor(delay)
+  if delay == 0 then
+    delay = 1
+  end
+
   vim.cmd('redraw')
 
   -- Don't create a delay when scrolling comleted.
   if remaining <= 0 then
     return
   end
+
+  -- TODO: use a lua delay instead of sleep.
 
   -- Increase the delay near the end of the scroll.
   if remaining <= 4 and slowdown then
@@ -112,13 +122,13 @@ fn.scroll_horizontally = function(delay, slowdown, wincol, column)
       while counter <= distance do
         vim.cmd('norm! l')
         counter = counter + 1
-        create_delay(distance - counter, delay, slowdown)
+        create_delay(distance - counter, delay, 0)
       end
     elseif distance < 0 then
       while counter <= -distance do
         vim.cmd('norm! h')
         counter = counter + 1
-        create_delay(-distance + counter, delay, slowdown)
+        create_delay(-distance + counter, delay, 0)
       end
     end
   end

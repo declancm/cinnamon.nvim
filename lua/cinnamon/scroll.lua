@@ -14,7 +14,7 @@ arg1 = A string containing the normal mode movement commands.
     for go-to-declaration).
 arg2 = Scroll the window with the cursor. (1 for on, 0 for off). Default is 1.
 arg3 = Accept a count before the command (1 for on, 0 for off). Default is 0.
-arg4 = Length of delay between lines (in ms). Default is the 'default_delay' config value.
+arg4 = Length of delay between each line (in ms). Default is the 'default_delay' config value.
 arg5 = Slowdown at the end of the movement (1 for on, 0 for off). Default is 1.
 
 Note: arg1 is a string while the others are integers.
@@ -90,23 +90,10 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
   end
 
   -- Scroll horizontally.
-  if distance == 0 and scrolled_horizontally then
-    fn.scroll_horizontally(delay, slowdown, wincol, column)
+  if scrolled_horizontally and config.horizontal_scroll then
+    fn.scroll_horizontally(delay / 2, slowdown, wincol, column)
   else
-    -- Set column position.
-    if column ~= -1 then
-      vim.fn.cursor(vim.fn.line('.'), column)
-    end
-
-    -- -- Set wincol position.
-    -- if wincol ~= -1 then
-    --   local current_wincol = vim.fn.wincol()
-    --   if wincol > current_wincol then
-    --     vim.cmd('norm! ' .. wincol - current_wincol .. 'zh')
-    --   elseif wincol < current_wincol then
-    --     vim.cmd('norm! ' .. wincol - current_wincol .. 'zl')
-    --   end
-    -- end
+    fn.scroll_horizontally(0, 0, wincol, column)
   end
 
   restore_options()
