@@ -149,12 +149,12 @@ vim.keymap.set('n', '<C-y>', "<Cmd>lua Scroll('<C-y>', 0, 1)<CR>")
 vim.keymap.set('n', '<C-e>', "<Cmd>lua Scroll('<C-e>', 0, 1)<CR>")
 
 -- Horizontal screen scrolling:
-vim.keymap.set('n', 'zh', "<Cmd>lua Scroll('zh', 0, 1)<CR>")
-vim.keymap.set('n', 'zl', "<Cmd>lua Scroll('zl', 0, 1)<CR>")
 vim.keymap.set('n', 'zH', "<Cmd>lua Scroll('zH', 0)<CR>")
 vim.keymap.set('n', 'zL', "<Cmd>lua Scroll('zL', 0)<CR>")
 vim.keymap.set('n', 'zs', "<Cmd>lua Scroll('zs', 0)<CR>")
 vim.keymap.set('n', 'ze', "<Cmd>lua Scroll('ze', 0)<CR>")
+vim.keymap.set('n', 'zh', "<Cmd>lua Scroll('zh', 0, 1)<CR>")
+vim.keymap.set('n', 'zl', "<Cmd>lua Scroll('zl', 0, 1)<CR>")
 
 -- EXTENDED_KEYMAPS:
 

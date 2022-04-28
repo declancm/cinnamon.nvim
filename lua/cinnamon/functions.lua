@@ -26,14 +26,12 @@ local create_delay = function(remaining, delay, slowdown)
     delay = 1
   end
 
-  vim.cmd('redraw')
-
   -- Don't create a delay when scrolling comleted.
   if remaining <= 0 then
     return
   end
 
-  -- TODO: use a lua delay instead of sleep.
+  -- TODO: find an alternative to 'sleep'
 
   -- Increase the delay near the end of the scroll.
   if remaining <= 4 and slowdown then
@@ -41,6 +39,8 @@ local create_delay = function(remaining, delay, slowdown)
   else
     vim.cmd('sleep ' .. delay .. 'm')
   end
+
+  vim.cmd('redraw')
 end
 
 fn.check_command_errors = function(command)

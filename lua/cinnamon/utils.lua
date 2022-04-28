@@ -1,10 +1,9 @@
 local utils = {}
 
-utils.error_msg = function(message, code, color)
-  message = vim.fn.escape(message, '"\\')
+utils.error_msg = function(message, code, level)
   code = code or 'Error'
-  color = color or 'ErrorMsg'
-  vim.cmd(string.format('echohl %s | echom "%s: %s" | echohl None', color, code, message))
+  level = level or 'ERROR'
+  vim.notify(string.format('%s: %s', code, message), vim.log.levels[level])
 end
 
 utils.contains = function(table, target)

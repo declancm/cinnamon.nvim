@@ -21,7 +21,7 @@ M.setup = function(user_config)
     require('cinnamon.utils').error_msg(
       "Using 'vim.g.cinnamon_no_defaults' is deprecated. Please use \"require('cinnamon').setup { default_keymaps = false }\" instead",
       'Warning',
-      'WarningMsg'
+      'WARN'
     )
     config.default_keymaps = false
   end
@@ -30,7 +30,7 @@ M.setup = function(user_config)
     require('cinnamon.utils').error_msg(
       "Using 'vim.g.cinnamon_extras' is deprecated. Please use \"require('cinnamon').setup { extra_keymaps = true }\" instead",
       'Warning',
-      'WarningMsg'
+      'WARN'
     )
     config.extra_keymaps = true
   end
