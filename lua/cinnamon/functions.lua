@@ -4,8 +4,6 @@ local config = require('cinnamon.config')
 local utils = require('cinnamon.utils')
 local motions = require('cinnamon.motions')
 
-local debugging = false
-
 local check_for_fold = function(counter)
   local fold_start = vim.fn.foldclosed('.')
 
@@ -232,92 +230,6 @@ fn.scroll_up = function(distance, winline, scroll_win, delay, slowdown)
     counter = counter + 1
     create_delay(-distance + counter, delay, slowdown)
   end
-end
-
-fn.get_scroll_values = function(command, use_count, scroll_win)
-  local saved_view = vim.fn.winsaveview()
-
-  local _, prev_row, prev_column, _, prev_curswant = unpack(vim.fn.getcurpos())
-  local prev_file = vim.fn.getreg('%')
-  local prev_winline = vim.fn.winline()
-  local prev_wincol = vim.fn.wincol()
-
-  -- Perform the command.
-  if command == 'definition' then
-    require('vim.lsp.buf').definition()
-    vim.cmd('sleep 100m')
-  elseif command == 'declaration' then
-    require('vim.lsp.buf').declaration()
-    vim.cmd('sleep 100m')
-  elseif use_count and vim.v.count > 0 then
-    vim.cmd('norm! ' .. vim.v.count .. command)
-  else
-    vim.cmd('norm! ' .. command)
-  end
-
-  -- If searching contains a fold, open the fold.
-  if utils.contains(motions.search, command) and vim.fn.foldclosed('.') ~= -1 then
-    vim.cmd('norm! zo')
-  end
-
-  -- Check if the file has changed.
-  if prev_file ~= vim.fn.getreg('%') then
-    vim.cmd('norm! zz')
-    return 0, -1, -1, -1, true, false, false
-  end
-
-  local _, new_row, new_column, _, new_curswant = unpack(vim.fn.getcurpos())
-  local new_winline = vim.fn.winline()
-  local new_wincol = vim.fn.wincol()
-  local distance = new_row - prev_row
-
-  -- Check if scroll limit has been exceeded.
-  if distance > config.scroll_limit or distance < -config.scroll_limit then
-    if scroll_win and config.centered then
-      vim.cmd('norm! zz')
-    end
-    return 0, -1, -1, -1, false, true, false
-  end
-
-  -- Check if scrolled horizontally.
-  local scrolled_horizontally
-  if new_wincol - new_column ~= prev_wincol - prev_column then
-    scrolled_horizontally = true
-  else
-    scrolled_horizontally = false
-  end
-
-  -- Check if curswant has changed.
-  if prev_curswant == new_curswant then
-    new_column = -1
-  end
-
-  -- Check if winline has changed.
-  if prev_winline == new_winline then
-    new_winline = -1
-  end
-
-  -- Check if wincol has changed.
-  if prev_wincol == new_winline then
-    new_wincol = -1
-  end
-
-  if debugging then
-    print(
-      'distance: '
-        .. distance
-        .. ', column: '
-        .. new_column
-        .. ', winline: '
-        .. new_winline
-        .. ', wincol: '
-        .. new_wincol
-    )
-  end
-
-  -- Restore the view to before the command was executed.
-  vim.fn.winrestview(saved_view)
-  return distance, new_column, new_winline, new_wincol, false, false, scrolled_horizontally
 end
 
 return fn

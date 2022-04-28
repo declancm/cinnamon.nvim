@@ -5,6 +5,8 @@ local utils = require('cinnamon.utils')
 local fn = require('cinnamon.functions')
 local motions = require('cinnamon.motions')
 
+local debugging = false
+
 --[[
 
 require('cinnamon.scroll').scroll(arg1, arg2, arg3, arg4, arg5, arg6)
@@ -66,16 +68,71 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
     vim.opt.lazyredraw = saved.lazyredraw
   end
 
-  -- Get the scroll distance and the final column position.
-  local distance, column, winline, wincol, file_changed, limit_exceeded, scrolled_horizontally = fn.get_scroll_values(
-    command,
-    use_count,
-    scroll_win
-  )
-  if file_changed or limit_exceeded then
-    restore_options()
+  local saved_view = vim.fn.winsaveview()
+  local _, prev_row, prev_column, _, prev_curswant = unpack(vim.fn.getcurpos())
+  local prev_file = vim.fn.getreg('%')
+  local prev_winline = vim.fn.winline()
+  local prev_wincol = vim.fn.wincol()
+
+  -- Perform the command.
+  if command == 'definition' then
+    require('vim.lsp.buf').definition()
+    vim.cmd('sleep 100m')
+  elseif command == 'declaration' then
+    require('vim.lsp.buf').declaration()
+    vim.cmd('sleep 100m')
+  elseif use_count and vim.v.count > 0 then
+    vim.cmd('norm! ' .. vim.v.count .. command)
+  else
+    vim.cmd('norm! ' .. command)
+  end
+
+  -- If searching contains a fold, open the fold.
+  if utils.contains(motions.search, command) and vim.fn.foldclosed('.') ~= -1 then
+    vim.cmd('norm! zo')
+  end
+
+  -- Check if the file has changed.
+  if prev_file ~= vim.fn.getreg('%') then
+    vim.cmd('norm! zz')
     return
   end
+
+  local _, row, column, _, curswant = unpack(vim.fn.getcurpos())
+  local winline = vim.fn.winline()
+  local wincol = vim.fn.wincol()
+  local distance = row - prev_row
+
+  -- Check if scroll limit has been exceeded.
+  if distance > config.scroll_limit or distance < -config.scroll_limit then
+    if scroll_win and config.centered then
+      vim.cmd('norm! zz')
+    end
+    return
+  end
+
+  -- Check if scrolled horizontally.
+  local scrolled_horizontally = false
+  if wincol - column ~= prev_wincol - prev_column then
+    scrolled_horizontally = true
+  end
+
+  -- Check if values have changed.
+  if curswant == prev_curswant then
+    column = -1
+  end
+  if winline == prev_winline then
+    winline = -1
+  end
+  if wincol == prev_winline then
+    wincol = -1
+  end
+
+  if debugging then
+    print(string.format('distance: %s, column: %s, winline: %s, wincol: %s', distance, column, winline, wincol))
+  end
+
+  vim.fn.winrestview(saved_view)
 
   -- Scroll the cursor.
   if distance > 0 then
