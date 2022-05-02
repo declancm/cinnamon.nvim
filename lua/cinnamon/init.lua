@@ -43,8 +43,8 @@ M.setup = function(user_config)
   if vim.fn.has('nvim-0.7.0') == 1 then
     if config.default_keymaps then
       -- Half-window movements:
-      vim.keymap.set({ 'n', 'x', 'i' }, '<C-u>', "<Cmd>lua Scroll('<C-u>')<CR>")
-      vim.keymap.set({ 'n', 'x', 'i' }, '<C-d>', "<Cmd>lua Scroll('<C-d>')<CR>")
+      vim.keymap.set({ 'n', 'x', 'i' }, '<C-u>', "<Cmd>lua Scroll('<C-u>', 1, 1)<CR>")
+      vim.keymap.set({ 'n', 'x', 'i' }, '<C-d>', "<Cmd>lua Scroll('<C-d>', 1, 1)<CR>")
 
       -- Page movements:
       vim.keymap.set('n', '<C-b>', "<Cmd>lua Scroll('<C-b>', 1, 1)<CR>")
@@ -58,21 +58,26 @@ M.setup = function(user_config)
       vim.keymap.set({ 'n', 'x' }, 'gg', "<Cmd>lua Scroll('gg', 0, 0, 3)<CR>")
       vim.keymap.set({ 'n', 'x' }, 'G', "<Cmd>lua Scroll('G', 0, 1, 3)<CR>")
 
+      -- Start/end of line:
+      vim.keymap.set('n', '0', "<Cmd>lua Scroll('0')<CR>")
+      vim.keymap.set('n', '^', "<Cmd>lua Scroll('^')<CR>")
+      vim.keymap.set('n', '$', "<Cmd>lua Scroll('$', 0, 1)<CR>")
+
       -- Paragraph movements:
-      vim.keymap.set({ 'n', 'x' }, '{', "<Cmd>lua Scroll('{', 0)<CR>")
-      vim.keymap.set({ 'n', 'x' }, '}', "<Cmd>lua Scroll('}', 0)<CR>")
+      vim.keymap.set({ 'n', 'x' }, '{', "<Cmd>lua Scroll('{')<CR>")
+      vim.keymap.set({ 'n', 'x' }, '}', "<Cmd>lua Scroll('}')<CR>")
 
       -- Previous/next search result:
-      vim.keymap.set('n', 'n', "<Cmd>lua Scroll('n')<CR>")
-      vim.keymap.set('n', 'N', "<Cmd>lua Scroll('N')<CR>")
-      vim.keymap.set('n', '*', "<Cmd>lua Scroll('*')<CR>")
-      vim.keymap.set('n', '#', "<Cmd>lua Scroll('#')<CR>")
-      vim.keymap.set('n', 'g*', "<Cmd>lua Scroll('g*')<CR>")
-      vim.keymap.set('n', 'g#', "<Cmd>lua Scroll('g#')<CR>")
+      vim.keymap.set('n', 'n', "<Cmd>lua Scroll('n', 1)<CR>")
+      vim.keymap.set('n', 'N', "<Cmd>lua Scroll('N', 1)<CR>")
+      vim.keymap.set('n', '*', "<Cmd>lua Scroll('*', 1)<CR>")
+      vim.keymap.set('n', '#', "<Cmd>lua Scroll('#', 1)<CR>")
+      vim.keymap.set('n', 'g*', "<Cmd>lua Scroll('g*', 1)<CR>")
+      vim.keymap.set('n', 'g#', "<Cmd>lua Scroll('g#', 1)<CR>")
 
       -- Previous/next cursor location:
-      vim.keymap.set('n', '<C-o>', "<Cmd>lua Scroll('<C-o>')<CR>")
-      vim.keymap.set('n', '<C-i>', "<Cmd>lua Scroll('1<C-i>')<CR>")
+      vim.keymap.set('n', '<C-o>', "<Cmd>lua Scroll('<C-o>', 1)<CR>")
+      vim.keymap.set('n', '<C-i>', "<Cmd>lua Scroll('1<C-i>', 1)<CR>")
 
       -- Screen scrolling:
       vim.keymap.set('n', 'zz', "<Cmd>lua Scroll('zz', 0, 1)<CR>")
@@ -89,15 +94,10 @@ M.setup = function(user_config)
       -- Horizontal screen scrolling:
       vim.keymap.set('n', 'zh', "<Cmd>lua Scroll('zh', 0, 1)<CR>")
       vim.keymap.set('n', 'zl', "<Cmd>lua Scroll('zl', 0, 1)<CR>")
-      vim.keymap.set('n', 'zH', "<Cmd>lua Scroll('zH', 0)<CR>")
-      vim.keymap.set('n', 'zL', "<Cmd>lua Scroll('zL', 0)<CR>")
-      vim.keymap.set('n', 'zs', "<Cmd>lua Scroll('zs', 0)<CR>")
-      vim.keymap.set('n', 'ze', "<Cmd>lua Scroll('ze', 0)<CR>")
-
-      -- Start/end of line:
-      vim.keymap.set('n', '0', "<Cmd>lua Scroll('0', 0)<CR>")
-      vim.keymap.set('n', '^', "<Cmd>lua Scroll('^', 0)<CR>")
-      vim.keymap.set('n', '$', "<Cmd>lua Scroll('$', 0, 1)<CR>")
+      vim.keymap.set('n', 'zH', "<Cmd>lua Scroll('zH')<CR>")
+      vim.keymap.set('n', 'zL', "<Cmd>lua Scroll('zL')<CR>")
+      vim.keymap.set('n', 'zs', "<Cmd>lua Scroll('zs')<CR>")
+      vim.keymap.set('n', 'ze', "<Cmd>lua Scroll('ze')<CR>")
     end
 
     if config.extended_keymaps then
@@ -119,10 +119,10 @@ M.setup = function(user_config)
 
     if config.default_keymaps then
       -- Half-window movements:
-      keymap('', '<C-u>', "<Cmd>lua Scroll('<C-u>')<CR>", opts)
-      keymap('i', '<C-u>', "<Cmd>lua Scroll('<C-u>')<CR>", opts)
-      keymap('', '<C-d>', "<Cmd>lua Scroll('<C-d>')<CR>", opts)
-      keymap('i', '<C-d>', "<Cmd>lua Scroll('<C-d>')<CR>", opts)
+      keymap('', '<C-u>', "<Cmd>lua Scroll('<C-u>', 1, 1)<CR>", opts)
+      keymap('i', '<C-u>', "<Cmd>lua Scroll('<C-u>', 1, 1)<CR>", opts)
+      keymap('', '<C-d>', "<Cmd>lua Scroll('<C-d>', 1, 1)<CR>", opts)
+      keymap('i', '<C-d>', "<Cmd>lua Scroll('<C-d>', 1, 1)<CR>", opts)
 
       -- Page movements:
       keymap('n', '<C-b>', "<Cmd>lua Scroll('<C-b>', 1, 1)<CR>", opts)
@@ -138,23 +138,28 @@ M.setup = function(user_config)
       keymap('n', 'G', "<Cmd>lua Scroll('G', 0, 1, 3)<CR>", opts)
       keymap('x', 'G', "<Cmd>lua Scroll('G', 0, 1, 3)<CR>", opts)
 
+      -- Start/end of line:
+      keymap('n', '0', "<Cmd>lua Scroll('0')<CR>", opts)
+      keymap('n', '^', "<Cmd>lua Scroll('^')<CR>", opts)
+      keymap('n', '$', "<Cmd>lua Scroll('$')<CR>", opts)
+
       -- Paragraph movements:
-      keymap('n', '{', "<Cmd>lua Scroll('{', 0)<CR>", opts)
-      keymap('x', '{', "<Cmd>lua Scroll('{', 0)<CR>", opts)
-      keymap('n', '}', "<Cmd>lua Scroll('}', 0)<CR>", opts)
-      keymap('x', '}', "<Cmd>lua Scroll('}', 0)<CR>", opts)
+      keymap('n', '{', "<Cmd>lua Scroll('{')<CR>", opts)
+      keymap('x', '{', "<Cmd>lua Scroll('{')<CR>", opts)
+      keymap('n', '}', "<Cmd>lua Scroll('}')<CR>", opts)
+      keymap('x', '}', "<Cmd>lua Scroll('}')<CR>", opts)
 
       -- Previous/next search result:
-      keymap('n', 'n', "<Cmd>lua Scroll('n')<CR>", opts)
-      keymap('n', 'N', "<Cmd>lua Scroll('N')<CR>", opts)
-      keymap('n', '*', "<Cmd>lua Scroll('*')<CR>", opts)
-      keymap('n', '#', "<Cmd>lua Scroll('#')<CR>", opts)
-      keymap('n', 'g*', "<Cmd>lua Scroll('g*')<CR>", opts)
-      keymap('n', 'g#', "<Cmd>lua Scroll('g#')<CR>", opts)
+      keymap('n', 'n', "<Cmd>lua Scroll('n', 1)<CR>", opts)
+      keymap('n', 'N', "<Cmd>lua Scroll('N', 1)<CR>", opts)
+      keymap('n', '*', "<Cmd>lua Scroll('*', 1)<CR>", opts)
+      keymap('n', '#', "<Cmd>lua Scroll('#', 1)<CR>", opts)
+      keymap('n', 'g*', "<Cmd>lua Scroll('g*', 1)<CR>", opts)
+      keymap('n', 'g#', "<Cmd>lua Scroll('g#', 1)<CR>", opts)
 
       -- Previous/next cursor location:
-      keymap('n', '<C-o>', "<Cmd>lua Scroll('<C-o>')<CR>", opts)
-      keymap('n', '<C-i>', "<Cmd>lua Scroll('1<C-i>')<CR>", opts)
+      keymap('n', '<C-o>', "<Cmd>lua Scroll('<C-o>', 1)<CR>", opts)
+      keymap('n', '<C-i>', "<Cmd>lua Scroll('1<C-i>', 1)<CR>", opts)
 
       -- Window scrolling:
       keymap('n', 'zz', "<Cmd>lua Scroll('zz', 0, 1)<CR>", opts)
@@ -171,15 +176,10 @@ M.setup = function(user_config)
       -- Horizontal screen scrolling:
       keymap('n', 'zh', "<Cmd>lua Scroll('zh', 0, 1)<CR>", opts)
       keymap('n', 'zl', "<Cmd>lua Scroll('zl', 0, 1)<CR>", opts)
-      keymap('n', 'zH', "<Cmd>lua Scroll('zH', 0)<CR>", opts)
-      keymap('n', 'zL', "<Cmd>lua Scroll('zL', 0)<CR>", opts)
-      keymap('n', 'zs', "<Cmd>lua Scroll('zs', 0)<CR>", opts)
-      keymap('n', 'ze', "<Cmd>lua Scroll('ze', 0)<CR>", opts)
-
-      -- Start/end of line:
-      keymap('n', '0', "<Cmd>lua Scroll('0', 0)<CR>", opts)
-      keymap('n', '^', "<Cmd>lua Scroll('^', 0)<CR>", opts)
-      keymap('n', '$', "<Cmd>lua Scroll('$', 0)<CR>", opts)
+      keymap('n', 'zH', "<Cmd>lua Scroll('zH')<CR>", opts)
+      keymap('n', 'zL', "<Cmd>lua Scroll('zL')<CR>", opts)
+      keymap('n', 'zs', "<Cmd>lua Scroll('zs')<CR>", opts)
+      keymap('n', 'ze', "<Cmd>lua Scroll('ze')<CR>", opts)
     end
 
     if config.extended_keymaps then

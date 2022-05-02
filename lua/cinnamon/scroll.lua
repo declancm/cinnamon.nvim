@@ -14,7 +14,7 @@ require('cinnamon.scroll').scroll(arg1, arg2, arg3, arg4, arg5, arg6)
 arg1 = A string containing the normal mode movement commands.
   * To use the go-to-definition LSP function, use 'definition' (or 'declaration'
     for go-to-declaration).
-arg2 = Scroll the window with the cursor. (1 for on, 0 for off). Default is 1.
+arg2 = Scroll the window with the cursor. (1 for on, 0 for off). Default is 0.
 arg3 = Accept a count before the command (1 for on, 0 for off). Default is 0.
 arg4 = Length of delay between each line (in ms). Default is the 'default_delay' config value.
 arg5 = Slowdown at the end of the movement (1 for on, 0 for off). Default is 1.
@@ -43,7 +43,7 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
     utils.error_msg('The command argument cannot be nil')
     return
   end
-  scroll_win = int_to_bool(scroll_win or 1)
+  scroll_win = int_to_bool(scroll_win or 0)
   use_count = int_to_bool(use_count or 0)
   delay = delay or config.default_delay
   slowdown = int_to_bool(slowdown or 1)
