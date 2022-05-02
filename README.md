@@ -31,9 +31,13 @@ A settings table can be passed into the setup function for custom options.
 ### Default Settings
 
 ```lua
+-- KEYMAPS:
 default_keymaps = true,   -- Create default keymaps.
 extra_keymaps = false,    -- Create extra keymaps.
 extended_keymaps = false, -- Create extended keymaps.
+
+-- OPTIONS:
+always_scroll = false,    -- Scroll the cursor even when the window hasn't scrolled.
 centered = true,          -- Keep cursor centered in window when using window scrolling.
 default_delay = 5,        -- The default delay (in ms) between each line when scrolling.
 horizontal_scroll = true, -- Enable smooth horizontal scrolling when view shifts left or right.
@@ -70,8 +74,9 @@ Line number:                [count]G
 Paragraph movements:        { and }
 Prev/next search result:    n, N, *, #, g* and g#
 Prev/next cursor location:  <C-O> and <C-I>
-Screen scrolling:           zz, zt, zb, z., z<CR>, z-, z^, z+, [count]<C-Y> and [count]<C-E>
-Horizontal scrolling:       zH, zL, zs, ze, [count]zh and [count]zl
+Screen scrolling:           zz, zt, zb, z., z<CR>, z-, z^, z+, <C-Y> and <C-E>
+Horizontal scrolling:       zH, zL, zs, ze, zh and zl
+Start/end of line:          0, ^ and $
 ```
 
 ### Extended Keymaps
@@ -79,8 +84,8 @@ Horizontal scrolling:       zH, zL, zs, ze, [count]zh and [count]zl
 ```
 Smooth scrolling for ...
 
-Up/down movements:          [count]j, [count]k, [count]<Up> and [count]<Down>
-Left/right movements:       [count]h, [count]l, [count]<Left> and [count]<Right>
+Up/down movements:          j, k, <Up> and <Down>
+Left/right movements:       h, l, <Left> and <Right>
 ```
 
 ## ℹ️ API
@@ -155,6 +160,11 @@ vim.keymap.set('n', 'zs', "<Cmd>lua Scroll('zs', 0)<CR>")
 vim.keymap.set('n', 'ze', "<Cmd>lua Scroll('ze', 0)<CR>")
 vim.keymap.set('n', 'zh', "<Cmd>lua Scroll('zh', 0, 1)<CR>")
 vim.keymap.set('n', 'zl', "<Cmd>lua Scroll('zl', 0, 1)<CR>")
+
+-- Start/end of line:
+vim.keymap.set('n', '0', "<Cmd>lua Scroll('0', 0)<CR>")
+vim.keymap.set('n', '^', "<Cmd>lua Scroll('^', 0)<CR>")
+vim.keymap.set('n', '$', "<Cmd>lua Scroll('$', 0, 1)<CR>")
 
 -- EXTENDED_KEYMAPS:
 

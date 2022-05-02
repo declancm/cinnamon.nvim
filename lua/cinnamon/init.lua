@@ -93,6 +93,11 @@ M.setup = function(user_config)
       vim.keymap.set('n', 'zL', "<Cmd>lua Scroll('zL', 0)<CR>")
       vim.keymap.set('n', 'zs', "<Cmd>lua Scroll('zs', 0)<CR>")
       vim.keymap.set('n', 'ze', "<Cmd>lua Scroll('ze', 0)<CR>")
+
+      -- Start/end of line:
+      vim.keymap.set('n', '0', "<Cmd>lua Scroll('0', 0)<CR>")
+      vim.keymap.set('n', '^', "<Cmd>lua Scroll('^', 0)<CR>")
+      vim.keymap.set('n', '$', "<Cmd>lua Scroll('$', 0, 1)<CR>")
     end
 
     if config.extended_keymaps then
@@ -170,6 +175,11 @@ M.setup = function(user_config)
       keymap('n', 'zL', "<Cmd>lua Scroll('zL', 0)<CR>", opts)
       keymap('n', 'zs', "<Cmd>lua Scroll('zs', 0)<CR>", opts)
       keymap('n', 'ze', "<Cmd>lua Scroll('ze', 0)<CR>", opts)
+
+      -- Start/end of line:
+      keymap('n', '0', "<Cmd>lua Scroll('0', 0)<CR>", opts)
+      keymap('n', '^', "<Cmd>lua Scroll('^', 0)<CR>", opts)
+      keymap('n', '$', "<Cmd>lua Scroll('$', 0)<CR>", opts)
     end
 
     if config.extended_keymaps then

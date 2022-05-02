@@ -2,6 +2,7 @@ return {
   default_keymaps = true,
   extra_keymaps = false,
   extended_keymaps = false,
+  always_scroll = false,
   centered = true,
   default_delay = 5,
   horizontal_scroll = true,

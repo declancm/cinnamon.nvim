@@ -63,7 +63,6 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
   local saved = {}
   saved.lazyredraw = vim.opt.lazyredraw:get()
   vim.opt.lazyredraw = false
-
   local restore_options = function()
     vim.opt.lazyredraw = saved.lazyredraw
   end
@@ -117,6 +116,14 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
     scrolled_horizontally = true
   end
 
+  -- Check if scrolled vertically.
+  if winline - row == prev_winline - prev_row and not config.always_scroll then
+    if not scrolled_horizontally and not scroll_win and not vim.opt.wrap:get() then
+      restore_options()
+      return
+    end
+  end
+
   -- Check if values have changed.
   if curswant == prev_curswant then
     column = -1
@@ -147,7 +154,7 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
   end
 
   -- Scroll horizontally.
-  if scrolled_horizontally and config.horizontal_scroll then
+  if scrolled_horizontally and config.horizontal_scroll or config.always_scroll then
     fn.scroll_horizontally(delay / 2, slowdown, wincol, column)
   else
     fn.scroll_horizontally(0, 0, wincol, column)
