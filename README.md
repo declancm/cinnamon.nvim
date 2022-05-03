@@ -110,14 +110,14 @@ _Note: When scrolling horizontally, the delay argument is halved so vertical and
 -- DEFAULT_KEYMAPS:
 
 -- Half-window movements:
-vim.keymap.set({ 'n', 'x', 'i' }, '<C-u>', "<Cmd>lua Scroll('<C-u>', 1, 1)<CR>")
-vim.keymap.set({ 'n', 'x', 'i' }, '<C-d>', "<Cmd>lua Scroll('<C-d>', 1, 1)<CR>")
+vim.keymap.set({ 'n', 'x' }, '<C-u>', "<Cmd>lua Scroll('<C-u>', 1, 1)<CR>")
+vim.keymap.set({ 'n', 'x' }, '<C-d>', "<Cmd>lua Scroll('<C-d>', 1, 1)<CR>")
 
 -- Page movements:
-vim.keymap.set('n', '<C-b>', "<Cmd>lua Scroll('<C-b>', 1, 1)<CR>")
-vim.keymap.set('n', '<C-f>', "<Cmd>lua Scroll('<C-f>', 1, 1)<CR>")
-vim.keymap.set('n', '<PageUp>', "<Cmd>lua Scroll('<C-b>', 1, 1)<CR>")
-vim.keymap.set('n', '<PageDown>', "<Cmd>lua Scroll('<C-f>', 1, 1)<CR>")
+vim.keymap.set({ 'n', 'x' }, '<C-b>', "<Cmd>lua Scroll('<C-b>', 1, 1)<CR>")
+vim.keymap.set({ 'n', 'x' }, '<C-f>', "<Cmd>lua Scroll('<C-f>', 1, 1)<CR>")
+vim.keymap.set({ 'n', 'x' }, '<PageUp>', "<Cmd>lua Scroll('<C-b>', 1, 1)<CR>")
+vim.keymap.set({ 'n', 'x' }, '<PageDown>', "<Cmd>lua Scroll('<C-f>', 1, 1)<CR>")
 
 -- EXTRA_KEYMAPS:
 
@@ -126,9 +126,9 @@ vim.keymap.set({ 'n', 'x' }, 'gg', "<Cmd>lua Scroll('gg', 0, 0, 3)<CR>")
 vim.keymap.set({ 'n', 'x' }, 'G', "<Cmd>lua Scroll('G', 0, 1, 3)<CR>")
 
 -- Start/end of line:
-vim.keymap.set('n', '0', "<Cmd>lua Scroll('0')<CR>")
-vim.keymap.set('n', '^', "<Cmd>lua Scroll('^')<CR>")
-vim.keymap.set('n', '$', "<Cmd>lua Scroll('$', 0, 1)<CR>")
+vim.keymap.set({ 'n', 'x' }, '0', "<Cmd>lua Scroll('0')<CR>")
+vim.keymap.set({ 'n', 'x' }, '^', "<Cmd>lua Scroll('^')<CR>")
+vim.keymap.set({ 'n', 'x' }, '$', "<Cmd>lua Scroll('$', 0, 1)<CR>")
 
 -- Paragraph movements:
 vim.keymap.set({ 'n', 'x' }, '{', "<Cmd>lua Scroll('{')<CR>")
@@ -191,14 +191,14 @@ vim.keymap.set('n', 'gD', "<Cmd>lua Scroll('declaration')<CR>")
 
 ### Custom Keymaps
 
-If creating a custom keymap which is within the preset keymaps, make sure they 
-are disabled so yours isn't overridden.
+Cinnamon will detect when a user has created their own keymaps for a command
+and will not replace it.
 
 ```lua
--- Disabling the default keymaps.
-require('cinnamon').setup { default_keymaps = false }
+-- Activating Cinnamon:
+require('cinnamon').setup { extra_keymaps = true }
 
--- Customizing keymaps that are part of the default mappings.
-vim.keymap.set({ 'n', 'x', 'i' }, '<C-u>', "<Cmd>lua Scroll('<C-u>', 1, 0, 7)<CR>")
-vim.keymap.set({ 'n', 'x', 'i' }, '<C-d>', "<Cmd>lua Scroll('<C-d>', 1, 0, 7)<CR>")
+-- Customizing keymaps that are part of the extra mappings:
+vim.keymap.set('n', 'n', "<Cmd>lua Scroll('n')<CR>")
+vim.keymap.set('n', 'N', "<Cmd>lua Scroll('N')<CR>")
 ```

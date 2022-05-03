@@ -6,6 +6,31 @@ utils.error_msg = function(message, code, level)
   vim.notify(string.format('%s: %s', code, message), vim.log.levels[level])
 end
 
+utils.create_keymap = function(mode, lhs, rhs)
+  local keymap
+  local opts
+
+  if vim.fn.has('nvim-0.7.0') == 1 then
+    keymap = vim.keymap.set
+    opts = {}
+  else
+    keymap = vim.api.nvim_set_keymap
+    opts = { noremap = true }
+  end
+
+  if type(mode) == 'table' then
+    for _, value in ipairs(mode) do
+      if vim.fn.maparg(lhs, value) == '' then
+        keymap(value, lhs, rhs, opts)
+      end
+    end
+  else
+    if vim.fn.maparg(lhs, mode) == '' then
+      keymap(mode, lhs, rhs, opts)
+    end
+  end
+end
+
 utils.contains = function(table, target)
   for _, item in pairs(table) do
     if item == target then

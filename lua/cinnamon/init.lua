@@ -1,5 +1,7 @@
 local M = {}
 
+-- TODO: redo the keymap creation to check if keymaps already exist.
+
 M.setup = function(user_config)
   local config = require('cinnamon.config')
   local utils = require('cinnamon.utils')
@@ -40,169 +42,77 @@ M.setup = function(user_config)
     require('cinnamon.scroll').scroll(...)
   end
 
-  if vim.fn.has('nvim-0.7.0') == 1 then
-    if config.default_keymaps then
-      -- Half-window movements:
-      vim.keymap.set({ 'n', 'x', 'i' }, '<C-u>', "<Cmd>lua Scroll('<C-u>', 1, 1)<CR>")
-      vim.keymap.set({ 'n', 'x', 'i' }, '<C-d>', "<Cmd>lua Scroll('<C-d>', 1, 1)<CR>")
+  if config.default_keymaps then
+    -- Half-window movements:
+    utils.create_keymap({ 'n', 'x' }, '<C-u>', "<Cmd>lua Scroll('<C-u>', 1, 1)<CR>")
+    utils.create_keymap({ 'n', 'x' }, '<C-d>', "<Cmd>lua Scroll('<C-d>', 1, 1)<CR>")
 
-      -- Page movements:
-      vim.keymap.set('n', '<C-b>', "<Cmd>lua Scroll('<C-b>', 1, 1)<CR>")
-      vim.keymap.set('n', '<C-f>', "<Cmd>lua Scroll('<C-f>', 1, 1)<CR>")
-      vim.keymap.set('n', '<PageUp>', "<Cmd>lua Scroll('<C-b>', 1, 1)<CR>")
-      vim.keymap.set('n', '<PageDown>', "<Cmd>lua Scroll('<C-f>', 1, 1)<CR>")
-    end
+    -- Page movements:
+    utils.create_keymap({ 'n', 'x' }, '<C-b>', "<Cmd>lua Scroll('<C-b>', 1, 1)<CR>")
+    utils.create_keymap({ 'n', 'x' }, '<C-f>', "<Cmd>lua Scroll('<C-f>', 1, 1)<CR>")
+    utils.create_keymap({ 'n', 'x' }, '<PageUp>', "<Cmd>lua Scroll('<C-b>', 1, 1)<CR>")
+    utils.create_keymap({ 'n', 'x' }, '<PageDown>', "<Cmd>lua Scroll('<C-f>', 1, 1)<CR>")
+  end
 
-    if config.extra_keymaps then
-      -- Start/end of file and line number movements:
-      vim.keymap.set({ 'n', 'x' }, 'gg', "<Cmd>lua Scroll('gg', 0, 0, 3)<CR>")
-      vim.keymap.set({ 'n', 'x' }, 'G', "<Cmd>lua Scroll('G', 0, 1, 3)<CR>")
+  if config.extra_keymaps then
+    -- Start/end of file and line number movements:
+    utils.create_keymap({ 'n', 'x' }, 'gg', "<Cmd>lua Scroll('gg', 0, 0, 3)<CR>")
+    utils.create_keymap({ 'n', 'x' }, 'G', "<Cmd>lua Scroll('G', 0, 1, 3)<CR>")
 
-      -- Start/end of line:
-      vim.keymap.set('n', '0', "<Cmd>lua Scroll('0')<CR>")
-      vim.keymap.set('n', '^', "<Cmd>lua Scroll('^')<CR>")
-      vim.keymap.set('n', '$', "<Cmd>lua Scroll('$', 0, 1)<CR>")
+    -- Start/end of line:
+    utils.create_keymap({ 'n', 'x' }, '0', "<Cmd>lua Scroll('0')<CR>")
+    utils.create_keymap({ 'n', 'x' }, '^', "<Cmd>lua Scroll('^')<CR>")
+    utils.create_keymap({ 'n', 'x' }, '$', "<Cmd>lua Scroll('$', 0, 1)<CR>")
 
-      -- Paragraph movements:
-      vim.keymap.set({ 'n', 'x' }, '{', "<Cmd>lua Scroll('{')<CR>")
-      vim.keymap.set({ 'n', 'x' }, '}', "<Cmd>lua Scroll('}')<CR>")
+    -- Paragraph movements:
+    utils.create_keymap({ 'n', 'x' }, '{', "<Cmd>lua Scroll('{')<CR>")
+    utils.create_keymap({ 'n', 'x' }, '}', "<Cmd>lua Scroll('}')<CR>")
 
-      -- Previous/next search result:
-      vim.keymap.set('n', 'n', "<Cmd>lua Scroll('n', 1)<CR>")
-      vim.keymap.set('n', 'N', "<Cmd>lua Scroll('N', 1)<CR>")
-      vim.keymap.set('n', '*', "<Cmd>lua Scroll('*', 1)<CR>")
-      vim.keymap.set('n', '#', "<Cmd>lua Scroll('#', 1)<CR>")
-      vim.keymap.set('n', 'g*', "<Cmd>lua Scroll('g*', 1)<CR>")
-      vim.keymap.set('n', 'g#', "<Cmd>lua Scroll('g#', 1)<CR>")
+    -- Previous/next search result:
+    utils.create_keymap('n', 'n', "<Cmd>lua Scroll('n', 1)<CR>")
+    utils.create_keymap('n', 'N', "<Cmd>lua Scroll('N', 1)<CR>")
+    utils.create_keymap('n', '*', "<Cmd>lua Scroll('*', 1)<CR>")
+    utils.create_keymap('n', '#', "<Cmd>lua Scroll('#', 1)<CR>")
+    utils.create_keymap('n', 'g*', "<Cmd>lua Scroll('g*', 1)<CR>")
+    utils.create_keymap('n', 'g#', "<Cmd>lua Scroll('g#', 1)<CR>")
 
-      -- Previous/next cursor location:
-      vim.keymap.set('n', '<C-o>', "<Cmd>lua Scroll('<C-o>', 1)<CR>")
-      vim.keymap.set('n', '<C-i>', "<Cmd>lua Scroll('1<C-i>', 1)<CR>")
+    -- Previous/next cursor location:
+    utils.create_keymap('n', '<C-o>', "<Cmd>lua Scroll('<C-o>', 1)<CR>")
+    utils.create_keymap('n', '<C-i>', "<Cmd>lua Scroll('1<C-i>', 1)<CR>")
 
-      -- Screen scrolling:
-      vim.keymap.set('n', 'zz', "<Cmd>lua Scroll('zz', 0, 1)<CR>")
-      vim.keymap.set('n', 'zt', "<Cmd>lua Scroll('zt', 0, 1)<CR>")
-      vim.keymap.set('n', 'zb', "<Cmd>lua Scroll('zb', 0, 1)<CR>")
-      vim.keymap.set('n', 'z.', "<Cmd>lua Scroll('z.', 0, 1)<CR>")
-      vim.keymap.set('n', 'z<CR>', "<Cmd>lua Scroll('zt^', 0, 1)<CR>")
-      vim.keymap.set('n', 'z-', "<Cmd>lua Scroll('z-', 0, 1)<CR>")
-      vim.keymap.set('n', 'z^', "<Cmd>lua Scroll('z^', 0, 1)<CR>")
-      vim.keymap.set('n', 'z+', "<Cmd>lua Scroll('z+', 0, 1)<CR>")
-      vim.keymap.set('n', '<C-y>', "<Cmd>lua Scroll('<C-y>', 0, 1)<CR>")
-      vim.keymap.set('n', '<C-e>', "<Cmd>lua Scroll('<C-e>', 0, 1)<CR>")
+    -- Screen scrolling:
+    utils.create_keymap('n', 'zz', "<Cmd>lua Scroll('zz', 0, 1)<CR>")
+    utils.create_keymap('n', 'zt', "<Cmd>lua Scroll('zt', 0, 1)<CR>")
+    utils.create_keymap('n', 'zb', "<Cmd>lua Scroll('zb', 0, 1)<CR>")
+    utils.create_keymap('n', 'z.', "<Cmd>lua Scroll('z.', 0, 1)<CR>")
+    utils.create_keymap('n', 'z<CR>', "<Cmd>lua Scroll('zt^', 0, 1)<CR>")
+    utils.create_keymap('n', 'z-', "<Cmd>lua Scroll('z-', 0, 1)<CR>")
+    utils.create_keymap('n', 'z^', "<Cmd>lua Scroll('z^', 0, 1)<CR>")
+    utils.create_keymap('n', 'z+', "<Cmd>lua Scroll('z+', 0, 1)<CR>")
+    utils.create_keymap('n', '<C-y>', "<Cmd>lua Scroll('<C-y>', 0, 1)<CR>")
+    utils.create_keymap('n', '<C-e>', "<Cmd>lua Scroll('<C-e>', 0, 1)<CR>")
 
-      -- Horizontal screen scrolling:
-      vim.keymap.set('n', 'zh', "<Cmd>lua Scroll('zh', 0, 1)<CR>")
-      vim.keymap.set('n', 'zl', "<Cmd>lua Scroll('zl', 0, 1)<CR>")
-      vim.keymap.set('n', 'zH', "<Cmd>lua Scroll('zH')<CR>")
-      vim.keymap.set('n', 'zL', "<Cmd>lua Scroll('zL')<CR>")
-      vim.keymap.set('n', 'zs', "<Cmd>lua Scroll('zs')<CR>")
-      vim.keymap.set('n', 'ze', "<Cmd>lua Scroll('ze')<CR>")
-    end
+    -- Horizontal screen scrolling:
+    utils.create_keymap('n', 'zh', "<Cmd>lua Scroll('zh', 0, 1)<CR>")
+    utils.create_keymap('n', 'zl', "<Cmd>lua Scroll('zl', 0, 1)<CR>")
+    utils.create_keymap('n', 'zH', "<Cmd>lua Scroll('zH')<CR>")
+    utils.create_keymap('n', 'zL', "<Cmd>lua Scroll('zL')<CR>")
+    utils.create_keymap('n', 'zs', "<Cmd>lua Scroll('zs')<CR>")
+    utils.create_keymap('n', 'ze', "<Cmd>lua Scroll('ze')<CR>")
+  end
 
-    if config.extended_keymaps then
-      -- Up/down movements:
-      vim.keymap.set({ 'n', 'x' }, 'k', "<Cmd>lua Scroll('k', 0, 1, 3, 0)<CR>")
-      vim.keymap.set({ 'n', 'x' }, 'j', "<Cmd>lua Scroll('j', 0, 1, 3, 0)<CR>")
-      vim.keymap.set({ 'n', 'x' }, '<Up>', "<Cmd>lua Scroll('k', 0, 1, 3, 0)<CR>")
-      vim.keymap.set({ 'n', 'x' }, '<Down>', "<Cmd>lua Scroll('j', 0, 1, 3, 0)<CR>")
+  if config.extended_keymaps then
+    -- Up/down movements:
+    utils.create_keymap({ 'n', 'x' }, 'k', "<Cmd>lua Scroll('k', 0, 1, 3, 0)<CR>")
+    utils.create_keymap({ 'n', 'x' }, 'j', "<Cmd>lua Scroll('j', 0, 1, 3, 0)<CR>")
+    utils.create_keymap({ 'n', 'x' }, '<Up>', "<Cmd>lua Scroll('k', 0, 1, 3, 0)<CR>")
+    utils.create_keymap({ 'n', 'x' }, '<Down>', "<Cmd>lua Scroll('j', 0, 1, 3, 0)<CR>")
 
-      -- Left/right movements:
-      vim.keymap.set({ 'n', 'x' }, 'h', "<Cmd>lua Scroll('h', 0, 1, 2, 0)<CR>")
-      vim.keymap.set({ 'n', 'x' }, 'l', "<Cmd>lua Scroll('l', 0, 1, 2, 0)<CR>")
-      vim.keymap.set({ 'n', 'x' }, '<Left>', "<Cmd>lua Scroll('h', 0, 1, 2, 0)<CR>")
-      vim.keymap.set({ 'n', 'x' }, '<Right>', "<Cmd>lua Scroll('l', 0, 1, 2, 0)<CR>")
-    end
-  else
-    local opts = { noremap = true, silent = true }
-    local keymap = vim.api.nvim_set_keymap
-
-    if config.default_keymaps then
-      -- Half-window movements:
-      keymap('', '<C-u>', "<Cmd>lua Scroll('<C-u>', 1, 1)<CR>", opts)
-      keymap('i', '<C-u>', "<Cmd>lua Scroll('<C-u>', 1, 1)<CR>", opts)
-      keymap('', '<C-d>', "<Cmd>lua Scroll('<C-d>', 1, 1)<CR>", opts)
-      keymap('i', '<C-d>', "<Cmd>lua Scroll('<C-d>', 1, 1)<CR>", opts)
-
-      -- Page movements:
-      keymap('n', '<C-b>', "<Cmd>lua Scroll('<C-b>', 1, 1)<CR>", opts)
-      keymap('n', '<C-f>', "<Cmd>lua Scroll('<C-f>', 1, 1)<CR>", opts)
-      keymap('n', '<PageUp>', "<Cmd>lua Scroll('<C-b>', 1, 1)<CR>", opts)
-      keymap('n', '<PageDown>', "<Cmd>lua Scroll('<C-f>', 1, 1)<CR>", opts)
-    end
-
-    if config.extra_keymaps then
-      -- Start/end of file and line number movements:
-      keymap('n', 'gg', "<Cmd>lua Scroll('gg', 0, 0, 3)<CR>", opts)
-      keymap('x', 'gg', "<Cmd>lua Scroll('gg', 0, 0, 3)<CR>", opts)
-      keymap('n', 'G', "<Cmd>lua Scroll('G', 0, 1, 3)<CR>", opts)
-      keymap('x', 'G', "<Cmd>lua Scroll('G', 0, 1, 3)<CR>", opts)
-
-      -- Start/end of line:
-      keymap('n', '0', "<Cmd>lua Scroll('0')<CR>", opts)
-      keymap('n', '^', "<Cmd>lua Scroll('^')<CR>", opts)
-      keymap('n', '$', "<Cmd>lua Scroll('$')<CR>", opts)
-
-      -- Paragraph movements:
-      keymap('n', '{', "<Cmd>lua Scroll('{')<CR>", opts)
-      keymap('x', '{', "<Cmd>lua Scroll('{')<CR>", opts)
-      keymap('n', '}', "<Cmd>lua Scroll('}')<CR>", opts)
-      keymap('x', '}', "<Cmd>lua Scroll('}')<CR>", opts)
-
-      -- Previous/next search result:
-      keymap('n', 'n', "<Cmd>lua Scroll('n', 1)<CR>", opts)
-      keymap('n', 'N', "<Cmd>lua Scroll('N', 1)<CR>", opts)
-      keymap('n', '*', "<Cmd>lua Scroll('*', 1)<CR>", opts)
-      keymap('n', '#', "<Cmd>lua Scroll('#', 1)<CR>", opts)
-      keymap('n', 'g*', "<Cmd>lua Scroll('g*', 1)<CR>", opts)
-      keymap('n', 'g#', "<Cmd>lua Scroll('g#', 1)<CR>", opts)
-
-      -- Previous/next cursor location:
-      keymap('n', '<C-o>', "<Cmd>lua Scroll('<C-o>', 1)<CR>", opts)
-      keymap('n', '<C-i>', "<Cmd>lua Scroll('1<C-i>', 1)<CR>", opts)
-
-      -- Window scrolling:
-      keymap('n', 'zz', "<Cmd>lua Scroll('zz', 0, 1)<CR>", opts)
-      keymap('n', 'zt', "<Cmd>lua Scroll('zt', 0, 1)<CR>", opts)
-      keymap('n', 'zb', "<Cmd>lua Scroll('zb', 0, 1)<CR>", opts)
-      keymap('n', 'z.', "<Cmd>lua Scroll('z.', 0, 1)<CR>", opts)
-      keymap('n', 'z<CR>', "<Cmd>lua Scroll('zt^', 0, 1)<CR>", opts)
-      keymap('n', 'z-', "<Cmd>lua Scroll('z-', 0, 1)<CR>", opts)
-      keymap('n', 'z^', "<Cmd>lua Scroll('z^', 0, 1)<CR>", opts)
-      keymap('n', 'z+', "<Cmd>lua Scroll('z+', 0, 1)<CR>", opts)
-      keymap('n', '<C-y>', "<Cmd>lua Scroll('<C-y>', 0, 1)<CR>", opts)
-      keymap('n', '<C-e>', "<Cmd>lua Scroll('<C-e>', 0, 1)<CR>", opts)
-
-      -- Horizontal screen scrolling:
-      keymap('n', 'zh', "<Cmd>lua Scroll('zh', 0, 1)<CR>", opts)
-      keymap('n', 'zl', "<Cmd>lua Scroll('zl', 0, 1)<CR>", opts)
-      keymap('n', 'zH', "<Cmd>lua Scroll('zH')<CR>", opts)
-      keymap('n', 'zL', "<Cmd>lua Scroll('zL')<CR>", opts)
-      keymap('n', 'zs', "<Cmd>lua Scroll('zs')<CR>", opts)
-      keymap('n', 'ze', "<Cmd>lua Scroll('ze')<CR>", opts)
-    end
-
-    if config.extended_keymaps then
-      -- Up/down movements:
-      keymap('n', 'k', "<Cmd>lua Scroll('k', 0, 1, 3, 0)<CR>", opts)
-      keymap('x', 'k', "<Cmd>lua Scroll('k', 0, 1, 3, 0)<CR>", opts)
-      keymap('n', 'j', "<Cmd>lua Scroll('j', 0, 1, 3, 0)<CR>", opts)
-      keymap('x', 'j', "<Cmd>lua Scroll('j', 0, 1, 3, 0)<CR>", opts)
-      keymap('n', '<Up>', "<Cmd>lua Scroll('k', 0, 1, 3, 0)<CR>", opts)
-      keymap('x', '<Up>', "<Cmd>lua Scroll('k', 0, 1, 3, 0)<CR>", opts)
-      keymap('n', '<Down>', "<Cmd>lua Scroll('j', 0, 1, 3, 0)<CR>", opts)
-      keymap('x', '<Down>', "<Cmd>lua Scroll('j', 0, 1, 3, 0)<CR>", opts)
-
-      -- Left/right movements:
-      keymap('n', 'h', "<Cmd>lua Scroll('h', 0, 1, 2, 0)<CR>", opts)
-      keymap('x', 'h', "<Cmd>lua Scroll('h', 0, 1, 2, 0)<CR>", opts)
-      keymap('n', 'l', "<Cmd>lua Scroll('l', 0, 1, 2, 0)<CR>", opts)
-      keymap('x', 'l', "<Cmd>lua Scroll('l', 0, 1, 2, 0)<CR>", opts)
-      keymap('n', '<Left>', "<Cmd>lua Scroll('h', 0, 1, 2, 0)<CR>", opts)
-      keymap('x', '<Left>', "<Cmd>lua Scroll('h', 0, 1, 2, 0)<CR>", opts)
-      keymap('n', '<Right>', "<Cmd>lua Scroll('l', 0, 1, 2, 0)<CR>", opts)
-      keymap('x', '<Right>', "<Cmd>lua Scroll('l', 0, 1, 2, 0)<CR>", opts)
-    end
+    -- Left/right movements:
+    utils.create_keymap({ 'n', 'x' }, 'h', "<Cmd>lua Scroll('h', 0, 1, 2, 0)<CR>")
+    utils.create_keymap({ 'n', 'x' }, 'l', "<Cmd>lua Scroll('l', 0, 1, 2, 0)<CR>")
+    utils.create_keymap({ 'n', 'x' }, '<Left>', "<Cmd>lua Scroll('h', 0, 1, 2, 0)<CR>")
+    utils.create_keymap({ 'n', 'x' }, '<Right>', "<Cmd>lua Scroll('l', 0, 1, 2, 0)<CR>")
   end
 end
 

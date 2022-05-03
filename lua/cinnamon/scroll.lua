@@ -74,11 +74,8 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
   local prev_wincol = vim.fn.wincol()
 
   -- Perform the command.
-  if command == 'definition' then
-    require('vim.lsp.buf').definition()
-    vim.cmd('sleep 100m')
-  elseif command == 'declaration' then
-    require('vim.lsp.buf').declaration()
+  if command == 'definition' or command == 'declaration' then
+    require('vim.lsp.buf')[command]()
     vim.cmd('sleep 100m')
   elseif use_count and vim.v.count > 0 then
     vim.cmd('norm! ' .. vim.v.count .. command)
@@ -94,6 +91,7 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
   -- Check if the file has changed.
   if prev_file ~= vim.fn.getreg('%') then
     vim.cmd('norm! zz')
+    restore_options()
     return
   end
 
@@ -107,6 +105,7 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
     if scroll_win and config.centered then
       vim.cmd('norm! zz')
     end
+    restore_options()
     return
   end
 
