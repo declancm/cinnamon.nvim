@@ -24,11 +24,6 @@ Note: arg1 is a string while the others are integers.
 ]]
 
 M.scroll = function(command, scroll_win, use_count, delay, slowdown)
-  if config.disable then
-    utils.error_msg('Cinnamon is disabled')
-    return
-  end
-
   -- Convert arguments to boolean:
   local int_to_bool = function(int)
     if int == 1 then

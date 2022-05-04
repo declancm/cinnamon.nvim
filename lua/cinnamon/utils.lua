@@ -7,26 +7,15 @@ utils.error_msg = function(message, code, level)
 end
 
 utils.create_keymap = function(mode, lhs, rhs)
-  local keymap
-  local opts
-
-  if vim.fn.has('nvim-0.7.0') == 1 then
-    keymap = vim.keymap.set
-    opts = {}
-  else
-    keymap = vim.api.nvim_set_keymap
-    opts = { noremap = true }
-  end
-
   if type(mode) == 'table' then
     for _, value in ipairs(mode) do
       if vim.fn.maparg(lhs, value) == '' then
-        keymap(value, lhs, rhs, opts)
+        vim.api.nvim_set_keymap(value, lhs, rhs, { noremap = true })
       end
     end
   else
     if vim.fn.maparg(lhs, mode) == '' then
-      keymap(mode, lhs, rhs, opts)
+      vim.api.nvim_set_keymap(mode, lhs, rhs, { noremap = true })
     end
   end
 end

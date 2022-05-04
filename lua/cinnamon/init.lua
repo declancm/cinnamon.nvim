@@ -1,7 +1,5 @@
 local M = {}
 
--- TODO: redo the keymap creation to check if keymaps already exist.
-
 M.setup = function(user_config)
   local config = require('cinnamon.config')
   local utils = require('cinnamon.utils')
@@ -11,13 +9,14 @@ M.setup = function(user_config)
     utils.merge(config, user_config)
   end
 
-  -- Disable plugin:
-  if config.disable then
-    return
+  -- Global function used to simplify the keymaps:
+  function Scroll(...)
+    require('cinnamon.scroll').scroll(...)
   end
 
   -- Deprecated settings:
-  Cinnamon = require('cinnamon')
+  Cinnamon = {}
+  Cinnamon.Scroll = Scroll
 
   if vim.g.cinnamon_no_defaults == 1 then
     require('cinnamon.utils').error_msg(
@@ -35,11 +34,6 @@ M.setup = function(user_config)
       'WARN'
     )
     config.extra_keymaps = true
-  end
-
-  -- Global function used to simplify the keymaps:
-  function Scroll(...)
-    require('cinnamon.scroll').scroll(...)
   end
 
   if config.default_keymaps then
@@ -114,12 +108,6 @@ M.setup = function(user_config)
     utils.create_keymap({ 'n', 'x' }, '<Left>', "<Cmd>lua Scroll('h', 0, 1, 2, 0)<CR>")
     utils.create_keymap({ 'n', 'x' }, '<Right>', "<Cmd>lua Scroll('l', 0, 1, 2, 0)<CR>")
   end
-end
-
--- API:
-
-M.Scroll = function(...)
-  require('cinnamon.scroll').scroll(...)
 end
 
 return M
