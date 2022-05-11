@@ -39,7 +39,7 @@ extended_keymaps = false, -- Create extended keymaps.
 -- OPTIONS:
 always_scroll = false,    -- Scroll the cursor even when the window hasn't scrolled.
 centered = true,          -- Keep cursor centered in window when using window scrolling.
-default_delay = 5,        -- The default delay (in ms) between each line when scrolling.
+default_delay = 7,        -- The default delay (in ms) between each line when scrolling.
 horizontal_scroll = true, -- Enable smooth horizontal scrolling when view shifts left or right.
 scroll_limit = 150,       -- Max number of lines moved before scrolling is skipped.
 ```
@@ -122,8 +122,8 @@ vim.keymap.set({ 'n', 'x' }, '<PageDown>', "<Cmd>lua Scroll('<C-f>', 1, 1)<CR>")
 -- EXTRA_KEYMAPS:
 
 -- Start/end of file and line number movements:
-vim.keymap.set({ 'n', 'x' }, 'gg', "<Cmd>lua Scroll('gg', 0, 0, 3)<CR>")
-vim.keymap.set({ 'n', 'x' }, 'G', "<Cmd>lua Scroll('G', 0, 1, 3)<CR>")
+vim.keymap.set({ 'n', 'x' }, 'gg', "<Cmd>lua Scroll('gg', 0, 0, 5)<CR>")
+vim.keymap.set({ 'n', 'x' }, 'G', "<Cmd>lua Scroll('G', 0, 1, 5)<CR>")
 
 -- Start/end of line:
 vim.keymap.set({ 'n', 'x' }, '0', "<Cmd>lua Scroll('0')<CR>")
@@ -169,10 +169,10 @@ vim.keymap.set('n', 'zl', "<Cmd>lua Scroll('zl', 0, 1)<CR>")
 -- EXTENDED_KEYMAPS:
 
 -- Up/down movements:
-vim.keymap.set({ 'n', 'x' }, 'k', "<Cmd>lua Scroll('k', 0, 1, 3, 0)<CR>")
-vim.keymap.set({ 'n', 'x' }, 'j', "<Cmd>lua Scroll('j', 0, 1, 3, 0)<CR>")
-vim.keymap.set({ 'n', 'x' }, '<Up>', "<Cmd>lua Scroll('k', 0, 1, 3, 0)<CR>")
-vim.keymap.set({ 'n', 'x' }, '<Down>', "<Cmd>lua Scroll('j', 0, 1, 3, 0)<CR>")
+vim.keymap.set({ 'n', 'x' }, 'k', "<Cmd>lua Scroll('k', 0, 1, 5, 0)<CR>")
+vim.keymap.set({ 'n', 'x' }, 'j', "<Cmd>lua Scroll('j', 0, 1, 5, 0)<CR>")
+vim.keymap.set({ 'n', 'x' }, '<Up>', "<Cmd>lua Scroll('k', 0, 1, 5, 0)<CR>")
+vim.keymap.set({ 'n', 'x' }, '<Down>', "<Cmd>lua Scroll('j', 0, 1, 5, 0)<CR>")
 
 -- Left/right movements:
 vim.keymap.set({ 'n', 'x' }, 'h', "<Cmd>lua Scroll('h', 0, 1, 2, 0)<CR>")
