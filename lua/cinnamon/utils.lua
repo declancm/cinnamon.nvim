@@ -1,5 +1,7 @@
 local utils = {}
 
+local config = require('cinnamon.config')
+
 utils.error_msg = function(message, code, level)
   code = code or 'Error'
   level = level or 'ERROR'
@@ -9,12 +11,12 @@ end
 utils.create_keymap = function(mode, lhs, rhs)
   if type(mode) == 'table' then
     for _, value in ipairs(mode) do
-      if vim.fn.maparg(lhs, value) == '' then
+      if vim.fn.maparg(lhs, value) == '' or config.override_keymaps then
         vim.api.nvim_set_keymap(value, lhs, rhs, { noremap = true })
       end
     end
   else
-    if vim.fn.maparg(lhs, mode) == '' then
+    if vim.fn.maparg(lhs, mode) == '' or config.override_keymaps then
       vim.api.nvim_set_keymap(mode, lhs, rhs, { noremap = true })
     end
   end
