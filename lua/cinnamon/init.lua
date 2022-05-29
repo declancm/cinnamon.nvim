@@ -50,8 +50,8 @@ M.setup = function(user_config)
 
   if config.extra_keymaps then
     -- Start/end of file and line number movements:
-    utils.create_keymap({ 'n', 'x' }, 'gg', "<Cmd>lua Scroll('gg', 0, 0, 5)<CR>")
-    utils.create_keymap({ 'n', 'x' }, 'G', "<Cmd>lua Scroll('G', 0, 1, 5)<CR>")
+    utils.create_keymap({ 'n', 'x' }, 'gg', "<Cmd>lua Scroll('gg')<CR>")
+    utils.create_keymap({ 'n', 'x' }, 'G', "<Cmd>lua Scroll('G', 0, 1)<CR>")
 
     -- Start/end of line:
     utils.create_keymap({ 'n', 'x' }, '0', "<Cmd>lua Scroll('0')<CR>")
