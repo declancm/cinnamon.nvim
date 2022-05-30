@@ -100,7 +100,7 @@ Scroll(arg1, arg2, arg3, arg4, arg5)
     for go-to-declaration).
 * __arg2__ = Scroll the window with the cursor. (1 for on, 0 for off). Default is 0.
 * __arg3__ = Accept a count before the command (1 for on, 0 for off). Default is 0.
-* __arg4__ = Length of delay between each line (in ms). Default is the 'default_delay' config value.
+* __arg4__ = Length of delay between each line (in ms). Setting to -1 will use the 'default_delay' config value. Default is -1.
 * __arg5__ = Slowdown at the end of the movement (1 for on, 0 for off). Default is 1.
 
 _Note: When scrolling horizontally, the delay argument is halved so vertical and horizontal scrolling have similar speeds._
@@ -170,16 +170,16 @@ vim.keymap.set('n', 'zl', "<Cmd>lua Scroll('zl', 0, 1)<CR>")
 -- EXTENDED_KEYMAPS:
 
 -- Up/down movements:
-vim.keymap.set({ 'n', 'x' }, 'k', "<Cmd>lua Scroll('k', 0, 1, 5, 0)<CR>")
-vim.keymap.set({ 'n', 'x' }, 'j', "<Cmd>lua Scroll('j', 0, 1, 5, 0)<CR>")
-vim.keymap.set({ 'n', 'x' }, '<Up>', "<Cmd>lua Scroll('k', 0, 1, 5, 0)<CR>")
-vim.keymap.set({ 'n', 'x' }, '<Down>', "<Cmd>lua Scroll('j', 0, 1, 5, 0)<CR>")
+vim.keymap.set({ 'n', 'x' }, 'k', "<Cmd>lua Scroll('k', 0, 1)<CR>")
+vim.keymap.set({ 'n', 'x' }, 'j', "<Cmd>lua Scroll('j', 0, 1)<CR>")
+vim.keymap.set({ 'n', 'x' }, '<Up>', "<Cmd>lua Scroll('k', 0, 1)<CR>")
+vim.keymap.set({ 'n', 'x' }, '<Down>', "<Cmd>lua Scroll('j', 0, 1)<CR>")
 
 -- Left/right movements:
-vim.keymap.set({ 'n', 'x' }, 'h', "<Cmd>lua Scroll('h', 0, 1, 2, 0)<CR>")
-vim.keymap.set({ 'n', 'x' }, 'l', "<Cmd>lua Scroll('l', 0, 1, 2, 0)<CR>")
-vim.keymap.set({ 'n', 'x' }, '<Left>', "<Cmd>lua Scroll('h', 0, 1, 2, 0)<CR>")
-vim.keymap.set({ 'n', 'x' }, '<Right>', "<Cmd>lua Scroll('l', 0, 1, 2, 0)<CR>")
+vim.keymap.set({ 'n', 'x' }, 'h', "<Cmd>lua Scroll('h', 0, 1)<CR>")
+vim.keymap.set({ 'n', 'x' }, 'l', "<Cmd>lua Scroll('l', 0, 1)<CR>")
+vim.keymap.set({ 'n', 'x' }, '<Left>', "<Cmd>lua Scroll('h', 0, 1)<CR>")
+vim.keymap.set({ 'n', 'x' }, '<Right>', "<Cmd>lua Scroll('l', 0, 1)<CR>")
 
 -- LSP_KEYMAPS:
 

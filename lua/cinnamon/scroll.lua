@@ -16,7 +16,7 @@ arg1 = A string containing the normal mode movement commands.
     for go-to-declaration).
 arg2 = Scroll the window with the cursor. (1 for on, 0 for off). Default is 0.
 arg3 = Accept a count before the command (1 for on, 0 for off). Default is 0.
-arg4 = Length of delay between each line (in ms). Default is the 'default_delay' config value.
+* __arg4__ = Length of delay between each line (in ms). Setting to -1 will use the 'default_delay' config value. Default is -1.
 arg5 = Slowdown at the end of the movement (1 for on, 0 for off). Default is 1.
 
 Note: arg1 is a string while the others are integers.
@@ -25,11 +25,13 @@ Note: arg1 is a string while the others are integers.
 
 M.scroll = function(command, scroll_win, use_count, delay, slowdown)
   -- Convert arguments to boolean:
-  local int_to_bool = function(int)
-    if int == 1 then
+  local int_to_bool = function(val)
+    if val == 1 then
       return true
-    elseif int == 0 then
+    elseif val == 0 then
       return false
+    else
+      return val
     end
   end
 
@@ -40,7 +42,9 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
   end
   scroll_win = int_to_bool(scroll_win or 0)
   use_count = int_to_bool(use_count or 0)
-  delay = delay or config.default_delay
+  if not delay or delay == -1 then
+    delay = config.default_delay
+  end
   slowdown = int_to_bool(slowdown or 1)
 
   -- Execute command if only moving one line/char.
@@ -149,7 +153,7 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
 
   -- Scroll horizontally.
   if scrolled_horizontally and config.horizontal_scroll or config.always_scroll then
-    fn.scroll_horizontally(delay / 2, slowdown, wincol, column)
+    fn.scroll_horizontally(math.ceil(delay / 3), slowdown, wincol, column)
   else
     fn.scroll_horizontally(0, 0, wincol, column)
   end
