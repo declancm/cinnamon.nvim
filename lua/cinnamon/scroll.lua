@@ -7,22 +7,6 @@ local motions = require('cinnamon.motions')
 
 local debugging = false
 
---[[
-
-require('cinnamon.scroll').scroll(arg1, arg2, arg3, arg4, arg5, arg6)
-
-arg1 = A string containing the normal mode movement commands.
-  * To use the go-to-definition LSP function, use 'definition' (or 'declaration'
-    for go-to-declaration).
-arg2 = Scroll the window with the cursor. (1 for on, 0 for off). Default is 0.
-arg3 = Accept a count before the command (1 for on, 0 for off). Default is 0.
-* __arg4__ = Length of delay between each line (in ms). Setting to -1 will use the 'default_delay' config value. Default is -1.
-arg5 = Slowdown at the end of the movement (1 for on, 0 for off). Default is 1.
-
-Note: arg1 is a string while the others are integers.
-
-]]
-
 M.scroll = function(command, scroll_win, use_count, delay, slowdown)
   -- Convert arguments to boolean:
   local int_to_bool = function(val)
