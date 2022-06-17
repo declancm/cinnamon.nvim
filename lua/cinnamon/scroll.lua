@@ -5,7 +5,14 @@ local utils = require('cinnamon.utils')
 local fn = require('cinnamon.functions')
 local motions = require('cinnamon.motions')
 
-M.scroll = function(command, scroll_win, use_count, delay, slowdown)
+local warning_counter = 0
+
+M.scroll = function(command, scroll_win, use_count, delay_length, deprecated_arg)
+  if deprecated_arg ~= nil and warning_counter < 1 then
+    utils.error_msg('Argument 5 for the Cinnamon Scroll API function is now deprecated.', 'Warning', 'WARN')
+    warning_counter = warning_counter + 1
+  end
+
   -- Convert arguments to boolean:
   local int_to_bool = function(val)
     if val == 0 then
@@ -22,10 +29,9 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
   end
   scroll_win = int_to_bool(scroll_win or 0)
   use_count = int_to_bool(use_count or 0)
-  if not delay or delay == -1 then
-    delay = config.default_delay
+  if not delay_length or delay_length == -1 then
+    delay_length = config.default_delay
   end
-  slowdown = int_to_bool(slowdown or 1)
 
   -- Execute command if only moving one line/char.
   if utils.contains(motions.no_scroll, command) and vim.v.count1 == 1 then
@@ -62,7 +68,8 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
     vim.cmd('norm! ' .. command)
   end
 
-  local _, lnum, column, _, curswant = unpack(vim.fn.getcurpos())
+  local curpos = vim.fn.getcurpos()
+  local _, lnum, column, _, curswant = unpack(curpos)
   local winline = vim.fn.winline()
   local wincol = vim.fn.wincol()
   local distance = lnum - prev_lnum
@@ -76,15 +83,6 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
 
   -- Check if scroll limit has been exceeded.
   if distance > config.scroll_limit or distance < -config.scroll_limit then
-    if scroll_win and config.centered then
-      vim.cmd('norm! zz')
-    end
-    restore_options()
-    return
-  end
-
-  -- Check if movement ends in a closed fold.
-  if vim.fn.foldclosed('.') ~= -1 then
     if scroll_win and config.centered then
       vim.cmd('norm! zz')
     end
@@ -129,21 +127,21 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
 
   -- Scroll the cursor.
   if distance > 0 then
-    fn.scroll_down(distance, lnum, scroll_win, delay, slowdown)
+    fn.scroll_down(curpos, scroll_win, delay_length)
   elseif distance < 0 then
-    fn.scroll_up(distance, lnum, scroll_win, delay, slowdown)
+    fn.scroll_up(curpos, scroll_win, delay_length)
   end
 
   -- Scroll the screen.
   if not scroll_win then
-    fn.scroll_screen(0, delay, slowdown, winline)
+    fn.scroll_screen(delay_length, winline)
   end
 
   -- Scroll horizontally.
-  if scrolled_horizontally and config.horizontal_scroll or config.always_scroll then
-    fn.scroll_horizontally(math.ceil(delay / 3), slowdown, wincol, column)
+  if (scrolled_horizontally and config.horizontal_scroll or config.always_scroll) and vim.fn.foldclosed ~= -1 then
+    fn.scroll_horizontally(math.ceil(delay_length / 3), wincol, column)
   else
-    fn.scroll_horizontally(0, 0, wincol, column)
+    fn.scroll_horizontally(0, wincol, column)
   end
 
   -- Restore the cursor.

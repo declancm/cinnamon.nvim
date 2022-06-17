@@ -93,7 +93,7 @@ Left/right movements:       h, l, <Left> and <Right>
 ## ℹ️ API
 
 ```lua
-Scroll(arg1, arg2, arg3, arg4, arg5)
+Scroll(arg1, arg2, arg3, arg4)
 ```
 
 * __arg1__ = A string containing the normal mode movement commands.
@@ -102,7 +102,6 @@ Scroll(arg1, arg2, arg3, arg4, arg5)
 * __arg2__ = Scroll the window with the cursor. (1 for on, 0 for off). Default is 0.
 * __arg3__ = Accept a count before the command (1 for on, 0 for off). Default is 0.
 * __arg4__ = Length of delay between each line (in ms). Setting to -1 will use the 'default_delay' config value. Default is -1.
-* __arg5__ = Slowdown at the end of the movement (1 for on, 0 for off). Default is 1.
 
 _Note: When scrolling horizontally, the delay argument is halved so vertical and horizontal scrolling have similar speeds._
 
