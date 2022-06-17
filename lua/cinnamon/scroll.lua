@@ -5,17 +5,13 @@ local utils = require('cinnamon.utils')
 local fn = require('cinnamon.functions')
 local motions = require('cinnamon.motions')
 
-local debugging = false
-
 M.scroll = function(command, scroll_win, use_count, delay, slowdown)
   -- Convert arguments to boolean:
   local int_to_bool = function(val)
-    if val == 1 then
-      return true
-    elseif val == 0 then
+    if val == 0 then
       return false
     else
-      return val
+      return true
     end
   end
 
@@ -51,8 +47,8 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
   end
 
   local saved_view = vim.fn.winsaveview()
-  local _, prev_row, prev_column, _, prev_curswant = unpack(vim.fn.getcurpos())
   local prev_file = vim.fn.getreg('%')
+  local _, prev_lnum, prev_column, _, prev_curswant = unpack(vim.fn.getcurpos())
   local prev_winline = vim.fn.winline()
   local prev_wincol = vim.fn.wincol()
 
@@ -66,10 +62,10 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
     vim.cmd('norm! ' .. command)
   end
 
-  -- If searching contains a fold, open the fold.
-  if utils.contains(motions.search, command) and vim.fn.foldclosed('.') ~= -1 then
-    vim.cmd('norm! zo')
-  end
+  local _, lnum, column, _, curswant = unpack(vim.fn.getcurpos())
+  local winline = vim.fn.winline()
+  local wincol = vim.fn.wincol()
+  local distance = lnum - prev_lnum
 
   -- Check if the file has changed.
   if prev_file ~= vim.fn.getreg('%') then
@@ -78,13 +74,17 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
     return
   end
 
-  local _, row, column, _, curswant = unpack(vim.fn.getcurpos())
-  local winline = vim.fn.winline()
-  local wincol = vim.fn.wincol()
-  local distance = row - prev_row
-
   -- Check if scroll limit has been exceeded.
   if distance > config.scroll_limit or distance < -config.scroll_limit then
+    if scroll_win and config.centered then
+      vim.cmd('norm! zz')
+    end
+    restore_options()
+    return
+  end
+
+  -- Check if movement ends in a closed fold.
+  if vim.fn.foldclosed('.') ~= -1 then
     if scroll_win and config.centered then
       vim.cmd('norm! zz')
     end
@@ -99,7 +99,7 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
   end
 
   -- Check if scrolled vertically.
-  if winline - row == prev_winline - prev_row and not config.always_scroll then
+  if winline - lnum == prev_winline - prev_lnum and not config.always_scroll then
     if not scrolled_horizontally and not scroll_win and not vim.opt.wrap:get() then
       restore_options()
       return
@@ -117,10 +117,6 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
     wincol = -1
   end
 
-  if debugging then
-    print(string.format('distance: %s, column: %s, winline: %s, wincol: %s', distance, column, winline, wincol))
-  end
-
   vim.fn.winrestview(saved_view)
 
   -- Hide the cursor.
@@ -133,9 +129,9 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
 
   -- Scroll the cursor.
   if distance > 0 then
-    fn.scroll_down(distance, winline, scroll_win, delay, slowdown)
+    fn.scroll_down(distance, lnum, scroll_win, delay, slowdown)
   elseif distance < 0 then
-    fn.scroll_up(distance, winline, scroll_win, delay, slowdown)
+    fn.scroll_up(distance, lnum, scroll_win, delay, slowdown)
   end
 
   -- Scroll the screen.

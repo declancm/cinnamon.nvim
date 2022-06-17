@@ -4,12 +4,22 @@ local config = require('cinnamon.config')
 local utils = require('cinnamon.utils')
 local motions = require('cinnamon.motions')
 
-local check_for_fold = function(counter)
-  local fold_start = vim.fn.foldclosed('.')
+local check_for_fold = function(counter, direction)
+  local fold_start
+  if direction == 'down' then
+    fold_start = vim.fn.foldclosed('.')
+  else
+    fold_start = vim.fn.foldclosedend('.')
+  end
 
   -- If a fold exists, add the length to the counter.
   if fold_start ~= -1 then
-    local fold_size = vim.fn.foldclosedend(fold_start) - fold_start
+    local fold_size
+    if direction == 'down' then
+      fold_size = vim.fn.foldclosedend(fold_start) - fold_start
+    else
+      fold_size = fold_start - vim.fn.foldclosed(fold_start)
+    end
     counter = counter + fold_size
   end
   return counter
@@ -156,7 +166,7 @@ fn.scroll_horizontally = function(delay, slowdown, wincol, column)
   end
 end
 
-fn.scroll_down = function(distance, winline, scroll_win, delay, slowdown)
+fn.scroll_down = function(distance, lnum, scroll_win, delay, slowdown)
   local win_height = vim.api.nvim_win_get_height(0)
 
   -- Center the screen.
@@ -168,9 +178,10 @@ fn.scroll_down = function(distance, winline, scroll_win, delay, slowdown)
   -- Scroll.
   local counter = 1
   while counter <= distance do
-    counter = check_for_fold(counter)
+    counter = check_for_fold(counter, 'down')
     vim.cmd('norm! j')
     local current_winline = vim.fn.winline()
+
     if scroll_win then
       if config.centered then
         if current_winline > half_height then
@@ -189,12 +200,19 @@ fn.scroll_down = function(distance, winline, scroll_win, delay, slowdown)
         end
       end
     end
+
     counter = counter + 1
+
+    -- Return if at or past the line number.
+    if vim.fn.getcurpos()[2] >= lnum then
+      return
+    end
+
     create_delay(distance - counter, delay, slowdown)
   end
 end
 
-fn.scroll_up = function(distance, winline, scroll_win, delay, slowdown)
+fn.scroll_up = function(distance, lnum, scroll_win, delay, slowdown)
   local win_height = vim.api.nvim_win_get_height(0)
 
   -- Center the screen.
@@ -206,9 +224,10 @@ fn.scroll_up = function(distance, winline, scroll_win, delay, slowdown)
   -- Scroll.
   local counter = 1
   while counter <= -distance do
-    counter = check_for_fold(counter)
+    counter = check_for_fold(counter, 'up')
     vim.cmd('norm! k')
     local current_winline = vim.fn.winline()
+
     if scroll_win then
       if config.centered then
         if current_winline < half_height then
@@ -227,7 +246,14 @@ fn.scroll_up = function(distance, winline, scroll_win, delay, slowdown)
         end
       end
     end
+
     counter = counter + 1
+
+    -- Return if at or past the line number.
+    if vim.fn.getcurpos()[2] <= lnum then
+      return
+    end
+
     create_delay(-distance + counter, delay, slowdown)
   end
 end
