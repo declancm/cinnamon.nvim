@@ -123,6 +123,14 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
 
   vim.fn.winrestview(saved_view)
 
+  -- Hide the cursor.
+  local saved_guicursor
+  if config.hide_cursor and vim.opt.termguicolors:get() then
+    saved_guicursor = vim.opt.guicursor:get()
+    vim.cmd('highlight Cursor blend=100')
+    vim.opt.guicursor:append('a:Cursor/lCursor')
+  end
+
   -- Scroll the cursor.
   if distance > 0 then
     fn.scroll_down(distance, winline, scroll_win, delay, slowdown)
@@ -140,6 +148,11 @@ M.scroll = function(command, scroll_win, use_count, delay, slowdown)
     fn.scroll_horizontally(math.ceil(delay / 3), slowdown, wincol, column)
   else
     fn.scroll_horizontally(0, 0, wincol, column)
+  end
+
+  -- Restore the cursor.
+  if config.hide_cursor and vim.opt.termguicolors:get() then
+    vim.opt.guicursor = saved_guicursor
   end
 
   restore_options()
