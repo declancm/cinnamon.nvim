@@ -138,7 +138,7 @@ M.scroll = function(command, scroll_win, use_count, delay_length, deprecated_arg
   end
 
   -- Scroll horizontally.
-  if (scrolled_horizontally and config.horizontal_scroll or config.always_scroll) and vim.fn.foldclosed ~= -1 then
+  if (scrolled_horizontally and config.horizontal_scroll or config.always_scroll) and vim.fn.foldclosed('.') == -1 then
     fn.scroll_horizontally(math.ceil(delay_length / 3), wincol, column)
   else
     fn.scroll_horizontally(0, wincol, column)
