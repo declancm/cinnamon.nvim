@@ -18,24 +18,6 @@ M.setup = function(user_config)
   Cinnamon = {}
   Cinnamon.Scroll = Scroll
 
-  if vim.g.cinnamon_no_defaults == 1 then
-    require('cinnamon.utils').error_msg(
-      "Using 'vim.g.cinnamon_no_defaults' is deprecated. Please use \"require('cinnamon').setup { default_keymaps = false }\" instead",
-      'Warning',
-      'WARN'
-    )
-    config.default_keymaps = false
-  end
-
-  if vim.g.cinnamon_extras == 1 then
-    require('cinnamon.utils').error_msg(
-      "Using 'vim.g.cinnamon_extras' is deprecated. Please use \"require('cinnamon').setup { extra_keymaps = true }\" instead",
-      'Warning',
-      'WARN'
-    )
-    config.extra_keymaps = true
-  end
-
   if config.default_keymaps then
     -- Half-window movements:
     utils.create_keymap({ 'n', 'x' }, '<C-u>', "<Cmd>lua Scroll('<C-u>', 1, 1)<CR>")
