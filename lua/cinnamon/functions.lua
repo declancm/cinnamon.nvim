@@ -4,21 +4,6 @@ local config = require('cinnamon.config')
 local utils = require('cinnamon.utils')
 local motions = require('cinnamon.motions')
 
-local create_delay = function(delay_length)
-  if delay_length == 0 then
-    return
-  end
-  delay_length = math.floor(delay_length)
-  if delay_length == 0 then
-    delay_length = 1
-  end
-
-  -- TODO: find an alternative to 'sleep'
-  vim.cmd('sleep ' .. delay_length .. 'm')
-
-  vim.cmd('redraw')
-end
-
 fn.check_command_errors = function(command)
   -- If no search pattern, return an error if using a repeat search command.
   if utils.contains(motions.search_repeat, command) then
@@ -55,7 +40,22 @@ fn.check_command_errors = function(command)
   return false
 end
 
-fn.scroll_screen = function(delay_length, target_line)
+local create_delay = function(delay_length)
+  if delay_length == 0 then
+    return
+  end
+  delay_length = math.floor(delay_length)
+  if delay_length == 0 then
+    delay_length = 1
+  end
+
+  -- TODO: find a more accurate alternative to 'sleep'
+  vim.cmd('sleep ' .. delay_length .. 'm')
+
+  vim.cmd('redraw')
+end
+
+local scroll_screen = function(delay_length, target_line)
   target_line = target_line or math.ceil(vim.api.nvim_win_get_height(0) / 2)
   if target_line == -1 then
     return
@@ -63,7 +63,7 @@ fn.scroll_screen = function(delay_length, target_line)
 
   local prev_line = vim.fn.winline()
 
-  -- Scroll up the screen.
+  -- Scroll the cursor up.
   while vim.fn.winline() > target_line do
     vim.cmd('silent exe "norm! \\<C-E>"')
     local new_line = vim.fn.winline()
@@ -74,7 +74,7 @@ fn.scroll_screen = function(delay_length, target_line)
     prev_line = new_line
   end
 
-  -- Scroll down the screen.
+  -- Scroll the cursor down.
   while vim.fn.winline() < target_line do
     vim.cmd('silent exe "norm! \\<C-Y>"')
     local new_line = vim.fn.winline()
@@ -86,62 +86,14 @@ fn.scroll_screen = function(delay_length, target_line)
   end
 end
 
-fn.scroll_horizontally = function(delay_length, wincol, column)
-  if wincol == -1 and column == -1 then
-    return
-  end
-
-  if column ~= -1 then
-    local prev_column = vim.fn.getcurpos()[3]
-    while vim.fn.getcurpos()[3] < column do
-      vim.cmd('norm! l')
-      create_delay(delay_length)
-      if vim.fn.getcurpos()[3] == prev_column then
-        break
-      end
-    end
-    while vim.fn.getcurpos()[3] > column do
-      vim.cmd('norm! h')
-      create_delay(delay_length)
-      if vim.fn.getcurpos()[3] == prev_column then
-        break
-      end
-    end
-  end
-
-  if wincol ~= -1 then
-    local prev_wincol = vim.fn.wincol()
-
-    while vim.fn.wincol() > wincol do
-      vim.cmd('norm! zl')
-      local new_wincol = vim.fn.wincol()
-      create_delay(delay_length)
-      if new_wincol == prev_wincol then
-        break
-      end
-      prev_wincol = new_wincol
-    end
-
-    while vim.fn.wincol() < wincol do
-      vim.cmd('norm! zh')
-      local new_wincol = vim.fn.wincol()
-      create_delay(delay_length)
-      if new_wincol == prev_wincol then
-        break
-      end
-      prev_wincol = new_wincol
-    end
-  end
-end
-
-fn.scroll_down = function(curpos, scroll_win, delay_length)
+local scroll_down = function(curpos, scroll_win, delay_length)
   local lnum = curpos[2]
   local win_height = vim.api.nvim_win_get_height(0)
 
   -- Center the screen.
   local half_height = math.ceil(win_height / 2)
   if vim.fn.winline() > half_height and scroll_win and config.centered then
-    fn.scroll_screen(delay_length)
+    scroll_screen(delay_length)
   end
 
   -- Scroll.
@@ -184,14 +136,14 @@ fn.scroll_down = function(curpos, scroll_win, delay_length)
   end
 end
 
-fn.scroll_up = function(curpos, scroll_win, delay_length)
+local scroll_up = function(curpos, scroll_win, delay_length)
   local lnum = curpos[2]
   local win_height = vim.api.nvim_win_get_height(0)
 
   -- Center the screen.
   local half_height = math.ceil(win_height / 2)
   if vim.fn.winline() < half_height and scroll_win and config.centered then
-    fn.scroll_screen(delay_length)
+    scroll_screen(delay_length)
   end
 
   -- Scroll.
@@ -231,6 +183,70 @@ fn.scroll_up = function(curpos, scroll_win, delay_length)
     end
 
     create_delay(delay_length)
+  end
+end
+
+fn.scroll_vertically = function(distance, curpos, winline, scroll_win, delay_length)
+  -- Scroll the cursor vertically.
+  if distance > 0 then
+    scroll_down(curpos, scroll_win, delay_length)
+  elseif distance < 0 then
+    scroll_up(curpos, scroll_win, delay_length)
+  end
+
+  -- Scroll the screen vertically.
+  if not scroll_win then
+    scroll_screen(delay_length, winline)
+  end
+end
+
+fn.scroll_horizontally = function(wincol, column, delay_length)
+  if wincol == -1 and column == -1 then
+    return
+  end
+
+  -- Scroll the cursor horizontally.
+  if column ~= -1 then
+    local prev_column = vim.fn.getcurpos()[3]
+    while vim.fn.getcurpos()[3] < column do
+      vim.cmd('norm! l')
+      create_delay(delay_length)
+      if vim.fn.getcurpos()[3] == prev_column then
+        break
+      end
+    end
+    while vim.fn.getcurpos()[3] > column do
+      vim.cmd('norm! h')
+      create_delay(delay_length)
+      if vim.fn.getcurpos()[3] == prev_column then
+        break
+      end
+    end
+  end
+
+  -- Scroll the screen horizontally.
+  if wincol ~= -1 then
+    local prev_wincol = vim.fn.wincol()
+
+    while vim.fn.wincol() > wincol do
+      vim.cmd('norm! zl')
+      local new_wincol = vim.fn.wincol()
+      create_delay(delay_length)
+      if new_wincol == prev_wincol then
+        break
+      end
+      prev_wincol = new_wincol
+    end
+
+    while vim.fn.wincol() < wincol do
+      vim.cmd('norm! zh')
+      local new_wincol = vim.fn.wincol()
+      create_delay(delay_length)
+      if new_wincol == prev_wincol then
+        break
+      end
+      prev_wincol = new_wincol
+    end
   end
 end
 

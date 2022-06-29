@@ -52,6 +52,7 @@ M.scroll = function(command, scroll_win, use_count, delay_length, deprecated_arg
     vim.opt.lazyredraw = saved.lazyredraw
   end
 
+  -- Get initial position values.
   local saved_view = vim.fn.winsaveview()
   local prev_file = vim.fn.getreg('%')
   local _, prev_lnum, prev_column, _, prev_curswant = unpack(vim.fn.getcurpos())
@@ -68,6 +69,7 @@ M.scroll = function(command, scroll_win, use_count, delay_length, deprecated_arg
     vim.cmd('norm! ' .. command)
   end
 
+  -- Get final position values.
   local curpos = vim.fn.getcurpos()
   local _, lnum, column, _, curswant = unpack(curpos)
   local winline = vim.fn.winline()
@@ -125,23 +127,14 @@ M.scroll = function(command, scroll_win, use_count, delay_length, deprecated_arg
     vim.opt.guicursor:append('a:Cursor/lCursor')
   end
 
-  -- Scroll the cursor.
-  if distance > 0 then
-    fn.scroll_down(curpos, scroll_win, delay_length)
-  elseif distance < 0 then
-    fn.scroll_up(curpos, scroll_win, delay_length)
-  end
-
-  -- Scroll the screen.
-  if not scroll_win then
-    fn.scroll_screen(delay_length, winline)
-  end
+  -- Scroll vertically.
+  fn.scroll_vertically(distance, curpos, winline, scroll_win, delay_length)
 
   -- Scroll horizontally.
   if (scrolled_horizontally and config.horizontal_scroll or config.always_scroll) and vim.fn.foldclosed('.') == -1 then
-    fn.scroll_horizontally(math.ceil(delay_length / 3), wincol, column)
+    fn.scroll_horizontally(wincol, column, math.ceil(delay_length / 3))
   else
-    fn.scroll_horizontally(0, wincol, column)
+    fn.scroll_horizontally(wincol, column, 0)
   end
 
   -- Restore the cursor.
