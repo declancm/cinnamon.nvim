@@ -5,12 +5,12 @@ local utils = require('cinnamon.utils')
 local fn = require('cinnamon.functions')
 local motions = require('cinnamon.motions')
 
-local warning_counter = 0
+local warning_given = false
 
 M.scroll = function(command, scroll_win, use_count, delay_length, deprecated_arg)
-  if deprecated_arg ~= nil and warning_counter < 1 then
+  if deprecated_arg ~= nil and not warning_given then
     utils.error_msg('Argument 5 for the Cinnamon Scroll API function is now deprecated.', 'Warning', 'WARN')
-    warning_counter = warning_counter + 1
+    warning_given = true
   end
 
   -- Convert arguments to boolean:
@@ -54,7 +54,7 @@ M.scroll = function(command, scroll_win, use_count, delay_length, deprecated_arg
 
   -- Get initial position values.
   local saved_view = vim.fn.winsaveview()
-  local prev_file = vim.fn.getreg('%')
+  local prev_filepath = vim.fn.getreg('%')
   local _, prev_lnum, prev_column, _, prev_curswant = unpack(vim.fn.getcurpos())
   local prev_winline = vim.fn.winline()
   local prev_wincol = vim.fn.wincol()
@@ -71,20 +71,14 @@ M.scroll = function(command, scroll_win, use_count, delay_length, deprecated_arg
 
   -- Get final position values.
   local curpos = vim.fn.getcurpos()
+  local filepath = vim.fn.getreg('%')
   local _, lnum, column, _, curswant = unpack(curpos)
   local winline = vim.fn.winline()
   local wincol = vim.fn.wincol()
   local distance = lnum - prev_lnum
 
-  -- Check if the file has changed.
-  if prev_file ~= vim.fn.getreg('%') then
-    vim.cmd('norm! zz')
-    restore_options()
-    return
-  end
-
-  -- Check if scroll limit has been exceeded.
-  if distance > config.scroll_limit or distance < -config.scroll_limit then
+  -- Check if the file changed or the scroll limit exceeded.
+  if prev_filepath ~= filepath or math.abs(distance) > config.scroll_limit then
     if scroll_win and config.centered then
       vim.cmd('norm! zz')
     end
@@ -92,18 +86,17 @@ M.scroll = function(command, scroll_win, use_count, delay_length, deprecated_arg
     return
   end
 
-  -- Check if scrolled horizontally.
+  -- Restore the original view.
+  vim.fn.winrestview(saved_view)
+
+  -- Check if scrolled vertically and/or horizontally.
+  local scrolled_vertically = false
+  if winline - lnum ~= prev_winline - prev_lnum then
+    scrolled_vertically = true
+  end
   local scrolled_horizontally = false
   if wincol - column ~= prev_wincol - prev_column then
     scrolled_horizontally = true
-  end
-
-  -- Check if scrolled vertically.
-  if winline - lnum == prev_winline - prev_lnum and not config.always_scroll then
-    if not scrolled_horizontally and not scroll_win and not vim.opt.wrap:get() then
-      restore_options()
-      return
-    end
   end
 
   -- Check if values have changed.
@@ -117,8 +110,6 @@ M.scroll = function(command, scroll_win, use_count, delay_length, deprecated_arg
     wincol = -1
   end
 
-  vim.fn.winrestview(saved_view)
-
   -- Hide the cursor.
   local saved_guicursor
   if config.hide_cursor and vim.opt.termguicolors:get() then
@@ -128,13 +119,17 @@ M.scroll = function(command, scroll_win, use_count, delay_length, deprecated_arg
   end
 
   -- Scroll vertically.
-  fn.scroll_vertically(distance, curpos, winline, scroll_win, delay_length)
+  if scrolled_vertically or config.always_scroll or scroll_win then
+    fn.scroll_vertically(distance, curpos, winline, scroll_win, delay_length)
+  else
+    fn.scroll_vertically(distance, curpos, winline, scroll_win, 0)
+  end
 
   -- Scroll horizontally.
   if (scrolled_horizontally and config.horizontal_scroll or config.always_scroll) and vim.fn.foldclosed('.') == -1 then
-    fn.scroll_horizontally(wincol, column, math.ceil(delay_length / 3))
+    fn.scroll_horizontally(column, wincol, math.ceil(delay_length / 3))
   else
-    fn.scroll_horizontally(wincol, column, 0)
+    fn.scroll_horizontally(column, wincol, 0)
   end
 
   -- Restore the cursor.

@@ -200,7 +200,7 @@ fn.scroll_vertically = function(distance, curpos, winline, scroll_win, delay_len
   end
 end
 
-fn.scroll_horizontally = function(wincol, column, delay_length)
+fn.scroll_horizontally = function(column, wincol, delay_length)
   if wincol == -1 and column == -1 then
     return
   end
