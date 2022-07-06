@@ -5,6 +5,7 @@ local utils = require('cinnamon.utils')
 local fn = require('cinnamon.functions')
 local motions = require('cinnamon.motions')
 
+local saved_guicursor
 local warning_given = false
 
 M.scroll = function(command, scroll_win, use_count, delay_length, deprecated_arg)
@@ -111,11 +112,14 @@ M.scroll = function(command, scroll_win, use_count, delay_length, deprecated_arg
   end
 
   -- Hide the cursor.
-  local saved_guicursor
+  local cursor_hidden = false
   if config.hide_cursor and vim.opt.termguicolors:get() then
-    saved_guicursor = vim.opt.guicursor:get()
+    if not saved_guicursor then
+      saved_guicursor = vim.opt.guicursor:get()
+    end
     vim.cmd('highlight Cursor blend=100')
     vim.opt.guicursor:append('a:Cursor/lCursor')
+    cursor_hidden = true
   end
 
   -- Scroll vertically.
@@ -133,7 +137,7 @@ M.scroll = function(command, scroll_win, use_count, delay_length, deprecated_arg
   end
 
   -- Restore the cursor.
-  if config.hide_cursor and vim.opt.termguicolors:get() then
+  if cursor_hidden then
     vim.opt.guicursor = saved_guicursor
   end
 
