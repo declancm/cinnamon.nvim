@@ -18,6 +18,18 @@ M.setup = function(user_config)
   Cinnamon = {}
   Cinnamon.Scroll = Scroll
 
+  -- Create highlight group for hiding cursor:
+  if config.hide_cursor and vim.opt.termguicolors:get() then
+    vim.cmd([[
+    augroup cinnamon_highlight
+      autocmd!
+      autocmd ColorScheme * highlight CinnamonHideCursor gui=reverse blend=100
+    augroup END
+
+    highlight CinnamonHideCursor gui=reverse blend=100
+    ]])
+  end
+
   if config.default_keymaps then
     -- Half-window movements:
     utils.create_keymap({ 'n', 'x' }, '<C-u>', "<Cmd>lua Scroll('<C-u>', 1, 1)<CR>")
