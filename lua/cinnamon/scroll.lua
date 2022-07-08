@@ -104,10 +104,7 @@ M.scroll = function(command, scroll_win, use_count, delay_length, deprecated_arg
   if curswant == prev_curswant then
     column = -1
   end
-  if winline == prev_winline then
-    winline = -1
-  end
-  if wincol == prev_winline then
+  if wincol == prev_wincol then
     wincol = -1
   end
 
