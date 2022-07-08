@@ -19,7 +19,7 @@ M.search = utils.append(M.search_repeat, M.search_cursor, M.goto_declaration)
 
 -- Screen Scrolling:
 
-M.scroll_count = { '<C-y>', '<C-e>' }
+M.scroll_count = { '', '' }
 M.horizontal_scroll_count = { 'zh', 'zl' }
 
 -- No Scroll Movements:
