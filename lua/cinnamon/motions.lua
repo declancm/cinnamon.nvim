@@ -2,13 +2,23 @@ local M = {}
 
 local utils = require('cinnamon.utils')
 
--- Up-Down:
+local function t(str)
+  return vim.api.nvim_replace_termcodes(str, true, true, true)
+end
 
-M.up_down = { 'j', 'k' }
+-- Vertical:
 
--- Left-Right:
+M.vertical = { 'j', 'k' }
+M.window_vertical = { t('<C-y>'), t('<C-e>') }
 
-M.left_right = { 'h', 'l' }
+-- Horizontal:
+
+M.horizontal = { 'h', 'l' }
+M.view_horizontal = { 'zh', 'zl' }
+
+-- Mouse Wheel:
+
+M.mouse_wheel = { t('<ScrollWheelUp>'), t('<ScrollWheelDown>') }
 
 -- Search:
 
@@ -17,13 +27,8 @@ M.search_cursor = { '*', '#', 'g*', 'g#' }
 M.goto_declaration = { 'gd', 'gD', '1gd', '1gD' }
 M.search = utils.append(M.search_repeat, M.search_cursor, M.goto_declaration)
 
--- Screen Scrolling:
-
-M.scroll_count = { '', '' }
-M.horizontal_scroll_count = { 'zh', 'zl' }
-
 -- No Scroll Movements:
 
-M.no_scroll = utils.append(M.up_down, M.left_right, M.scroll_count, M.horizontal_scroll_count)
+M.no_scroll = utils.append(M.vertical, M.horizontal, M.window_vertical, M.view_horizontal)
 
 return M
