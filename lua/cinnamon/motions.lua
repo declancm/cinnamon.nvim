@@ -16,9 +16,9 @@ M.window_vertical = { t('<C-y>'), t('<C-e>') }
 M.horizontal = { 'h', 'l' }
 M.view_horizontal = { 'zh', 'zl' }
 
--- Mouse Wheel:
+-- Scroll wheel:
 
-M.mouse_wheel = { t('<ScrollWheelUp>'), t('<ScrollWheelDown>') }
+M.scroll_wheel = { t('<ScrollWheelUp>'), t('<ScrollWheelDown>') }
 
 -- Search:
 
@@ -27,7 +27,7 @@ M.search_cursor = { '*', '#', 'g*', 'g#' }
 M.goto_declaration = { 'gd', 'gD', '1gd', '1gD' }
 M.search = utils.append(M.search_repeat, M.search_cursor, M.goto_declaration)
 
--- No Scroll Movements:
+-- Single line/char movements:
 
 M.no_scroll = utils.append(M.vertical, M.horizontal, M.window_vertical, M.view_horizontal)
 
