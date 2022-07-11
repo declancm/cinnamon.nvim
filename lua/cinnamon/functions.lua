@@ -40,6 +40,10 @@ fn.check_command_errors = function(command)
   return false
 end
 
+local t = function(str)
+  return vim.api.nvim_replace_termcodes(str, true, true, true)
+end
+
 local create_delay = function(delay_length)
   if delay_length == 0 then
     return
@@ -65,7 +69,7 @@ local scroll_screen = function(delay_length, target_line)
 
   -- Scroll the cursor up.
   while vim.fn.winline() > target_line do
-    vim.cmd('silent exe "norm! \\<C-E>"')
+    vim.cmd('norm! ' .. t('<C-e>'))
     local new_line = vim.fn.winline()
     create_delay(delay_length)
     if new_line == prev_line then
@@ -76,7 +80,7 @@ local scroll_screen = function(delay_length, target_line)
 
   -- Scroll the cursor down.
   while vim.fn.winline() < target_line do
-    vim.cmd('silent exe "norm! \\<C-Y>"')
+    vim.cmd('norm! ' .. t('<C-y>'))
     local new_line = vim.fn.winline()
     create_delay(delay_length)
     if new_line == prev_line then
@@ -86,7 +90,7 @@ local scroll_screen = function(delay_length, target_line)
   end
 end
 
-local scroll_down = function(curpos, scroll_win, delay_length)
+local scroll_down = function(curpos, scroll_win, delay_length, scrolloff)
   local lnum = curpos[2]
   local win_height = vim.api.nvim_win_get_height(0)
 
@@ -105,24 +109,20 @@ local scroll_down = function(curpos, scroll_win, delay_length)
     end
 
     local prev_lnum = vim.fn.getcurpos()[2]
+
     vim.cmd('norm! j')
+
     local current_winline = vim.fn.winline()
 
     if scroll_win then
       if config.centered then
         if current_winline > half_height then
-          vim.cmd('silent exe "norm! \\<C-E>"')
+          vim.cmd('norm! ' .. t('<C-e>'))
         end
       else
         -- Scroll the window if the current line is not within 'scrolloff'.
-        local scrolloff
-        if vim.opt_local.so:get() ~= -1 then
-          scrolloff = vim.opt_local.so:get()
-        else
-          scrolloff = vim.opt.so:get()
-        end
         if current_winline > scrolloff + 1 and current_winline < win_height - scrolloff then
-          vim.cmd('silent exe "norm! \\<C-E>"')
+          vim.cmd('norm! ' .. t('<C-e>'))
         end
       end
     end
@@ -136,7 +136,7 @@ local scroll_down = function(curpos, scroll_win, delay_length)
   end
 end
 
-local scroll_up = function(curpos, scroll_win, delay_length)
+local scroll_up = function(curpos, scroll_win, delay_length, scrolloff)
   local lnum = curpos[2]
   local win_height = vim.api.nvim_win_get_height(0)
 
@@ -155,24 +155,20 @@ local scroll_up = function(curpos, scroll_win, delay_length)
     end
 
     local prev_lnum = vim.fn.getcurpos()[2]
+
     vim.cmd('norm! k')
+
     local current_winline = vim.fn.winline()
 
     if scroll_win then
       if config.centered then
         if current_winline < half_height then
-          vim.cmd('silent exe "norm! \\<C-Y>"')
+          vim.cmd('norm! ' .. t('<C-y>'))
         end
       else
         -- Scroll the window if the current line is not within 'scrolloff'.
-        local scrolloff
-        if vim.opt_local.so:get() ~= -1 then
-          scrolloff = vim.opt_local.so:get()
-        else
-          scrolloff = vim.opt.so:get()
-        end
         if current_winline > scrolloff + 1 and current_winline < win_height - scrolloff then
-          vim.cmd('silent exe "norm! \\<C-Y>"')
+          vim.cmd('norm! ' .. t('<C-y>'))
         end
       end
     end
@@ -187,16 +183,91 @@ local scroll_up = function(curpos, scroll_win, delay_length)
 end
 
 fn.scroll_vertically = function(distance, curpos, winline, scroll_win, delay_length)
+  -- Get the scrolloff value.
+  local scrolloff
+  if vim.opt_local.so:get() ~= -1 then
+    scrolloff = vim.opt_local.so:get()
+  else
+    scrolloff = vim.opt.so:get()
+  end
+
   -- Scroll the cursor vertically.
   if distance > 0 then
-    scroll_down(curpos, scroll_win, delay_length)
+    scroll_down(curpos, scroll_win, delay_length, scrolloff)
   elseif distance < 0 then
-    scroll_up(curpos, scroll_win, delay_length)
+    scroll_up(curpos, scroll_win, delay_length, scrolloff)
   end
 
   -- Scroll the screen vertically.
   if not scroll_win then
     scroll_screen(delay_length, winline)
+  end
+end
+
+fn.scroll_wheel_vertically = function(command, distance, curpos, winline, delay_length)
+  if distance == 0 and (vim.fn.winline() == winline) then
+    return
+  end
+
+  -- Get the scrolloff value.
+  local scrolloff
+  if vim.opt_local.so:get() ~= -1 then
+    scrolloff = vim.opt_local.so:get()
+  else
+    scrolloff = vim.opt.so:get()
+  end
+
+  local lnum = curpos[2]
+
+  if command == t('<ScrollWheelDown>') then
+    -- Scroll down.
+    while vim.fn.getcurpos()[2] < lnum or vim.fn.winline() > winline do
+      -- TODO: Find alternative method.
+      -- FIX: Not working with scrolloff = 999
+      -- Stop scrolling too far at the bottom of the file due to bug with winrestview and scrolloff.
+      if vim.fn.getcurpos()[2] == lnum and vim.fn.winline() <= scrolloff + 1 then
+        return
+      end
+
+      -- Check if movement ends in the current fold.
+      if vim.fn.foldclosedend('.') ~= -1 and vim.fn.foldclosedend('.') > lnum then
+        vim.fn.setpos('.', curpos)
+        return
+      end
+
+      local prev_lnum = vim.fn.getcurpos()[2]
+      local prev_winline = vim.fn.winline()
+
+      vim.cmd('norm! ' .. t('<C-e>'))
+
+      -- Break if line number and winline not changing.
+      if vim.fn.getcurpos()[2] == prev_lnum and vim.fn.winline() == prev_winline then
+        break
+      end
+
+      create_delay(delay_length)
+    end
+  elseif command == t('<ScrollWheelUp>') then
+    -- Scroll up.
+    while vim.fn.getcurpos()[2] > lnum or vim.fn.winline() < winline do
+      -- Check if movement ends in the current fold.
+      if vim.fn.foldclosedend('.') ~= -1 and vim.fn.foldclosedend('.') < lnum then
+        vim.fn.setpos('.', curpos)
+        return
+      end
+
+      local prev_lnum = vim.fn.getcurpos()[2]
+      local prev_winline = vim.fn.winline()
+
+      vim.cmd('norm! ' .. t('<C-y>'))
+
+      -- Break if line number and winline not changing.
+      if vim.fn.getcurpos()[2] == prev_lnum and vim.fn.winline() == prev_winline then
+        break
+      end
+
+      create_delay(delay_length)
+    end
   end
 end
 

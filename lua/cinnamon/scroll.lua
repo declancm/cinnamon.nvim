@@ -40,6 +40,12 @@ M.scroll = function(command, scroll_win, use_count, delay_length, deprecated_arg
     return
   end
 
+  -- Check if command is a mouse wheel scroll.
+  local scroll_wheel = false
+  if utils.contains(motions.scroll_wheel, command) then
+    scroll_wheel = true
+  end
+
   -- Check for any errors with the command.
   if fn.check_command_errors(command) then
     return
@@ -91,13 +97,13 @@ M.scroll = function(command, scroll_win, use_count, delay_length, deprecated_arg
   vim.fn.winrestview(saved_view)
 
   -- Check if scrolled vertically and/or horizontally.
-  local scrolled_vertically = false
+  local scrolled_window_vertically = false
   if winline - lnum ~= prev_winline - prev_lnum then
-    scrolled_vertically = true
+    scrolled_window_vertically = true
   end
-  local scrolled_horizontally = false
+  local scrolled_view_horizontally = false
   if wincol - column ~= prev_wincol - prev_column then
-    scrolled_horizontally = true
+    scrolled_view_horizontally = true
   end
 
   -- Check if values have changed.
@@ -119,14 +125,18 @@ M.scroll = function(command, scroll_win, use_count, delay_length, deprecated_arg
   end
 
   -- Scroll vertically.
-  if scrolled_vertically or config.always_scroll or scroll_win then
+  if scroll_wheel then
+    fn.scroll_wheel_vertically(command, distance, curpos, winline, delay_length)
+  elseif scrolled_window_vertically or config.always_scroll or scroll_win or scroll_wheel then
     fn.scroll_vertically(distance, curpos, winline, scroll_win, delay_length)
   else
     fn.scroll_vertically(distance, curpos, winline, scroll_win, 0)
   end
 
   -- Scroll horizontally.
-  if (scrolled_horizontally and config.horizontal_scroll or config.always_scroll) and vim.fn.foldclosed('.') == -1 then
+  if
+    (scrolled_view_horizontally and config.horizontal_scroll or config.always_scroll) and vim.fn.foldclosed('.') == -1
+  then
     fn.scroll_horizontally(column, wincol, math.ceil(delay_length / 3))
   else
     fn.scroll_horizontally(column, wincol, 0)

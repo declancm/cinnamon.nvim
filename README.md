@@ -8,6 +8,7 @@ over folds.
 __New Features:__
 * Support for the go-to-definition and go-to-declaration builtin LSP functions 🥳🎉.
 * Smooth horizontal scrolling when view has shifted left or right.
+* Smooth scrolling for the scroll wheel.
 
 __Petition for a cinnamon roll emoji:__<https://www.change.org/p/apple-cinnamon-roll-emoji>
 
@@ -97,7 +98,7 @@ Left/right movements:       h, l, <Left> and <Right>
 Scroll(arg1, arg2, arg3, arg4)
 ```
 
-* __arg1__ = A string containing the normal mode movement commands.
+* __arg1__ = A string containing the normal mode movement commands. Look at the 'Keymaps' section for examples.
   * To use the go-to-definition LSP function, use 'definition' (or 'declaration'
     for go-to-declaration).
 * __arg2__ = Scroll the window with the cursor. (1 for on, 0 for off). Default is 0.
@@ -181,6 +182,11 @@ vim.keymap.set({ 'n', 'x' }, 'h', "<Cmd>lua Scroll('h', 0, 1)<CR>")
 vim.keymap.set({ 'n', 'x' }, 'l', "<Cmd>lua Scroll('l', 0, 1)<CR>")
 vim.keymap.set({ 'n', 'x' }, '<Left>', "<Cmd>lua Scroll('h', 0, 1)<CR>")
 vim.keymap.set({ 'n', 'x' }, '<Right>', "<Cmd>lua Scroll('l', 0, 1)<CR>")
+
+-- SCROLL_WHEEL_KEYMAPS:
+
+vim.keymap.set({ 'n', 'x' }, '<ScrollWheelUp>', "<Cmd>lua Scroll('<ScrollWheelUp>')<CR>")
+vim.keymap.set({ 'n', 'x' }, '<ScrollWheelDown>', "<Cmd>lua Scroll('<ScrollWheelDown>')<CR>")
 
 -- LSP_KEYMAPS:
 
