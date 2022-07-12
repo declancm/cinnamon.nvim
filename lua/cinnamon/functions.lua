@@ -205,16 +205,9 @@ fn.scroll_vertically = function(distance, curpos, winline, scroll_win, delay_len
 end
 
 fn.scroll_wheel_vertically = function(command, distance, curpos, winline, delay_length)
+  -- If line number and winline don't need to be changed, return.
   if distance == 0 and (vim.fn.winline() == winline) then
     return
-  end
-
-  -- Get the scrolloff value.
-  local scrolloff
-  if vim.opt_local.so:get() ~= -1 then
-    scrolloff = vim.opt_local.so:get()
-  else
-    scrolloff = vim.opt.so:get()
   end
 
   local lnum = curpos[2]
@@ -222,13 +215,6 @@ fn.scroll_wheel_vertically = function(command, distance, curpos, winline, delay_
   if command == t('<ScrollWheelDown>') then
     -- Scroll down.
     while vim.fn.getcurpos()[2] < lnum or vim.fn.winline() > winline do
-      -- TODO: Find alternative method.
-      -- FIX: Not working with scrolloff = 999
-      -- Stop scrolling too far at the bottom of the file due to bug with winrestview and scrolloff.
-      if vim.fn.getcurpos()[2] == lnum and vim.fn.winline() <= scrolloff + 1 then
-        return
-      end
-
       -- Check if movement ends in the current fold.
       if vim.fn.foldclosedend('.') ~= -1 and vim.fn.foldclosedend('.') > lnum then
         vim.fn.setpos('.', curpos)
@@ -237,6 +223,25 @@ fn.scroll_wheel_vertically = function(command, distance, curpos, winline, delay_
 
       local prev_lnum = vim.fn.getcurpos()[2]
       local prev_winline = vim.fn.winline()
+
+      -- TODO: Find alternative method.
+      -- Stop scrolling past the bottom of the file due to bug with winrestview and scrolloff.
+      local offset = 0
+      local i = prev_lnum
+      while i <= prev_lnum + vim.fn.winheight('.') - vim.fn.winline() + offset + 1 do
+        -- Return if the current line doesn't exist.
+        if not vim.fn.getbufline(vim.fn.bufname(), i)[1] then
+          return
+        end
+
+        -- If fold found, jump over it.
+        if vim.fn.foldclosedend(i) ~= -1 then
+          offset = offset + vim.fn.foldclosedend(i) - i
+          i = i + offset
+        end
+
+        i = i + 1
+      end
 
       vim.cmd('norm! ' .. t('<C-e>'))
 
