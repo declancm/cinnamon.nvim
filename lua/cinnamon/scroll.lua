@@ -85,7 +85,7 @@ M.scroll = function(command, scroll_win, use_count, delay_length, deprecated_arg
   local distance = fn.get_visual_distance(prev_lnum, lnum)
 
   -- Check if the file changed or the scroll limit exceeded.
-  if prev_filepath ~= filepath or math.abs(distance) > config.scroll_limit then
+  if prev_filepath ~= filepath or (math.abs(distance) > config.scroll_limit and config.scroll_limit ~= -1) then
     if scroll_win and config.centered then
       vim.cmd('norm! zz')
     end
@@ -122,6 +122,13 @@ M.scroll = function(command, scroll_win, use_count, delay_length, deprecated_arg
     end
     vim.opt.guicursor = 'a:CinnamonHideCursor'
     cursor_hidden = true
+  end
+
+  -- Calculate the delay length.
+  if config.max_length ~= -1 then
+    if math.abs(distance) * delay_length > config.max_length then
+      delay_length = math.floor((config.max_length / math.abs(distance)) + 0.5)
+    end
   end
 
   -- Scroll vertically.
