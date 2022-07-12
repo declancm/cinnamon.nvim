@@ -8,5 +8,6 @@ return {
   default_delay = 7,
   hide_cursor = false,
   horizontal_scroll = true,
+  max_length = -1,
   scroll_limit = 150,
 }

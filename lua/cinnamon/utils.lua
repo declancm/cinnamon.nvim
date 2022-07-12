@@ -31,16 +31,6 @@ utils.contains = function(table, target)
   return false
 end
 
-utils.append = function(...)
-  local new_table = {}
-  for _, current_table in pairs { ... } do
-    for _, item in pairs(current_table) do
-      table.insert(new_table, item)
-    end
-  end
-  return new_table
-end
-
 utils.merge = function(t1, t2)
   for k, v in pairs(t2) do
     if (type(v) == 'table') and (type(t1[k] or false) == 'table') then
