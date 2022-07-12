@@ -40,6 +40,41 @@ fn.check_command_errors = function(command)
   return false
 end
 
+fn.get_visual_distance = function(start_line, end_line)
+  local distance = 0
+  local i = start_line
+
+  if start_line < end_line then
+    while i < end_line do
+      if vim.fn.foldclosedend(i) ~= -1 and vim.fn.foldclosedend(i) > end_line then
+        return distance
+      elseif vim.fn.foldclosedend(i) ~= -1 then
+        -- If fold found, jump over it.
+        local fold_size = vim.fn.foldclosedend(i) - i
+        i = i + fold_size
+      end
+
+      distance = distance + 1
+      i = i + 1
+    end
+  elseif start_line > end_line then
+    while i > end_line do
+      if vim.fn.foldclosed(i) ~= -1 and vim.fn.foldclosed(i) < end_line then
+        return distance
+      elseif vim.fn.foldclosed(i) ~= -1 then
+        -- If fold found, jump over it.
+        local fold_size = i - vim.fn.foldclosed(i)
+        i = i - fold_size
+      end
+
+      distance = distance - 1
+      i = i - 1
+    end
+  end
+
+  return distance
+end
+
 local t = function(str)
   return vim.api.nvim_replace_termcodes(str, true, true, true)
 end
@@ -236,8 +271,9 @@ fn.scroll_wheel_vertically = function(command, distance, curpos, winline, delay_
 
         -- If fold found, jump over it.
         if vim.fn.foldclosedend(i) ~= -1 then
-          offset = offset + vim.fn.foldclosedend(i) - i
-          i = i + offset
+          local fold_size = vim.fn.foldclosedend(i) - i
+          offset = offset + fold_size
+          i = i + fold_size
         end
 
         i = i + 1

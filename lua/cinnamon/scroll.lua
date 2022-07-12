@@ -82,7 +82,7 @@ M.scroll = function(command, scroll_win, use_count, delay_length, deprecated_arg
   local _, lnum, column, _, curswant = unpack(curpos)
   local winline = vim.fn.winline()
   local wincol = vim.fn.wincol()
-  local distance = lnum - prev_lnum
+  local distance = fn.get_visual_distance(prev_lnum, lnum)
 
   -- Check if the file changed or the scroll limit exceeded.
   if prev_filepath ~= filepath or math.abs(distance) > config.scroll_limit then
