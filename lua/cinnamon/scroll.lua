@@ -35,14 +35,14 @@ M.scroll = function(command, scroll_win, use_count, delay_length, deprecated_arg
   end
 
   -- Execute command if only moving one line/char.
-  if utils.contains(motions.no_scroll, command) and vim.v.count1 == 1 then
+  if vim.tbl_contains(motions.no_scroll, command) and vim.v.count1 == 1 then
     vim.cmd('norm! ' .. command)
     return
   end
 
   -- Check if command is a mouse wheel scroll.
   local scroll_wheel = false
-  if utils.contains(motions.scroll_wheel, command) then
+  if vim.tbl_contains(motions.scroll_wheel, command) then
     scroll_wheel = true
   end
 

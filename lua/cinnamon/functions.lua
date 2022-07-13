@@ -6,7 +6,7 @@ local motions = require('cinnamon.motions')
 
 fn.check_command_errors = function(command)
   -- If no search pattern, return an error if using a repeat search command.
-  if utils.contains(motions.search_repeat, command) then
+  if vim.tbl_contains(motions.search_repeat, command) then
     local pattern = vim.fn.getreg('/')
     if pattern == '' then
       utils.error_msg('The search pattern is empty')
@@ -19,7 +19,7 @@ fn.check_command_errors = function(command)
   end
 
   -- If no word under cursor, return an error if using a word-near-cursor search command.
-  if utils.contains(motions.search_cursor, command) then
+  if vim.tbl_contains(motions.search_cursor, command) then
     -- Check if string is empty or only whitespace.
     if vim.fn.getline('.'):match('^%s*$') then
       utils.error_msg('No string under cursor', 'E348')
@@ -28,7 +28,7 @@ fn.check_command_errors = function(command)
   end
 
   -- If no word under cursor, return an error if using a goto declaration command.
-  if utils.contains(motions.goto_declaration, command) then
+  if vim.tbl_contains(motions.goto_declaration, command) then
     -- Check if string is empty or only whitespace.
     if vim.fn.getline('.'):match('^%s*$') then
       utils.error_msg('No identifier under cursor', 'E349')
