@@ -133,7 +133,7 @@ M.scroll = function(command, scroll_win, use_count, delay_length, deprecated_arg
   -- Calculate the delay length.
   if config.max_length ~= -1 then
     if math.abs(distance) * delay_length > config.max_length then
-      delay_length = math.floor((config.max_length / math.abs(distance)) + 0.5)
+      delay_length = config.max_length / math.abs(distance)
     end
   end
 

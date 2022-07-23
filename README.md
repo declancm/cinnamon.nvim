@@ -49,6 +49,11 @@ max_length = -1,          -- Maximum length (in ms) of a command. The line delay
                           -- re-calculated. Setting to -1 will disable this option.
 scroll_limit = 150,       -- Max number of lines moved before scrolling is skipped. Setting
                           -- to -1 will disable this option.
+smallest_delay_per_frame = 0.5, -- Smallest delay of one frame when scrolling. If the delay
+                                -- would be shorter than this (when scrolling many lines),
+                                -- then multiple lines are scrolled in order to get a
+                                -- faster scrolling. Slower terminal emulators probably need
+                                -- a larger value.
 ```
 
 ### Example Configuration
