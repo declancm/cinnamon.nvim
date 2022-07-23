@@ -125,6 +125,19 @@ local scroll_screen = function(delay_length, target_line)
   end
 end
 
+-- If the delay for scrolling one line would be too small, we want to scroll
+-- multiple lines at the same time.
+-- For example, if the delay is 0.25ms and the smallest delay is 0.5ms, we want
+-- to scroll 2 lines instead of one.
+local calculate_lines_to_scroll_at_once = function (delay_length)
+  local smallest_delay = 0.5
+
+  local divided = smallest_delay / delay_length
+  local times_to_scroll = delay_length >= smallest_delay and 1 or math.ceil(divided)
+
+  return times_to_scroll
+end
+
 local scroll_down = function(curpos, scroll_win, delay_length, scrolloff)
   local lnum = curpos[2]
   local win_height = vim.api.nvim_win_get_height(0)
@@ -134,6 +147,8 @@ local scroll_down = function(curpos, scroll_win, delay_length, scrolloff)
   if vim.fn.winline() > half_height and scroll_win and config.centered then
     scroll_screen(delay_length)
   end
+
+  local lines_to_scroll_at_once = calculate_lines_to_scroll_at_once(delay_length)
 
   -- Scroll.
   while vim.fn.getcurpos()[2] < lnum do
@@ -145,19 +160,29 @@ local scroll_down = function(curpos, scroll_win, delay_length, scrolloff)
 
     local prev_lnum = vim.fn.getcurpos()[2]
 
-    vim.cmd('norm! j')
+    -- Make sure that we don't over-scroll
+    local lnum_difference = lnum - prev_lnum
+    local times_to_scroll = math.min(lnum_difference, lines_to_scroll_at_once)
+
+    for _ = 1, times_to_scroll, 1 do
+      vim.cmd('norm! j')
+    end
 
     local current_winline = vim.fn.winline()
 
     if scroll_win then
       if config.centered then
         if current_winline > half_height then
-          vim.cmd('norm! ' .. t('<C-e>'))
+          for _ = 1, times_to_scroll, 1 do
+            vim.cmd('norm! ' .. t('<C-e>'))
+          end
         end
       else
         -- Scroll the window if the current line is not within 'scrolloff'.
         if current_winline > scrolloff + 1 and current_winline < win_height - scrolloff then
-          vim.cmd('norm! ' .. t('<C-e>'))
+          for _ = 1, times_to_scroll, 1 do
+            vim.cmd('norm! ' .. t('<C-e>'))
+          end
         end
       end
     end
@@ -181,6 +206,8 @@ local scroll_up = function(curpos, scroll_win, delay_length, scrolloff)
     scroll_screen(delay_length)
   end
 
+  local lines_to_scroll_at_once = calculate_lines_to_scroll_at_once(delay_length)
+
   -- Scroll.
   while vim.fn.getcurpos()[2] > lnum do
     -- Check if movement ends in the current fold.
@@ -191,19 +218,29 @@ local scroll_up = function(curpos, scroll_win, delay_length, scrolloff)
 
     local prev_lnum = vim.fn.getcurpos()[2]
 
-    vim.cmd('norm! k')
+    -- Make sure that we don't over-scroll
+    local lnum_difference = prev_lnum - lnum
+    local times_to_scroll = math.min(lnum_difference, lines_to_scroll_at_once)
+
+    for _ = 1, times_to_scroll, 1 do
+      vim.cmd('norm! k')
+    end
 
     local current_winline = vim.fn.winline()
 
     if scroll_win then
       if config.centered then
         if current_winline < half_height then
-          vim.cmd('norm! ' .. t('<C-y>'))
+          for _ = 1, times_to_scroll, 1 do
+            vim.cmd('norm! ' .. t('<C-y>'))
+          end
         end
       else
         -- Scroll the window if the current line is not within 'scrolloff'.
         if current_winline > scrolloff + 1 and current_winline < win_height - scrolloff then
-          vim.cmd('norm! ' .. t('<C-y>'))
+          for _ = 1, times_to_scroll, 1 do
+            vim.cmd('norm! ' .. t('<C-y>'))
+          end
         end
       end
     end
