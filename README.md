@@ -117,14 +117,14 @@ _Note: When scrolling horizontally, the delay argument is halved so vertical and
 -- DEFAULT_KEYMAPS:
 
 -- Half-window movements:
-vim.keymap.set({ 'n', 'x' }, '<C-u>', "<Cmd>lua Scroll('<C-u>', 1, 1)<CR>")
-vim.keymap.set({ 'n', 'x' }, '<C-d>', "<Cmd>lua Scroll('<C-d>', 1, 1)<CR>")
+vim.keymap.set({ 'n', 'v' }, '<C-u>', "<Cmd>lua Scroll('<C-u>', 1, 1)<CR>")
+vim.keymap.set({ 'n', 'v' }, '<C-d>', "<Cmd>lua Scroll('<C-d>', 1, 1)<CR>")
 
 -- Page movements:
-vim.keymap.set({ 'n', 'x' }, '<C-b>', "<Cmd>lua Scroll('<C-b>', 1, 1)<CR>")
-vim.keymap.set({ 'n', 'x' }, '<C-f>', "<Cmd>lua Scroll('<C-f>', 1, 1)<CR>")
-vim.keymap.set({ 'n', 'x' }, '<PageUp>', "<Cmd>lua Scroll('<C-b>', 1, 1)<CR>")
-vim.keymap.set({ 'n', 'x' }, '<PageDown>', "<Cmd>lua Scroll('<C-f>', 1, 1)<CR>")
+vim.keymap.set({ 'n', 'v' }, '<C-b>', "<Cmd>lua Scroll('<C-b>', 1, 1)<CR>")
+vim.keymap.set({ 'n', 'v' }, '<C-f>', "<Cmd>lua Scroll('<C-f>', 1, 1)<CR>")
+vim.keymap.set({ 'n', 'v' }, '<PageUp>', "<Cmd>lua Scroll('<C-b>', 1, 1)<CR>")
+vim.keymap.set({ 'n', 'v' }, '<PageDown>', "<Cmd>lua Scroll('<C-f>', 1, 1)<CR>")
 
 -- EXTRA_KEYMAPS:
 
@@ -176,21 +176,21 @@ vim.keymap.set('n', 'zl', "<Cmd>lua Scroll('zl', 0, 1)<CR>")
 -- EXTENDED_KEYMAPS:
 
 -- Up/down movements:
-vim.keymap.set({ 'n', 'x' }, 'k', "<Cmd>lua Scroll('k', 0, 1)<CR>")
-vim.keymap.set({ 'n', 'x' }, 'j', "<Cmd>lua Scroll('j', 0, 1)<CR>")
-vim.keymap.set({ 'n', 'x' }, '<Up>', "<Cmd>lua Scroll('k', 0, 1)<CR>")
-vim.keymap.set({ 'n', 'x' }, '<Down>', "<Cmd>lua Scroll('j', 0, 1)<CR>")
+vim.keymap.set({ 'n', 'v' }, 'k', "<Cmd>lua Scroll('k', 0, 1)<CR>")
+vim.keymap.set({ 'n', 'v' }, 'j', "<Cmd>lua Scroll('j', 0, 1)<CR>")
+vim.keymap.set({ 'n', 'v' }, '<Up>', "<Cmd>lua Scroll('k', 0, 1)<CR>")
+vim.keymap.set({ 'n', 'v' }, '<Down>', "<Cmd>lua Scroll('j', 0, 1)<CR>")
 
 -- Left/right movements:
 vim.keymap.set({ 'n', 'x' }, 'h', "<Cmd>lua Scroll('h', 0, 1)<CR>")
 vim.keymap.set({ 'n', 'x' }, 'l', "<Cmd>lua Scroll('l', 0, 1)<CR>")
-vim.keymap.set({ 'n', 'x' }, '<Left>', "<Cmd>lua Scroll('h', 0, 1)<CR>")
-vim.keymap.set({ 'n', 'x' }, '<Right>', "<Cmd>lua Scroll('l', 0, 1)<CR>")
+vim.keymap.set({ 'n', 'v' }, '<Left>', "<Cmd>lua Scroll('h', 0, 1)<CR>")
+vim.keymap.set({ 'n', 'v' }, '<Right>', "<Cmd>lua Scroll('l', 0, 1)<CR>")
 
 -- SCROLL_WHEEL_KEYMAPS:
 
-vim.keymap.set({ 'n', 'x' }, '<ScrollWheelUp>', "<Cmd>lua Scroll('<ScrollWheelUp>')<CR>")
-vim.keymap.set({ 'n', 'x' }, '<ScrollWheelDown>', "<Cmd>lua Scroll('<ScrollWheelDown>')<CR>")
+vim.keymap.set({ 'n', 'v' }, '<ScrollWheelUp>', "<Cmd>lua Scroll('<ScrollWheelUp>')<CR>")
+vim.keymap.set({ 'n', 'v' }, '<ScrollWheelDown>', "<Cmd>lua Scroll('<ScrollWheelDown>')<CR>")
 
 -- LSP_KEYMAPS:
 
