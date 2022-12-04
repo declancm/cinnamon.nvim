@@ -32,14 +32,14 @@ M.setup = function(user_config)
 
   if config.default_keymaps then
     -- Half-window movements:
-    utils.create_keymap({ 'n', 'x' }, '<C-u>', "<Cmd>lua Scroll('<C-u>', 1, 1)<CR>")
-    utils.create_keymap({ 'n', 'x' }, '<C-d>', "<Cmd>lua Scroll('<C-d>', 1, 1)<CR>")
+    utils.create_keymap({ 'n', 'v' }, '<C-u>', "<Cmd>lua Scroll('<C-u>', 1, 1)<CR>")
+    utils.create_keymap({ 'n', 'v' }, '<C-d>', "<Cmd>lua Scroll('<C-d>', 1, 1)<CR>")
 
     -- Page movements:
-    utils.create_keymap({ 'n', 'x' }, '<C-b>', "<Cmd>lua Scroll('<C-b>', 1, 1)<CR>")
-    utils.create_keymap({ 'n', 'x' }, '<C-f>', "<Cmd>lua Scroll('<C-f>', 1, 1)<CR>")
-    utils.create_keymap({ 'n', 'x' }, '<PageUp>', "<Cmd>lua Scroll('<C-b>', 1, 1)<CR>")
-    utils.create_keymap({ 'n', 'x' }, '<PageDown>', "<Cmd>lua Scroll('<C-f>', 1, 1)<CR>")
+    utils.create_keymap({ 'n', 'v' }, '<C-b>', "<Cmd>lua Scroll('<C-b>', 1, 1)<CR>")
+    utils.create_keymap({ 'n', 'v' }, '<C-f>', "<Cmd>lua Scroll('<C-f>', 1, 1)<CR>")
+    utils.create_keymap({ 'n', 'v' }, '<PageUp>', "<Cmd>lua Scroll('<C-b>', 1, 1)<CR>")
+    utils.create_keymap({ 'n', 'v' }, '<PageDown>', "<Cmd>lua Scroll('<C-f>', 1, 1)<CR>")
   end
 
   if config.extra_keymaps then
@@ -91,16 +91,16 @@ M.setup = function(user_config)
 
   if config.extended_keymaps then
     -- Up/down movements:
-    utils.create_keymap({ 'n', 'x' }, 'k', "<Cmd>lua Scroll('k', 0, 1)<CR>")
-    utils.create_keymap({ 'n', 'x' }, 'j', "<Cmd>lua Scroll('j', 0, 1)<CR>")
-    utils.create_keymap({ 'n', 'x' }, '<Up>', "<Cmd>lua Scroll('k', 0, 1)<CR>")
-    utils.create_keymap({ 'n', 'x' }, '<Down>', "<Cmd>lua Scroll('j', 0, 1)<CR>")
+    utils.create_keymap({ 'n', 'v' }, 'k', "<Cmd>lua Scroll('k', 0, 1)<CR>")
+    utils.create_keymap({ 'n', 'v' }, 'j', "<Cmd>lua Scroll('j', 0, 1)<CR>")
+    utils.create_keymap({ 'n', 'v' }, '<Up>', "<Cmd>lua Scroll('k', 0, 1)<CR>")
+    utils.create_keymap({ 'n', 'v' }, '<Down>', "<Cmd>lua Scroll('j', 0, 1)<CR>")
 
     -- Left/right movements:
     utils.create_keymap({ 'n', 'x' }, 'h', "<Cmd>lua Scroll('h', 0, 1)<CR>")
     utils.create_keymap({ 'n', 'x' }, 'l', "<Cmd>lua Scroll('l', 0, 1)<CR>")
-    utils.create_keymap({ 'n', 'x' }, '<Left>', "<Cmd>lua Scroll('h', 0, 1)<CR>")
-    utils.create_keymap({ 'n', 'x' }, '<Right>', "<Cmd>lua Scroll('l', 0, 1)<CR>")
+    utils.create_keymap({ 'n', 'v' }, '<Left>', "<Cmd>lua Scroll('h', 0, 1)<CR>")
+    utils.create_keymap({ 'n', 'v' }, '<Right>', "<Cmd>lua Scroll('l', 0, 1)<CR>")
   end
 end
 
