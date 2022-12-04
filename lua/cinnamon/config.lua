@@ -1,5 +1,6 @@
 return {
   default_keymaps = true,
+  disabled = false,
   extra_keymaps = false,
   extended_keymaps = false,
   override_keymaps = false,

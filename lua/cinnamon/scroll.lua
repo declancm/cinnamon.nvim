@@ -9,6 +9,12 @@ local saved_guicursor = vim.opt.guicursor:get()
 local warning_given = false
 
 M.scroll = function(command, scroll_win, use_count, delay_length, deprecated_arg)
+  -- Check if plugin is disabled.
+  if config.disabled then
+    vim.cmd('norm! ' .. command)
+    return
+  end
+
   if deprecated_arg ~= nil and not warning_given then
     utils.error_msg('Argument 5 for the Cinnamon Scroll API function is now deprecated.', 'Warning', 'WARN')
     warning_given = true
