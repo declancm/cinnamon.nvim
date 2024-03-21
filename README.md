@@ -25,6 +25,15 @@ use {
 }
 ```
 
+### Lazy
+
+```lua
+{
+  'declancm/cinnamon.nvim',
+  config = function() require('cinnamon').setup() end
+}
+```
+
 ## ⚙️ Configuration
 
 A settings table can be passed into the setup function for custom options.
