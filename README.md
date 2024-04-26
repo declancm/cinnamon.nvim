@@ -1,4 +1,4 @@
-# Cinnamon Scroll 🌀
+# Cinnamon Scroll 🍥
 
 Smooth scrolling for __ANY__ movement command (or string of commands) 🤯. A
 highly customizable Neovim plugin written in Lua which doesn't break the
