@@ -60,7 +60,7 @@ M.scroll = function(command, scroll_win, use_count, delay_length, deprecated_arg
   -- Save and set options.
   local saved = {}
   saved.lazyredraw = vim.opt.lazyredraw:get()
-  vim.opt.lazyredraw = false
+  vim.opt.lazyredraw = true
   local restore_options = function()
     vim.opt.lazyredraw = saved.lazyredraw
   end
