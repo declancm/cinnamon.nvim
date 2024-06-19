@@ -190,6 +190,10 @@ vim.keymap.set({ 'n', 'x' }, 'k', "<Cmd>lua Scroll('k', 0, 1)<CR>")
 vim.keymap.set({ 'n', 'x' }, 'j', "<Cmd>lua Scroll('j', 0, 1)<CR>")
 vim.keymap.set({ 'n', 'x' }, '<Up>', "<Cmd>lua Scroll('<Up>', 0, 1)<CR>")
 vim.keymap.set({ 'n', 'x' }, '<Down>', "<Cmd>lua Scroll('<Down>', 0, 1)<CR>")
+vim.keymap.set({ 'n', 'x' }, 'gk', "<Cmd>lua Scroll('gk', 0, 1)<CR>")
+vim.keymap.set({ 'n', 'x' }, 'gj', "<Cmd>lua Scroll('gj', 0, 1)<CR>")
+vim.keymap.set({ 'n', 'x' }, 'g<Up>', "<Cmd>lua Scroll('g<Up>', 0, 1)<CR>")
+vim.keymap.set({ 'n', 'x' }, 'g<Down>', "<Cmd>lua Scroll('g<Down>', 0, 1)<CR>")
 
 -- Left/right movements:
 vim.keymap.set({ 'n', 'x' }, 'h', "<Cmd>lua Scroll('h', 0, 1)<CR>")

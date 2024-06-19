@@ -95,6 +95,10 @@ M.setup = function(user_config)
     utils.create_keymap({ 'n', 'x' }, 'j', "<Cmd>lua Scroll('j', 0, 1)<CR>")
     utils.create_keymap({ 'n', 'x' }, '<Up>', "<Cmd>lua Scroll('<Up>', 0, 1)<CR>")
     utils.create_keymap({ 'n', 'x' }, '<Down>', "<Cmd>lua Scroll('<Down>', 0, 1)<CR>")
+    utils.create_keymap({ 'n', 'x' }, 'gk', "<Cmd>lua Scroll('gk', 0, 1)<CR>")
+    utils.create_keymap({ 'n', 'x' }, 'gj', "<Cmd>lua Scroll('gj', 0, 1)<CR>")
+    utils.create_keymap({ 'n', 'x' }, 'g<Up>', "<Cmd>lua Scroll('g<Up>', 0, 1)<CR>")
+    utils.create_keymap({ 'n', 'x' }, 'g<Down>', "<Cmd>lua Scroll('g<Down>', 0, 1)<CR>")
 
     -- Left/right movements:
     utils.create_keymap({ 'n', 'x' }, 'h', "<Cmd>lua Scroll('h', 0, 1)<CR>")
