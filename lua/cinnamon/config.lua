@@ -11,4 +11,5 @@ return {
   horizontal_scroll = true,
   max_length = -1,
   scroll_limit = 150,
+  smallest_delay_per_frame = 0.5,
 }
