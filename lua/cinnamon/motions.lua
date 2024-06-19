@@ -14,16 +14,6 @@ local append_table = function(...)
   return new_table
 end
 
--- Vertical:
-
-M.vertical = { 'j', 'k' }
-M.window_vertical = { t('<C-y>'), t('<C-e>') }
-
--- Horizontal:
-
-M.horizontal = { 'h', 'l' }
-M.view_horizontal = { 'zh', 'zl' }
-
 -- Scroll wheel:
 
 M.scroll_wheel = { t('<ScrollWheelUp>'), t('<ScrollWheelDown>') }
@@ -35,8 +25,11 @@ M.search_cursor = { '*', '#', 'g*', 'g#' }
 M.goto_declaration = { 'gd', 'gD', '1gd', '1gD' }
 M.search = append_table(M.search_repeat, M.search_cursor, M.goto_declaration)
 
--- Single line/char movements:
+-- Movements that never require a smooth scroll (without using a count):
 
-M.no_scroll = append_table(M.vertical, M.horizontal, M.window_vertical, M.view_horizontal)
+M.no_scroll_vertical =
+  { 'j', 'k', 'gj', 'gk', t('<Up>'), t('<Down>'), t('g<Up>'), t('g<Down>'), t('<C-y>'), t('<C-e>') }
+M.no_scroll_horizontal = { 'h', 'l', t('<Left>'), t('<Right>'), 'zh', 'zl' }
+M.no_scroll = append_table(M.no_scroll_vertical, M.no_scroll_horizontal)
 
 return M
