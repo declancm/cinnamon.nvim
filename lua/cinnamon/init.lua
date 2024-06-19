@@ -36,10 +36,10 @@ M.setup = function(user_config)
     utils.create_keymap({ 'n', 'x' }, '<C-d>', "<Cmd>lua Scroll('<C-d>', 1, 1)<CR>")
 
     -- Page movements:
-    utils.create_keymap({ 'n', 'x' }, '<C-b>', "<Cmd>lua Scroll('<C-b>', 1, 1)<CR>")
-    utils.create_keymap({ 'n', 'x' }, '<C-f>', "<Cmd>lua Scroll('<C-f>', 1, 1)<CR>")
-    utils.create_keymap({ 'n', 'x' }, '<PageUp>', "<Cmd>lua Scroll('<C-b>', 1, 1)<CR>")
-    utils.create_keymap({ 'n', 'x' }, '<PageDown>', "<Cmd>lua Scroll('<C-f>', 1, 1)<CR>")
+    utils.create_keymap({ 'n', 'x' }, '<C-b>', "<Cmd>lua Scroll('<C-b>', 0, 1)<CR>")
+    utils.create_keymap({ 'n', 'x' }, '<C-f>', "<Cmd>lua Scroll('<C-f>', 0, 1)<CR>")
+    utils.create_keymap({ 'n', 'x' }, '<PageUp>', "<Cmd>lua Scroll('<C-b>', 0, 1)<CR>")
+    utils.create_keymap({ 'n', 'x' }, '<PageDown>', "<Cmd>lua Scroll('<C-f>', 0, 1)<CR>")
   end
 
   if config.extra_keymaps then
