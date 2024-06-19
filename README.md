@@ -102,7 +102,8 @@ Horizontal scrolling:       zH, zL, zs, ze, zh and zl
 ```
 Smooth scrolling for ...
 
-Up/down movements:          [count]j, [count]k, [count]<Up> and [count]<Down>
+Up/down movements:          [count]j, [count]k, [count]<Up>, [count]<Down>,
+                            [count]gj, [count]gk, [count]g<Up> and [count]g<Down>
 Left/right movements:       [count]h, [count]l, [count]<Left> and [count]<Right>
 ```
 
