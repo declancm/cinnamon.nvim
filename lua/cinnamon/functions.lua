@@ -143,9 +143,11 @@ local scroll_down = function(curpos, winline, scroll_win, delay_length, scrollof
       return
     end
 
-    local prev_lnum = vim.fn.getcurpos()[2]
+    local prev_curpos = vim.fn.getcurpos()
+    local prev_lnum = prev_curpos[2]
+    local prev_col = prev_curpos[3]
 
-    vim.cmd('norm! j')
+    vim.cmd('norm! gj')
 
     local current_winline = vim.fn.winline()
 
@@ -168,7 +170,11 @@ local scroll_down = function(curpos, winline, scroll_win, delay_length, scrollof
     end
 
     -- Break if line number not changing.
-    if vim.fn.getcurpos()[2] == prev_lnum then
+    local new_curpos = vim.fn.getcurpos()
+    local new_lnum = new_curpos[2]
+    local new_col = new_curpos[3]
+
+    if prev_lnum == new_lnum and prev_col == new_col then
       break
     end
 
@@ -194,9 +200,11 @@ local scroll_up = function(curpos, winline, scroll_win, delay_length, scrolloff)
       return
     end
 
-    local prev_lnum = vim.fn.getcurpos()[2]
+    local prev_curpos = vim.fn.getcurpos()
+    local prev_lnum = prev_curpos[2]
+    local prev_col = prev_curpos[3]
 
-    vim.cmd('norm! k')
+    vim.cmd('norm! gk')
 
     local current_winline = vim.fn.winline()
 
@@ -219,7 +227,11 @@ local scroll_up = function(curpos, winline, scroll_win, delay_length, scrolloff)
     end
 
     -- Break if line number not changing.
-    if vim.fn.getcurpos()[2] == prev_lnum then
+    local new_curpos = vim.fn.getcurpos()
+    local new_lnum = new_curpos[2]
+    local new_col = new_curpos[3]
+
+    if prev_lnum == new_lnum and prev_col == new_col then
       break
     end
 
