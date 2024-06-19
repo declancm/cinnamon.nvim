@@ -125,7 +125,7 @@ local scroll_screen = function(delay_length, target_line)
   end
 end
 
-local scroll_down = function(curpos, scroll_win, delay_length, scrolloff)
+local scroll_down = function(curpos, winline, scroll_win, delay_length, scrolloff)
   local lnum = curpos[2]
   local win_height = vim.api.nvim_win_get_height(0)
 
@@ -160,6 +160,11 @@ local scroll_down = function(curpos, scroll_win, delay_length, scrolloff)
           vim.cmd('norm! ' .. t('<C-e>'))
         end
       end
+    else
+      -- Don't let the cursor scroll past the final winline position.
+      if vim.fn.winline() > winline then
+        vim.cmd('norm! ' .. t('<C-e>'))
+      end
     end
 
     -- Break if line number not changing.
@@ -171,7 +176,7 @@ local scroll_down = function(curpos, scroll_win, delay_length, scrolloff)
   end
 end
 
-local scroll_up = function(curpos, scroll_win, delay_length, scrolloff)
+local scroll_up = function(curpos, winline, scroll_win, delay_length, scrolloff)
   local lnum = curpos[2]
   local win_height = vim.api.nvim_win_get_height(0)
 
@@ -206,6 +211,11 @@ local scroll_up = function(curpos, scroll_win, delay_length, scrolloff)
           vim.cmd('norm! ' .. t('<C-y>'))
         end
       end
+    else
+      -- Don't let the cursor scroll past the final winline position.
+      if vim.fn.winline() < winline then
+        vim.cmd('norm! ' .. t('<C-y>'))
+      end
     end
 
     -- Break if line number not changing.
@@ -228,9 +238,9 @@ fn.scroll_vertically = function(distance, curpos, winline, scroll_win, delay_len
 
   -- Scroll the cursor vertically.
   if distance > 0 then
-    scroll_down(curpos, scroll_win, delay_length, scrolloff)
+    scroll_down(curpos, winline, scroll_win, delay_length, scrolloff)
   elseif distance < 0 then
-    scroll_up(curpos, scroll_win, delay_length, scrolloff)
+    scroll_up(curpos, winline, scroll_win, delay_length, scrolloff)
   end
 
   -- Scroll the screen vertically.
