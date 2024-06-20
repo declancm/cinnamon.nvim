@@ -31,7 +31,11 @@ local positions_are_close = function(p1, p2)
     if math.abs(p1.winline - p2.winline) > 1 then
         return false
     end
-    if config.horizontal_scroll then
+    if math.abs(p1.col - p2.col) > 1 then
+        return false
+    end
+    if math.abs(p1.wincol - p2.wincol) > 1 then
+        return false
     end
     return true
 end
@@ -81,7 +85,7 @@ M.scroll = function(command, options)
     end
 
     local final_position = get_win_position()
-    if not vim.deep_equal(original_position, final_position) then
+    if not positions_are_close(original_position, final_position) then
         if options.center then
             final_position.winline = math.ceil(vim.api.nvim_win_get_height(0) / 2)
         end
