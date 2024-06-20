@@ -155,7 +155,10 @@ M.scroll = function(command, scroll_win, use_count, delay_length, deprecated_arg
     fn.scroll_horizontally(column, wincol, 0)
   end
 
-  -- Restore the cursor.
+  -- Restore the curswant for movements like '$'.
+  vim.fn.winrestview { curswant = curswant }
+
+  -- Restore the cursor style.
   if cursor_hidden then
     vim.opt.guicursor = saved_guicursor
   end
