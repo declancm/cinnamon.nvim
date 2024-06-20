@@ -36,12 +36,12 @@ local positions_are_close = function(p1, p2)
     return true
 end
 
-M.scroll = function(command, scroll_win, use_count, delay_length, deprecated_arg)
-    local options = {
-        callback = function() end,
+M.scroll = function(command, options)
+    options = vim.tbl_deep_extend("force", options, {
+        callback = nil,
         center = false,
         delay = 5,
-    }
+    })
 
     if lock then
         return

@@ -1,17 +1,17 @@
 local M = {}
 
 local map = function(mode, lhs, rhs)
-  if type(mode) == 'table' then
-    for _, value in ipairs(mode) do
-      if vim.fn.maparg(lhs, value) == '' or config.override_keymaps then
-        vim.api.nvim_set_keymap(value, lhs, rhs, { noremap = true })
-      end
+    if type(mode) == "table" then
+        for _, value in ipairs(mode) do
+            if vim.fn.maparg(lhs, value) == "" or config.override_keymaps then
+                vim.api.nvim_set_keymap(value, lhs, rhs, { noremap = true })
+            end
+        end
+    else
+        if vim.fn.maparg(lhs, mode) == "" or config.override_keymaps then
+            vim.api.nvim_set_keymap(mode, lhs, rhs, { noremap = true })
+        end
     end
-  else
-    if vim.fn.maparg(lhs, mode) == '' or config.override_keymaps then
-      vim.api.nvim_set_keymap(mode, lhs, rhs, { noremap = true })
-    end
-  end
 end
 
 M.setup = function(user_config)
@@ -19,12 +19,18 @@ M.setup = function(user_config)
 
     -- Set the config:
     if user_config ~= nil then
-        vim.tbl_deep_extend('force', config, user_config or {})
+        vim.tbl_deep_extend("force", config, user_config or {})
     end
 
     -- Global function used to simplify the keymaps:
     function Scroll(...)
-        require("cinnamon.scroll").scroll(...)
+        local args = { ... }
+
+        local command = args[1]
+        local options = {}
+        options.center = args[2] == 1
+        options.delay = args[4]
+        require("cinnamon.scroll").scroll(command, options)
     end
 
     -- Deprecated settings:
