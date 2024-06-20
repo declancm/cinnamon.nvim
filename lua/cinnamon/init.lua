@@ -30,7 +30,7 @@ M.setup = function(user_config)
         local options = {}
         options.center = args[2] == 1
         options.delay = args[4]
-        require("cinnamon.scroll").scroll(command, options)
+        M.scroll(command, options)
     end
 
     -- Deprecated settings:
@@ -126,5 +126,7 @@ M.setup = function(user_config)
         map({ "n", "x" }, "<Right>", "<Cmd>lua Scroll('<Right>', 0, 1)<CR>")
     end
 end
+
+M.scroll = require("cinnamon.scroll").scroll
 
 return M
