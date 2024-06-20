@@ -8,10 +8,6 @@ local lock = false
 local callback
 local saved_virtualedit
 
-local replace_codes = function(str)
-    return vim.api.nvim_replace_termcodes(str, true, true, true)
-end
-
 local get_win_position = function()
     local curpos = vim.fn.getcurpos()
     return {
@@ -59,13 +55,13 @@ M.scroll = function(command, options)
     if type(command) == "string" then
         if command[1] == ":" then
             -- Ex (command-line) command
-            vim.cmd(replace_codes(command:sub(2)))
+            vim.cmd(vim.keycode(command:sub(2)))
         elseif command ~= "" then
             -- Normal mode command
             if vim.v.count ~= 0 then
-                vim.cmd("normal! " .. vim.v.count .. replace_codes(command))
+                vim.cmd("normal! " .. vim.v.count .. vim.keycode(command))
             else
-                vim.cmd("normal! " .. replace_codes(command))
+                vim.cmd("normal! " .. vim.keycode(command))
             end
         end
     elseif type(command) == "function" then
@@ -152,17 +148,17 @@ M.vertical_scroller = function(target_position, delay)
     if initial_position.lnum < target_position.lnum then
         vim.cmd("normal! gj")
         if get_win_position().winline > target_position.winline then
-            vim.cmd("normal! " .. replace_codes("<c-e>"))
+            vim.cmd("normal! " .. vim.keycode("<c-e>"))
         end
     elseif initial_position.lnum > target_position.lnum then
         vim.cmd("normal! gk")
         if get_win_position().winline < target_position.winline then
-            vim.cmd("normal! " .. replace_codes("<c-y>"))
+            vim.cmd("normal! " .. vim.keycode("<c-y>"))
         end
     elseif initial_position.winline < target_position.winline then
-        vim.cmd("normal! " .. replace_codes("<c-y>"))
+        vim.cmd("normal! " .. vim.keycode("<c-y>"))
     elseif initial_position.winline > target_position.winline then
-        vim.cmd("normal! " .. replace_codes("<c-e>"))
+        vim.cmd("normal! " .. vim.keycode("<c-e>"))
     end
 
     local final_position = get_win_position()
