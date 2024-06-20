@@ -41,7 +41,7 @@ local positions_are_close = function(p1, p2)
 end
 
 M.scroll = function(command, options)
-    options = vim.tbl_deep_extend("force", options, {
+    options = vim.tbl_deep_extend("force", options or {}, {
         callback = nil,
         center = false,
         delay = 5,
