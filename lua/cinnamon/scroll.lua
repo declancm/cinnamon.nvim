@@ -20,16 +20,17 @@ M.scroll = function(command, options)
         },
     })
 
+    H.original_view = vim.fn.winsaveview()
     local original_position = H.get_position()
     local original_buffer = vim.api.nvim_get_current_buf()
     local original_window = vim.api.nvim_get_current_win()
-    H.original_view = vim.fn.winsaveview()
 
     H.execute_movement(command)
 
+    H.final_view = vim.fn.winsaveview()
+    local final_position = H.get_position()
     local final_buffer = vim.api.nvim_get_current_buf()
     local final_window = vim.api.nvim_get_current_win()
-    local final_position = H.get_position()
 
     if
         original_buffer ~= final_buffer
@@ -194,8 +195,10 @@ H.positions_are_close = function(p1, p2)
 end
 
 H.scroll_setup = function()
-    H.final_view = vim.fn.winsaveview()
+    H.vimopts:set("lazyredraw", "o", true)
     vim.fn.winrestview(H.original_view)
+    H.vimopts:restore("lazyredraw", "o")
+
     H.horizontal_scrolling = true
     H.vertical_scrolling = true
     H.horizontal_count = 0
