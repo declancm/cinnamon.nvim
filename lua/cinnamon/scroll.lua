@@ -160,6 +160,8 @@ H.cleanup = function(options)
         end
     end
     H.locked = false
+
+    assert(H.vimopts:are_restored(), "Not all Vim options were restored")
 end
 
 H.get_position = function()
@@ -208,15 +210,19 @@ H.scroll_teardown = function()
     H.vimopts:restore("virtualedit", "o")
 end
 
-H.vimopts = {}
+H.vimopts = { _opts = {} }
 function H.vimopts:set(option, context, value)
-    self[option] = vim[context][option]
+    self._opts[option] = vim[context][option]
     vim[context][option] = value
 end
 function H.vimopts:restore(option, context)
-    if vim[context][option] ~= self[option] then
-        vim[context][option] = self[option]
+    if vim[context][option] ~= self._opts[option] then
+        vim[context][option] = self._opts[option]
     end
+    self._opts[option] = nil
+end
+function H.vimopts:are_restored()
+    return next(self._opts) == nil
 end
 
 H.calculate_target_position = function(position, options)
