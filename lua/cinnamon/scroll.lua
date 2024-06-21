@@ -25,7 +25,6 @@ M.scroll = function(command, options)
     local original_position = H.get_position()
     local original_buffer = vim.api.nvim_get_current_buf()
     local original_window = vim.api.nvim_get_current_win()
-    local saved_view = vim.fn.winsaveview()
 
     H.movement_setup()
     H.execute_movement(command)
@@ -46,7 +45,6 @@ M.scroll = function(command, options)
         return
     end
 
-    vim.fn.winrestview(saved_view)
     H.movement_teardown()
     H.scroll_setup()
     local target_position = H.calculate_target_position(final_position, options)
@@ -105,12 +103,6 @@ H.horizontal_scroller = function(target_position, options)
 
     if scroll_complete or scroll_failed then
         H.horizontal_scrolling = false
-        vim.fn.cursor({
-            final_position.lnum,
-            target_position.col,
-            target_position.off,
-            target_position.curswant,
-        })
         H.cleanup(options)
         return
     end
@@ -150,10 +142,6 @@ H.vertical_scroller = function(target_position, options)
 
     if scroll_complete or scroll_failed then
         H.vertical_scrolling = false
-        vim.fn.cursor({
-            target_position.lnum,
-            final_position.col,
-        })
         H.cleanup(options)
         return
     end
@@ -200,6 +188,7 @@ H.positions_are_close = function(p1, p2)
 end
 
 H.movement_setup = function()
+    H.original_view = vim.fn.winsaveview()
     H.vimopts:set("lazyredraw", "o", true)
 end
 H.movement_teardown = function()
@@ -207,6 +196,8 @@ H.movement_teardown = function()
 end
 
 H.scroll_setup = function()
+    H.final_view = vim.fn.winsaveview()
+    vim.fn.winrestview(H.original_view)
     H.horizontal_scrolling = true
     H.vertical_scrolling = true
     H.horizontal_count = 0
@@ -214,6 +205,9 @@ H.scroll_setup = function()
     H.vimopts:set("virtualedit", "o", "all")
 end
 H.scroll_teardown = function()
+    -- Need to restore the final view in case something went wrong.
+    -- It also restores the 'curswant' requires for movements with '$'.
+    vim.fn.winrestview(H.final_view)
     H.vimopts:restore("virtualedit", "o")
 end
 
