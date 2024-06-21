@@ -170,9 +170,10 @@ end
 
 H.get_position = function()
     local curpos = vim.fn.getcurpos()
+    local view = vim.fn.winsaveview()
     return {
         lnum = curpos[2],
-        col = curpos[3],
+        col = curpos[3] + view.coladd, -- Adjust for 'virtualedit'
         off = curpos[4],
         curswant = curpos[5],
         winline = vim.fn.winline(),
