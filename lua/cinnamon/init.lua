@@ -120,9 +120,9 @@ function Scroll(...)
 
     local command = args[1]
     if command == "definition" then
-        command = ":lua vim.lsp.buf.definition()"
+        command = vim.lsp.buf.definition
     elseif command == "declaration" then
-        command = ":lua vim.lsp.buf.declaration()"
+        command = vim.lsp.buf.declaration
     end
 
     local options = {}
