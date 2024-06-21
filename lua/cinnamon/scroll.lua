@@ -139,7 +139,7 @@ H.vertical_scroller = function(target_position, options)
     local scroll_complete = final_position.lnum == target_position.lnum
         and final_position.winline == target_position.winline
     local scroll_failed = (
-        final_position.lnum == initial_position.lnum and final_position.winlHine == initial_position.winline
+        final_position.lnum == initial_position.lnum and final_position.winline == initial_position.winline
     ) or H.vertical_count > options.max_delta.lnum + vim.api.nvim_win_get_height(0)
 
     if scroll_complete or scroll_failed then
