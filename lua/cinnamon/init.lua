@@ -74,9 +74,7 @@ M.setup = function(user_config)
         map({ "n", "x" }, "$", function() s("$") end)
 
         -- Paragraph movements:
-        map({ "n", "x" }, "{", function()
-            s("{")
-        end)
+        map({ "n", "x" }, "{", function() s("{") end)
         map({ "n", "x" }, "}", function() s("}") end)
 
         -- Previous/next search result:
@@ -119,9 +117,7 @@ M.setup = function(user_config)
         map({ "n", "x" }, "<Up>", function() s("<Up>") end)
         map({ "n", "x" }, "<Down>", function() s("<Down>") end)
         map({ "n", "x" }, "gk", function() s("gk") end)
-        map({ "n", "x" }, "gj", function()
-            s("gj")
-        end)
+        map({ "n", "x" }, "gj", function() s("gj") end)
         map({ "n", "x" }, "g<Up>", function() s("g<Up>") end)
         map({ "n", "x" }, "g<Down>", function() s("g<Down>") end)
 
