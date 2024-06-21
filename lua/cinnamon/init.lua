@@ -15,7 +15,7 @@ M.setup = function(user_config)
 
     -- Set the config:
     if user_config ~= nil then
-        vim.tbl_deep_extend("force", config, user_config or {})
+        config = vim.tbl_deep_extend("force", config, user_config or {})
     end
 
     -- Create highlight group for hiding cursor:
