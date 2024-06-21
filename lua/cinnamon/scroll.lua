@@ -25,7 +25,7 @@ M.scroll = function(command, options)
     local original_buffer = vim.api.nvim_get_current_buf()
     local original_window = vim.api.nvim_get_current_win()
 
-    H.execute_movement(command)
+    H.with_lazyredraw(H.execute_movement, command)
 
     H.final_view = vim.fn.winsaveview()
     local final_position = H.get_position()
@@ -44,15 +44,13 @@ M.scroll = function(command, options)
         return
     end
 
-    H.scroll_setup()
+    H.scrollers_setup()
     local target_position = H.calculate_target_position(final_position, options)
     H.vertical_scroller(target_position, options)
     H.horizontal_scroller(target_position, options)
 end
 
 H.execute_movement = function(command)
-    H.vimopts:set("lazyredraw", "o", true)
-
     if type(command) == "string" then
         if command[1] == ":" then
             -- Ex (command-line) command
@@ -72,8 +70,6 @@ H.execute_movement = function(command)
             vim.notify(message)
         end
     end
-
-    H.vimopts:restore("lazyredraw", "o")
 end
 
 H.horizontal_scroller = function(target_position, options)
@@ -107,7 +103,7 @@ H.horizontal_scroller = function(target_position, options)
     if scroll_complete or scroll_failed then
         H.horizontal_scrolling = false
         if not H.vertical_scrolling then
-            H.scroll_teardown()
+            H.scrollers_teardown()
             H.cleanup(options)
         end
         return
@@ -149,7 +145,7 @@ H.vertical_scroller = function(target_position, options)
     if scroll_complete or scroll_failed then
         H.vertical_scrolling = false
         if not H.horizontal_scrolling then
-            H.scroll_teardown()
+            H.scrollers_teardown()
             H.cleanup(options)
         end
         return
@@ -194,37 +190,44 @@ H.positions_are_close = function(p1, p2)
     return true
 end
 
-H.scroll_setup = function()
-    H.vimopts:set("lazyredraw", "o", true)
-    vim.fn.winrestview(H.original_view)
-    H.vimopts:restore("lazyredraw", "o")
+H.scrollers_setup = function()
+    H.with_lazyredraw(vim.fn.winrestview, H.original_view)
 
     H.horizontal_scrolling = true
     H.vertical_scrolling = true
     H.horizontal_count = 0
     H.vertical_count = 0
     -- Virtual editing allows for clean diagonal scrolling
-    H.vimopts:set("virtualedit", "o", "all")
+    H.vimopts:set("virtualedit", "all")
 end
-H.scroll_teardown = function()
+
+H.scrollers_teardown = function()
     -- Need to restore the final view in case something went wrong.
     -- It also restores the 'curswant' requires for movements with '$'.
     vim.fn.winrestview(H.final_view)
-    H.vimopts:restore("virtualedit", "o")
+    H.vimopts:restore("virtualedit")
 end
 
 H.vimopts = { _opts = {} }
-function H.vimopts:set(option, context, value)
+function H.vimopts:set(option, value, context)
     assert(self._opts[option] == nil, "Vim option already saved")
+    context = context or "o"
     self._opts[option] = vim[context][option]
     vim[context][option] = value
 end
 function H.vimopts:restore(option, context)
     assert(self._opts[option] ~= nil, "Vim option already restored")
+    context = context or "o"
     if vim[context][option] ~= self._opts[option] then
         vim[context][option] = self._opts[option]
     end
     self._opts[option] = nil
+end
+function H.vimopts:is_set(option)
+    return self._opts[option] ~= nil
+end
+function H.vimopts:is_restored(option)
+    return self._opts[option] == nil
 end
 function H.vimopts:are_restored()
     return next(self._opts) == nil
@@ -236,6 +239,17 @@ H.calculate_target_position = function(position, options)
         target_position.winline = math.ceil(vim.api.nvim_win_get_height(0) / 2)
     end
     return target_position
+end
+
+H.with_lazyredraw = function(func, ...)
+    -- Need to check if already set and restored in case of nested calls
+    if not H.vimopts:is_set("lazyredraw") then
+        H.vimopts:set("lazyredraw", true)
+    end
+    func(...)
+    if not H.vimopts:is_restored("lazyredraw") then
+        H.vimopts:restore("lazyredraw")
+    end
 end
 
 return M
