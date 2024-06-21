@@ -23,8 +23,8 @@ M.scroll = function(command, options)
     local original_position = H.get_position()
     local original_buffer = vim.api.nvim_get_current_buf()
     local original_window = vim.api.nvim_get_current_win()
+    H.original_view = vim.fn.winsaveview()
 
-    H.movement_setup()
     H.execute_movement(command)
 
     local final_buffer = vim.api.nvim_get_current_buf()
@@ -43,7 +43,6 @@ M.scroll = function(command, options)
         return
     end
 
-    H.movement_teardown()
     H.scroll_setup()
     local target_position = H.calculate_target_position(final_position, options)
     H.vertical_scroller(target_position, options)
@@ -51,6 +50,8 @@ M.scroll = function(command, options)
 end
 
 H.execute_movement = function(command)
+    H.vimopts:set("lazyredraw", "o", true)
+
     if type(command) == "string" then
         if command[1] == ":" then
             -- Ex (command-line) command
@@ -70,6 +71,8 @@ H.execute_movement = function(command)
             vim.notify(message)
         end
     end
+
+    H.vimopts:restore("lazyredraw", "o")
 end
 
 H.horizontal_scroller = function(target_position, options)
@@ -102,7 +105,10 @@ H.horizontal_scroller = function(target_position, options)
 
     if scroll_complete or scroll_failed then
         H.horizontal_scrolling = false
-        H.cleanup(options)
+        if not H.vertical_scrolling then
+            H.scroll_teardown()
+            H.cleanup(options)
+        end
         return
     end
 
@@ -141,7 +147,10 @@ H.vertical_scroller = function(target_position, options)
 
     if scroll_complete or scroll_failed then
         H.vertical_scrolling = false
-        H.cleanup(options)
+        if not H.horizontal_scrolling then
+            H.scroll_teardown()
+            H.cleanup(options)
+        end
         return
     end
 
@@ -151,10 +160,6 @@ H.vertical_scroller = function(target_position, options)
 end
 
 H.cleanup = function(options)
-    if H.vertical_scrolling or H.horizontal_scrolling then
-        return
-    end
-    H.scroll_teardown()
     if options.callback ~= nil then
         local success, message = pcall(options.callback)
         if not success then
@@ -186,14 +191,6 @@ H.positions_are_close = function(p1, p2)
     if math.abs(p1.wincol - p2.wincol) > 1 then return false end
     -- stylua: ignore end
     return true
-end
-
-H.movement_setup = function()
-    H.original_view = vim.fn.winsaveview()
-    H.vimopts:set("lazyredraw", "o", true)
-end
-H.movement_teardown = function()
-    H.vimopts:restore("lazyredraw", "o")
 end
 
 H.scroll_setup = function()
