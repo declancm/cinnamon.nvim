@@ -92,19 +92,13 @@ H.horizontal_scroller = function(target_position, delay)
         and final_position.wincol == initial_position.wincol
     if scroll_complete or scroll_failed then
         horizontal_scrolling = false
-        vim.o.virtualedit = H.saved_virtualedit
         vim.fn.cursor({
             final_position.lnum,
             target_position.col,
             target_position.off,
             target_position.curswant,
         })
-        if not vertical_scrolling then
-            if type(H.callback) == "function" then
-                H.callback()
-            end
-            locked = false
-        end
+        H.scroller_cleanup()
         return
     end
 
@@ -144,18 +138,23 @@ H.vertical_scroller = function(target_position, delay)
             target_position.lnum,
             final_position.col,
         })
-        if not horizontal_scrolling then
-            if type(H.callback) == "function" then
-                H.callback()
-            end
-            locked = false
-        end
+        H.scroller_cleanup()
         return
     end
 
     vim.defer_fn(function()
         H.vertical_scroller(target_position, delay)
     end, delay)
+end
+
+H.scroller_cleanup = function()
+    if not vertical_scrolling and not horizontal_scrolling then
+        H.scroll_vimopts:restore_all()
+        if type(H.callback) == "function" then
+            H.callback()
+        end
+        locked = false
+    end
 end
 
 H.get_position = function()
