@@ -34,6 +34,7 @@ M.scroll = function(command, options)
         original_buffer ~= final_buffer
         or original_window ~= final_window
         or H.positions_are_close(original_position, final_position)
+        or vim.fn.foldclosed(final_position.lnum) ~= -1
     then
         H.movement_teardown()
         H.locked = false
