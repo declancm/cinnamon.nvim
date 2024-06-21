@@ -46,9 +46,9 @@ M.scroll = function(command, options)
 
     local original_position = get_win_position()
     local original_buffer = vim.api.nvim_get_current_buf()
+    local original_window = vim.api.nvim_get_current_win()
 
     local saved_view = vim.fn.winsaveview()
-
     local saved_lazyredraw = vim.o.lazyredraw
     vim.o.lazyredraw = true
 
@@ -68,35 +68,35 @@ M.scroll = function(command, options)
         command()
     end
 
-    if original_buffer ~= vim.api.nvim_get_current_buf() then
+    local final_buffer = vim.api.nvim_get_current_buf()
+    local final_window = vim.api.nvim_get_current_win()
+    local final_position = get_win_position()
+
+    if
+        original_buffer ~= final_buffer
+        or original_window ~= final_window
+        or positions_are_close(original_position, final_position)
+    then
         vim.o.lazyredraw = saved_lazyredraw
         lock = false
         return
     end
 
-    local final_position = get_win_position()
-    if not positions_are_close(original_position, final_position) then
-        if options.center then
-            final_position.winline = math.ceil(vim.api.nvim_win_get_height(0) / 2)
-        end
-        vim.fn.winrestview(saved_view)
-        vim.o.lazyredraw = saved_lazyredraw
-        saved_virtualedit = vim.o.virtualedit
-        vim.o.virtualedit = "all" -- Use virtual columns for horizontal scrolling.
-        M.vertical_scroller(final_position, options.delay)
-        M.horizontal_scroller(final_position, options.delay)
+    if options.center then
+        final_position.winline = math.ceil(vim.api.nvim_win_get_height(0) / 2)
     end
+    vim.fn.winrestview(saved_view)
+    vim.o.lazyredraw = saved_lazyredraw
+    saved_virtualedit = vim.o.virtualedit
+    vim.o.virtualedit = "all" -- Use virtual columns for horizontal scrolling.
+    M.vertical_scroller(final_position, options.delay)
+    M.horizontal_scroller(final_position, options.delay)
 end
 
 M.horizontal_scroller = function(target_position, delay)
     horizontal_scrolling = true
-
     local initial_position = get_win_position()
 
-    -- local col_delta = target_position.col - initial_position.col
-    -- local wincol_delta = target_position.wincol - initial_position.wincol
-
-    -- if col_delta > 0 then
     if initial_position.col < target_position.col then
         vim.cmd("normal! l")
         if get_win_position().wincol > target_position.wincol then
@@ -119,6 +119,7 @@ M.horizontal_scroller = function(target_position, delay)
     local scroll_failed = final_position.col == initial_position.col
         and final_position.wincol == initial_position.wincol
     if scroll_complete or scroll_failed then
+        horizontal_scrolling = false
         vim.o.virtualedit = saved_virtualedit
         vim.fn.cursor({
             final_position.lnum,
@@ -132,7 +133,6 @@ M.horizontal_scroller = function(target_position, delay)
             end
             lock = false
         end
-        horizontal_scrolling = false
         return
     end
 
@@ -167,6 +167,7 @@ M.vertical_scroller = function(target_position, delay)
     local scroll_failed = final_position.lnum == initial_position.lnum
         and final_position.winline == initial_position.winline
     if scroll_complete or scroll_failed then
+        vertical_scrolling = false
         vim.fn.cursor({
             target_position.lnum,
             final_position.col,
@@ -177,7 +178,6 @@ M.vertical_scroller = function(target_position, delay)
             end
             lock = false
         end
-        vertical_scrolling = false
         return
     end
 
