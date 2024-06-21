@@ -36,8 +36,7 @@ M.scroll = function(command, options)
         or H.positions_are_close(original_position, final_position)
         or vim.fn.foldclosed(final_position.lnum) ~= -1
     then
-        H.movement_teardown()
-        H.locked = false
+        H.cleanup(options)
         return
     end
 
@@ -102,7 +101,7 @@ H.horizontal_scroller = function(target_position, options)
             target_position.off,
             target_position.curswant,
         })
-        H.scroller_cleanup(options)
+        H.cleanup(options)
         return
     end
 
@@ -141,7 +140,7 @@ H.vertical_scroller = function(target_position, options)
             target_position.lnum,
             final_position.col,
         })
-        H.scroller_cleanup(options)
+        H.cleanup(options)
         return
     end
 
@@ -150,17 +149,18 @@ H.vertical_scroller = function(target_position, options)
     end, options.delay)
 end
 
-H.scroller_cleanup = function(options)
-    if not H.vertical_scrolling and not H.horizontal_scrolling then
-        H.scroll_teardown()
-        if options.callback ~= nil then
-            local success, message = pcall(options.callback)
-            if not success then
-                vim.notify(message)
-            end
-        end
-        H.locked = false
+H.cleanup = function(options)
+    if H.vertical_scrolling or H.horizontal_scrolling then
+        return
     end
+    H.scroll_teardown()
+    if options.callback ~= nil then
+        local success, message = pcall(options.callback)
+        if not success then
+            vim.notify(message)
+        end
+    end
+    H.locked = false
 end
 
 H.get_position = function()
