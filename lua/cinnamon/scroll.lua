@@ -6,15 +6,11 @@ local H = {}
 
 local config = require("cinnamon.config")
 
-local vertical_scrolling = false
-local horizontal_scrolling = false
-local locked = false
-
 M.scroll = function(command, options)
-    if locked then
+    if H.locked then
         return
     end
-    locked = true
+    H.locked = true
 
     options = vim.tbl_deep_extend("force", options or {}, {
         callback = nil,
@@ -55,7 +51,7 @@ M.scroll = function(command, options)
         or H.positions_are_close(original_position, final_position)
     then
         H.movement_teardown()
-        locked = false
+        H.locked = false
         return
     end
 
@@ -69,7 +65,6 @@ M.scroll = function(command, options)
 end
 
 H.horizontal_scroller = function(target_position, options)
-    horizontal_scrolling = true
     local initial_position = H.get_position()
 
     if initial_position.col < target_position.col then
@@ -94,7 +89,7 @@ H.horizontal_scroller = function(target_position, options)
     local scroll_failed = final_position.col == initial_position.col
         and final_position.wincol == initial_position.wincol
     if scroll_complete or scroll_failed then
-        horizontal_scrolling = false
+        H.horizontal_scrolling = false
         vim.fn.cursor({
             final_position.lnum,
             target_position.col,
@@ -111,7 +106,6 @@ H.horizontal_scroller = function(target_position, options)
 end
 
 H.vertical_scroller = function(target_position, options)
-    vertical_scrolling = true
     local initial_position = H.get_position()
 
     if initial_position.lnum < target_position.lnum then
@@ -136,7 +130,7 @@ H.vertical_scroller = function(target_position, options)
     local scroll_failed = final_position.lnum == initial_position.lnum
         and final_position.winlHine == initial_position.winline
     if scroll_complete or scroll_failed then
-        vertical_scrolling = false
+        H.vertical_scrolling = false
         vim.fn.cursor({
             target_position.lnum,
             final_position.col,
@@ -151,12 +145,12 @@ H.vertical_scroller = function(target_position, options)
 end
 
 H.scroller_cleanup = function(options)
-    if not vertical_scrolling and not horizontal_scrolling then
+    if not H.vertical_scrolling and not H.horizontal_scrolling then
         H.scroll_teardown()
         if type(options.callback) == "function" then
             options.callback()
         end
-        locked = false
+        H.locked = false
     end
 end
 
@@ -190,6 +184,8 @@ H.movement_teardown = function()
 end
 
 H.scroll_setup = function()
+    H.horizontal_scrolling = true
+    H.vertical_scrolling = true
     H.vimopts:set("virtualedit", "o", "all")
 end
 H.scroll_teardown = function()
