@@ -28,7 +28,7 @@ M.setup = function(user_config)
 
         local command = args[1]
         local options = {}
-        options.center = args[2] == 1
+        options.center = args[2] ~= 0
         options.delay = args[4]
         M.scroll(command, options)
     end
