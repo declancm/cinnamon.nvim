@@ -1,6 +1,9 @@
 local M = {}
 local H = {}
 
+-- TODO: handle folds
+-- TODO: track scroller count
+
 local config = require("cinnamon.config")
 
 local vertical_scrolling = false
@@ -24,7 +27,7 @@ M.scroll = function(command, options)
     local original_window = vim.api.nvim_get_current_win()
     local saved_view = vim.fn.winsaveview()
 
-    H.movement_vimopts:set_all()
+    H.movement_setup()
 
     if type(command) == "string" then
         if command[1] == ":" then
@@ -51,21 +54,21 @@ M.scroll = function(command, options)
         or original_window ~= final_window
         or H.positions_are_close(original_position, final_position)
     then
-        H.movement_vimopts:restore_all()
+        H.movement_teardown()
         locked = false
         return
     end
 
     vim.fn.winrestview(saved_view)
-    H.movement_vimopts:restore_all()
-    H.scroll_vimopts:set_all()
-    H.callback = options.callback
-    local target_position = H.get_target_position(final_position, options)
-    H.vertical_scroller(target_position, options.delay)
-    H.horizontal_scroller(target_position, options.delay)
+
+    H.movement_teardown()
+    H.scroll_setup()
+    local target_position = H.calculate_target_position(final_position, options)
+    H.vertical_scroller(target_position, options)
+    H.horizontal_scroller(target_position, options)
 end
 
-H.horizontal_scroller = function(target_position, delay)
+H.horizontal_scroller = function(target_position, options)
     horizontal_scrolling = true
     local initial_position = H.get_position()
 
@@ -98,16 +101,16 @@ H.horizontal_scroller = function(target_position, delay)
             target_position.off,
             target_position.curswant,
         })
-        H.scroller_cleanup()
+        H.scroller_cleanup(options)
         return
     end
 
     vim.defer_fn(function()
-        H.horizontal_scroller(target_position, delay)
-    end, delay)
+        H.horizontal_scroller(target_position, options)
+    end, options.delay)
 end
 
-H.vertical_scroller = function(target_position, delay)
+H.vertical_scroller = function(target_position, options)
     vertical_scrolling = true
     local initial_position = H.get_position()
 
@@ -138,20 +141,20 @@ H.vertical_scroller = function(target_position, delay)
             target_position.lnum,
             final_position.col,
         })
-        H.scroller_cleanup()
+        H.scroller_cleanup(options)
         return
     end
 
     vim.defer_fn(function()
-        H.vertical_scroller(target_position, delay)
-    end, delay)
+        H.vertical_scroller(target_position, options)
+    end, options.delay)
 end
 
-H.scroller_cleanup = function()
+H.scroller_cleanup = function(options)
     if not vertical_scrolling and not horizontal_scrolling then
-        H.scroll_vimopts:restore_all()
-        if type(H.callback) == "function" then
-            H.callback()
+        H.scroll_teardown()
+        if type(options.callback) == "function" then
+            options.callback()
         end
         locked = false
     end
@@ -179,40 +182,32 @@ H.positions_are_close = function(p1, p2)
     return true
 end
 
-local vimopts = {}
-function vimopts:new(o)
-    o = o or {}
-    setmetatable(o, self)
-    self.__index = self
-    return o
+H.movement_setup = function()
+    H.vimopts:set("lazyredraw", "o", true)
 end
-function vimopts:set(option, context, value)
-    vimopts[option] = vim[context][option]
+H.movement_teardown = function()
+    H.vimopts:restore("lazyredraw", "o")
+end
+
+H.scroll_setup = function()
+    H.vimopts:set("virtualedit", "o", "all")
+end
+H.scroll_teardown = function()
+    H.vimopts:restore("virtualedit", "o")
+end
+
+H.vimopts = {}
+function H.vimopts:set(option, context, value)
+    self[option] = vim[context][option]
     vim[context][option] = value
 end
-function vimopts:restore(option, context)
-    if vim[context][option] ~= vimopts[option] then
-        vim[context][option] = vimopts[option]
+function H.vimopts:restore(option, context)
+    if vim[context][option] ~= self[option] then
+        vim[context][option] = self[option]
     end
 end
 
-H.movement_vimopts = vimopts:new()
-function H.movement_vimopts:set_all()
-    self:set("lazyredraw", "o", true)
-end
-function H.movement_vimopts:restore_all()
-    self:restore("lazyredraw", "o")
-end
-
-H.scroll_vimopts = vimopts:new()
-function H.scroll_vimopts:set_all()
-    self:set("virtualedit", "o", "all") -- Use virtual columns for diagonal scrolling.
-end
-function H.scroll_vimopts:restore_all()
-    self:restore("virtualedit", "o")
-end
-
-H.get_target_position = function(position, options)
+H.calculate_target_position = function(position, options)
     local target_position = position
     if options.center then
         target_position.winline = math.ceil(vim.api.nvim_win_get_height(0) / 2)
