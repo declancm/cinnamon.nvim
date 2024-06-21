@@ -18,7 +18,7 @@ M.setup = function(user_config)
         vim.tbl_deep_extend("force", config, user_config or {})
     end
 
-    -- Global function used to simplify the keymaps:
+    -- For backward compatibility:
     function Scroll(...)
         local args = { ... }
 
@@ -35,10 +35,6 @@ M.setup = function(user_config)
 
         M.scroll(command, options)
     end
-
-    -- Deprecated settings:
-    Cinnamon = {}
-    Cinnamon.Scroll = Scroll
 
     -- Create highlight group for hiding cursor:
     if config.hide_cursor and vim.opt.termguicolors:get() then
