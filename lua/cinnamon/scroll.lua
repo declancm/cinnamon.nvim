@@ -24,22 +24,7 @@ M.scroll = function(command, options)
     local saved_view = vim.fn.winsaveview()
 
     H.movement_setup()
-
-    if type(command) == "string" then
-        if command[1] == ":" then
-            -- Ex (command-line) command
-            vim.cmd(vim.keycode(command:sub(2)))
-        elseif command ~= "" then
-            -- Normal mode command
-            if vim.v.count ~= 0 then
-                vim.cmd("normal! " .. vim.v.count .. vim.keycode(command))
-            else
-                vim.cmd("normal! " .. vim.keycode(command))
-            end
-        end
-    elseif type(command) == "function" then
-        command()
-    end
+    H.execute_movement(command)
 
     local final_buffer = vim.api.nvim_get_current_buf()
     local final_window = vim.api.nvim_get_current_win()
@@ -56,12 +41,29 @@ M.scroll = function(command, options)
     end
 
     vim.fn.winrestview(saved_view)
-
     H.movement_teardown()
     H.scroll_setup()
     local target_position = H.calculate_target_position(final_position, options)
     H.vertical_scroller(target_position, options)
     H.horizontal_scroller(target_position, options)
+end
+
+H.execute_movement = function(command)
+    if type(command) == "string" then
+        if command[1] == ":" then
+            -- Ex (command-line) command
+            vim.cmd(vim.keycode(command:sub(2)))
+        elseif command ~= "" then
+            -- Normal mode command
+            if vim.v.count ~= 0 then
+                vim.cmd("normal! " .. vim.v.count .. vim.keycode(command))
+            else
+                vim.cmd("normal! " .. vim.keycode(command))
+            end
+        end
+    elseif type(command) == "function" then
+        command()
+    end
 end
 
 H.horizontal_scroller = function(target_position, options)
