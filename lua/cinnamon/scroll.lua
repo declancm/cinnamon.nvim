@@ -1,9 +1,6 @@
 local M = {}
 local H = {}
 
--- TODO: handle folds
--- TODO: track scroller count
-
 local config = require("cinnamon.config")
 
 M.scroll = function(command, options)
