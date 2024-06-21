@@ -16,6 +16,10 @@ M.scroll = function(command, options)
         callback = nil,
         center = false,
         delay = 5,
+        max_delta = {
+            lnum = 100,
+            col = 200,
+        },
     })
 
     local original_position = H.get_position()
@@ -35,6 +39,8 @@ M.scroll = function(command, options)
         or original_window ~= final_window
         or H.positions_are_close(original_position, final_position)
         or vim.fn.foldclosed(final_position.lnum) ~= -1
+        or math.abs(original_position.lnum - final_position.lnum) > options.max_delta.lnum
+        or math.abs(original_position.col - final_position.col) > options.max_delta.col
     then
         H.cleanup(options)
         return
@@ -88,11 +94,15 @@ H.horizontal_scroller = function(target_position, options)
         vim.cmd("normal! zl")
     end
 
+    H.horizontal_count = H.horizontal_count + 1
+
     local final_position = H.get_position()
     local scroll_complete = final_position.col == target_position.col
         and final_position.wincol == target_position.wincol
-    local scroll_failed = final_position.col == initial_position.col
-        and final_position.wincol == initial_position.wincol
+    local scroll_failed = (
+        final_position.col == initial_position.col and final_position.wincol == initial_position.wincol
+    ) or H.horizontal_count > options.max_delta.col + vim.api.nvim_win_get_width(0)
+
     if scroll_complete or scroll_failed then
         H.horizontal_scrolling = false
         vim.fn.cursor({
@@ -129,11 +139,15 @@ H.vertical_scroller = function(target_position, options)
         vim.cmd("normal! " .. vim.keycode("<c-e>"))
     end
 
+    H.vertical_count = H.vertical_count + 1
+
     local final_position = H.get_position()
     local scroll_complete = final_position.lnum == target_position.lnum
         and final_position.winline == target_position.winline
-    local scroll_failed = final_position.lnum == initial_position.lnum
-        and final_position.winlHine == initial_position.winline
+    local scroll_failed = (
+        final_position.lnum == initial_position.lnum and final_position.winlHine == initial_position.winline
+    ) or H.vertical_count > options.max_delta.lnum + vim.api.nvim_win_get_height(0)
+
     if scroll_complete or scroll_failed then
         H.vertical_scrolling = false
         vim.fn.cursor({
@@ -195,6 +209,8 @@ end
 H.scroll_setup = function()
     H.horizontal_scrolling = true
     H.vertical_scrolling = true
+    H.horizontal_count = 0
+    H.vertical_count = 0
     H.vimopts:set("virtualedit", "o", "all")
 end
 H.scroll_teardown = function()
