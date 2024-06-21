@@ -18,24 +18,6 @@ M.setup = function(user_config)
         vim.tbl_deep_extend("force", config, user_config or {})
     end
 
-    -- For backward compatibility:
-    function Scroll(...)
-        local args = { ... }
-
-        local command = args[1]
-        if command == "definition" then
-            command = ":lua vim.lsp.buf.definition()"
-        elseif command == "declaration" then
-            command = ":lua vim.lsp.buf.declaration()"
-        end
-
-        local options = {}
-        options.center = args[2] ~= 0
-        options.delay = args[4]
-
-        M.scroll(command, options)
-    end
-
     -- Create highlight group for hiding cursor:
     if config.hide_cursor and vim.opt.termguicolors:get() then
         vim.cmd([[
@@ -131,5 +113,23 @@ M.setup = function(user_config)
 end
 
 M.scroll = require("cinnamon.scroll").scroll
+
+-- For backward compatibility:
+function Scroll(...)
+    local args = { ... }
+
+    local command = args[1]
+    if command == "definition" then
+        command = ":lua vim.lsp.buf.definition()"
+    elseif command == "declaration" then
+        command = ":lua vim.lsp.buf.declaration()"
+    end
+
+    local options = {}
+    options.center = args[2] ~= 0
+    options.delay = args[4]
+
+    M.scroll(command, options)
+end
 
 return M
