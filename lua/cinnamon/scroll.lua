@@ -4,6 +4,7 @@ local H = {}
 local config = require("cinnamon.config")
 
 M.scroll = function(command, options)
+    -- Lock the function to prevent re-entrancy. Must be first.
     if H.locked then
         return
     end
@@ -63,6 +64,7 @@ H.execute_movement = function(command)
             end
         end
     elseif type(command) == "function" then
+        -- Lua function
         local success, message = pcall(command)
         if not success then
             vim.notify(message)
@@ -201,6 +203,7 @@ H.scroll_setup = function()
     H.vertical_scrolling = true
     H.horizontal_count = 0
     H.vertical_count = 0
+    -- Virtual editing allows for clean diagonal scrolling
     H.vimopts:set("virtualedit", "o", "all")
 end
 H.scroll_teardown = function()
