@@ -58,9 +58,9 @@ H.execute_movement = function(command)
         elseif command ~= "" then
             -- Normal mode command
             if vim.v.count ~= 0 then
-                vim.cmd("normal! " .. vim.v.count .. vim.keycode(command))
+                vim.cmd("silent! normal! " .. vim.v.count .. vim.keycode(command))
             else
-                vim.cmd("normal! " .. vim.keycode(command))
+                vim.cmd("silent! normal! " .. vim.keycode(command))
             end
         end
     elseif type(command) == "function" then
