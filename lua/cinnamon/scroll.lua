@@ -62,7 +62,10 @@ H.execute_movement = function(command)
             end
         end
     elseif type(command) == "function" then
-        command()
+        local success, message = pcall(command)
+        if not success then
+            vim.notify(message)
+        end
     end
 end
 
@@ -149,8 +152,11 @@ end
 H.scroller_cleanup = function(options)
     if not H.vertical_scrolling and not H.horizontal_scrolling then
         H.scroll_teardown()
-        if type(options.callback) == "function" then
-            options.callback()
+        if options.callback ~= nil then
+            local success, message = pcall(options.callback)
+            if not success then
+                vim.notify(message)
+            end
         end
         H.locked = false
     end
