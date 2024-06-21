@@ -165,7 +165,7 @@ H.cleanup = function(options)
     end
     H.locked = false
 
-    assert(H.vimopts:are_restored(), "Not all Vim options were restored")
+    assert(not H.vimopts:are_set(), "Not all Vim options were restored")
 end
 
 H.get_position = function()
@@ -227,11 +227,8 @@ end
 function H.vimopts:is_set(option)
     return self._opts[option] ~= nil
 end
-function H.vimopts:is_restored(option)
-    return self._opts[option] == nil
-end
-function H.vimopts:are_restored()
-    return next(self._opts) == nil
+function H.vimopts:are_set()
+    return next(self._opts) ~= nil
 end
 
 H.calculate_target_position = function(position, options)
@@ -248,7 +245,7 @@ H.with_lazyredraw = function(func, ...)
         H.vimopts:set("lazyredraw", true)
     end
     func(...)
-    if not H.vimopts:is_restored("lazyredraw") then
+    if H.vimopts:is_set("lazyredraw") then
         H.vimopts:restore("lazyredraw")
     end
 end
