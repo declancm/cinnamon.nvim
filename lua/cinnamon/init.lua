@@ -23,9 +23,16 @@ M.setup = function(user_config)
         local args = { ... }
 
         local command = args[1]
+        if command == "definition" then
+            command = ":lua vim.lsp.buf.definition()"
+        elseif command == "declaration" then
+            command = ":lua vim.lsp.buf.declaration()"
+        end
+
         local options = {}
         options.center = args[2] ~= 0
         options.delay = args[4]
+
         M.scroll(command, options)
     end
 
