@@ -8,18 +8,6 @@ M.setup = function(user_config)
         config = vim.tbl_deep_extend("force", config, user_config or {})
     end
 
-    -- Create highlight group for hiding cursor:
-    if config.hide_cursor and vim.opt.termguicolors:get() then
-        vim.cmd([[
-    augroup cinnamon_highlight
-      autocmd!
-      autocmd ColorScheme * highlight CinnamonHideCursor gui=reverse blend=100
-    augroup END
-
-    highlight CinnamonHideCursor gui=reverse blend=100
-    ]])
-    end
-
     local s = require("cinnamon.scroll").scroll
 
     -- stylua: ignore start
