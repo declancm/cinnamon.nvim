@@ -239,7 +239,7 @@ H.scrollers_setup = function()
     H.vertical_count = 0
 
     -- Virtual editing allows for clean diagonal scrolling
-    H.vimopts:set("virtualedit", "all")
+    H.vimopts:set("virtualedit", "all", "wo")
 end
 
 H.scrollers_teardown = function()
@@ -247,7 +247,7 @@ H.scrollers_teardown = function()
     -- It also restores the 'curswant' requires for movements with '$'.
     vim.fn.winrestview(H.final_view)
 
-    H.vimopts:restore("virtualedit")
+    H.vimopts:restore("virtualedit", "wo")
 end
 
 H.vimopts = { _opts = {} }
