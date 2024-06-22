@@ -15,8 +15,8 @@ M.scroll = function(command, options)
         center = false,
         delay = 5,
         max_delta = {
-            lnum = 150,
-            col = 200,
+            line = 150,
+            column = 200,
         },
     })
 
@@ -36,9 +36,9 @@ M.scroll = function(command, options)
         original_buffer ~= final_buffer
         or original_window ~= final_window
         or H.positions_are_close(original_position, final_position)
-        or vim.fn.foldclosed(final_position.lnum) ~= -1
-        or math.abs(original_position.lnum - final_position.lnum) > options.max_delta.lnum
-        or math.abs(original_position.col - final_position.col) > options.max_delta.col
+        or vim.fn.foldclosed(final_position.line) ~= -1
+        or math.abs(original_position.line - final_position.line) > options.max_delta.line
+        or math.abs(original_position.col - final_position.col) > options.max_delta.column
     then
         H.cleanup(options)
         return
@@ -130,7 +130,7 @@ H.horizontal_scroller = function(target_position, options)
     local final_position = H.get_position()
     local scroll_complete = final_position.col == target_position.col
         and final_position.wincol == target_position.wincol
-    local scroll_failed = H.horizontal_count > options.max_delta.col + vim.api.nvim_win_get_width(0)
+    local scroll_failed = H.horizontal_count > options.max_delta.column + vim.api.nvim_win_get_width(0)
 
     if scroll_complete or scroll_failed then
         H.horizontal_scrolling = false
@@ -151,11 +151,11 @@ H.vertical_scroller = function(target_position, options)
     local moved_up = false
     local moved_down = false
 
-    local lnum_error = target_position.lnum - initial_position.lnum
-    if lnum_error < 0 then
+    local line_error = target_position.line - initial_position.line
+    if line_error < 0 then
         H.move_cursor("up")
         moved_up = true
-    elseif lnum_error > 0 then
+    elseif line_error > 0 then
         H.move_cursor("down")
         moved_down = true
     end
@@ -170,9 +170,9 @@ H.vertical_scroller = function(target_position, options)
     H.vertical_count = H.vertical_count + 1
 
     local final_position = H.get_position()
-    local scroll_complete = final_position.lnum == target_position.lnum
+    local scroll_complete = final_position.line == target_position.line
         and final_position.winline == target_position.winline
-    local scroll_failed = H.vertical_count > options.max_delta.lnum + vim.api.nvim_win_get_height(0)
+    local scroll_failed = H.vertical_count > options.max_delta.line + vim.api.nvim_win_get_height(0)
 
     if scroll_complete or scroll_failed then
         H.vertical_scrolling = false
@@ -203,7 +203,7 @@ end
 H.get_position = function()
     local curpos = vim.fn.getcurpos()
     return {
-        lnum = curpos[2],
+        line = curpos[2],
         col = vim.fn.virtcol("."),
         winline = vim.fn.winline(),
         wincol = vim.fn.wincol(),
@@ -212,7 +212,7 @@ end
 
 H.positions_are_close = function(p1, p2)
     -- stylua: ignore start
-    if math.abs(p1.lnum - p2.lnum) > 1 then return false end
+    if math.abs(p1.line - p2.line) > 1 then return false end
     if math.abs(p1.winline - p2.winline) > 1 then return false end
     if math.abs(p1.col - p2.col) > 2 then return false end
     if math.abs(p1.wincol - p2.wincol) > 2 then return false end
