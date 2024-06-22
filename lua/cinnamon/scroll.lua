@@ -104,6 +104,7 @@ H.scroll_view = function(direction, count)
 end
 
 H.horizontal_scroller = function(target_position, options)
+    H.horizontal_scrolling = true
     local initial_position = H.get_position()
     local moved_right = false
     local moved_left = false
@@ -149,6 +150,7 @@ H.horizontal_scroller = function(target_position, options)
 end
 
 H.vertical_scroller = function(target_position, options)
+    H.vertical_scrolling = true
     local initial_position = H.get_position()
     local moved_up = false
     local moved_down = false
@@ -230,8 +232,9 @@ end
 H.scrollers_setup = function()
     H.with_lazyredraw(vim.fn.winrestview, H.original_view)
 
-    H.horizontal_scrolling = true
-    H.vertical_scrolling = true
+    H.horizontal_scrolling = false
+    H.vertical_scrolling = false
+
     H.horizontal_count = 0
     H.vertical_count = 0
 
