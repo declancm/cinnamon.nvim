@@ -130,9 +130,7 @@ H.horizontal_scroller = function(target_position, options)
     local final_position = H.get_position()
     local scroll_complete = final_position.virtcol == target_position.virtcol
         and final_position.wincol == target_position.wincol
-    local scroll_failed = (
-        final_position.virtcol == initial_position.virtcol and final_position.wincol == initial_position.wincol
-    ) or H.horizontal_count > options.max_delta.col + vim.api.nvim_win_get_width(0)
+    local scroll_failed = H.horizontal_count > options.max_delta.col + vim.api.nvim_win_get_width(0)
 
     if scroll_complete or scroll_failed then
         H.horizontal_scrolling = false
@@ -174,9 +172,7 @@ H.vertical_scroller = function(target_position, options)
     local final_position = H.get_position()
     local scroll_complete = final_position.lnum == target_position.lnum
         and final_position.winline == target_position.winline
-    local scroll_failed = (
-        final_position.lnum == initial_position.lnum and final_position.winline == initial_position.winline
-    ) or H.vertical_count > options.max_delta.lnum + vim.api.nvim_win_get_height(0)
+    local scroll_failed = H.vertical_count > options.max_delta.lnum + vim.api.nvim_win_get_height(0)
 
     if scroll_complete or scroll_failed then
         H.vertical_scrolling = false
