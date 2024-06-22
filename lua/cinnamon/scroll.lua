@@ -71,26 +71,61 @@ H.execute_movement = function(command)
     end
 end
 
+H.move_cursor = function(direction, count)
+    local command = "normal! " .. (count or 1)
+    if direction == "up" then
+        command = command .. "gk"
+    elseif direction == "down" then
+        command = command .. "gj"
+    elseif direction == "left" then
+        command = command .. "h"
+    elseif direction == "right" then
+        command = command .. "l"
+    else
+        error("Invalid direction: " .. direction)
+    end
+    vim.cmd(command)
+end
+
+H.scroll_view = function(direction, count)
+    local command = "normal! " .. (count or 1)
+    if direction == "up" then
+        command = command .. vim.keycode("<c-y>")
+    elseif direction == "down" then
+        command = command .. vim.keycode("<c-e>")
+    elseif direction == "left" then
+        command = command .. "zh"
+    elseif direction == "right" then
+        command = command .. "zl"
+    else
+        error("Invalid direction: " .. direction)
+    end
+    vim.cmd(command)
+end
+
 H.horizontal_scroller = function(target_position, options)
     local initial_position = H.get_position()
+    local moved_right = false
+    local moved_left = false
 
-    if initial_position.col < target_position.col then
-        vim.cmd("normal! l")
-        if H.get_position().wincol > target_position.wincol then
-            vim.cmd("normal! zl")
-        end
-    elseif initial_position.col > target_position.col then
-        vim.cmd("normal! h")
-        if H.get_position().wincol < target_position.wincol then
-            vim.cmd("normal! zh")
-        end
-    elseif initial_position.wincol < target_position.wincol then
-        vim.cmd("normal! zh")
-    elseif initial_position.wincol > target_position.wincol then
-        vim.cmd("normal! zl")
+    -- Move 2 columns at a time so vertical and horizontal scrolling are in sync
+    local col_error = target_position.col - initial_position.col
+    if col_error > 1 then
+        H.move_cursor("right", 2)
+        moved_right = true
+    elseif col_error < -1 then
+        H.move_cursor("left", 2)
+        moved_left = true
     end
 
-    H.horizontal_count = H.horizontal_count + 1
+    local wincol_error = target_position.wincol - H.get_position().wincol
+    if not moved_right and wincol_error > 1 then
+        H.scroll_view("right", 2)
+    elseif not moved_left and wincol_error < -1 then
+        H.scroll_view("left", 2)
+    end
+
+    H.horizontal_count = H.horizontal_count + 2
 
     local final_position = H.get_position()
     local scroll_complete = final_position.col == target_position.col
@@ -115,21 +150,23 @@ end
 
 H.vertical_scroller = function(target_position, options)
     local initial_position = H.get_position()
+    local moved_up = false
+    local moved_down = false
 
-    if initial_position.lnum < target_position.lnum then
-        vim.cmd("normal! gj")
-        if H.get_position().winline > target_position.winline then
-            vim.cmd("normal! " .. vim.keycode("<c-e>"))
-        end
-    elseif initial_position.lnum > target_position.lnum then
-        vim.cmd("normal! gk")
-        if H.get_position().winline < target_position.winline then
-            vim.cmd("normal! " .. vim.keycode("<c-y>"))
-        end
-    elseif initial_position.winline < target_position.winline then
-        vim.cmd("normal! " .. vim.keycode("<c-y>"))
-    elseif initial_position.winline > target_position.winline then
-        vim.cmd("normal! " .. vim.keycode("<c-e>"))
+    local lnum_error = target_position.lnum - initial_position.lnum
+    if lnum_error < 0 then
+        H.move_cursor("up")
+        moved_up = true
+    elseif lnum_error > 0 then
+        H.move_cursor("down")
+        moved_down = true
+    end
+
+    local winline_error = target_position.winline - H.get_position().winline
+    if not moved_down and winline_error > 0 then
+        H.scroll_view("up")
+    elseif not moved_up and winline_error < 0 then
+        H.scroll_view("down")
     end
 
     H.vertical_count = H.vertical_count + 1
@@ -197,6 +234,7 @@ H.scrollers_setup = function()
     H.vertical_scrolling = true
     H.horizontal_count = 0
     H.vertical_count = 0
+
     -- Virtual editing allows for clean diagonal scrolling
     H.vimopts:set("virtualedit", "all")
 end
@@ -205,6 +243,7 @@ H.scrollers_teardown = function()
     -- Need to restore the final view in case something went wrong.
     -- It also restores the 'curswant' requires for movements with '$'.
     vim.fn.winrestview(H.final_view)
+
     H.vimopts:restore("virtualedit")
 end
 
