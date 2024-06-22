@@ -245,13 +245,13 @@ end
 
 H.vimopts = { _opts = {} }
 function H.vimopts:set(option, value, context)
-    assert(self._opts[option] == nil, "Vim option already saved")
+    assert(self._opts[option] == nil, "Vim option '" .. option .. "' already saved")
     context = context or "o"
     self._opts[option] = vim[context][option]
     vim[context][option] = value
 end
 function H.vimopts:restore(option, context)
-    assert(self._opts[option] ~= nil, "Vim option already restored")
+    assert(self._opts[option] ~= nil, "Vim option '" .. option .. "' already restored")
     context = context or "o"
     if vim[context][option] ~= self._opts[option] then
         vim[context][option] = self._opts[option]
