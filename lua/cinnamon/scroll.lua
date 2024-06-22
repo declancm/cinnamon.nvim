@@ -15,7 +15,7 @@ M.scroll = function(command, options)
         center = false,
         delay = 5,
         max_delta = {
-            lnum = 100,
+            lnum = 150,
             col = 200,
         },
     })
