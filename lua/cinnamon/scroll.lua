@@ -201,10 +201,10 @@ H.cleanup = function(options)
 end
 
 H.get_position = function()
-    local curpos = vim.fn.getcurpos()
+    local pos = vim.fn.getpos(".")
     return {
-        line = curpos[2],
-        col = vim.fn.virtcol("."),
+        line = pos[2],
+        col = pos[3] + pos[4],
         winline = vim.fn.winline(),
         wincol = vim.fn.wincol(),
     }
