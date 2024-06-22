@@ -126,7 +126,6 @@ function Scroll(...)
     end
 
     local options = {}
-    options.center = args[2] ~= 0
     options.delay = args[4]
 
     M.scroll(command, options)

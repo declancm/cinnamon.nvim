@@ -45,9 +45,8 @@ M.scroll = function(command, options)
     end
 
     H.scrollers_setup()
-    local target_position = H.calculate_target_position(final_position, options)
-    H.vertical_scroller(target_position, options)
-    H.horizontal_scroller(target_position, options)
+    H.vertical_scroller(final_position, options)
+    H.horizontal_scroller(final_position, options)
 end
 
 H.execute_movement = function(command)
@@ -229,14 +228,6 @@ function H.vimopts:is_set(option)
 end
 function H.vimopts:are_set()
     return next(self._opts) ~= nil
-end
-
-H.calculate_target_position = function(position, options)
-    local target_position = position
-    if options.center then
-        target_position.winline = math.ceil(vim.api.nvim_win_get_height(0) / 2)
-    end
-    return target_position
 end
 
 H.with_lazyredraw = function(func, ...)
