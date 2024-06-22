@@ -108,7 +108,7 @@ H.horizontal_scroller = function(target_position, options)
     local moved_right = false
     local moved_left = false
 
-    -- Move 2 columns at a time so vertical and horizontal scrolling are in sync
+    -- Move 2 columns at a time since the columns are around half the size of the lines
     local col_error = target_position.col - initial_position.col
     if col_error > 1 then
         H.move_cursor("right", 2)
@@ -209,7 +209,7 @@ H.get_position = function()
     local view = vim.fn.winsaveview()
     return {
         lnum = curpos[2],
-        col = curpos[3] + view.coladd, -- Adjust for 'virtualedit'
+        col = curpos[3] + view.coladd, -- Account for 'virtualedit'
         off = curpos[4],
         curswant = curpos[5],
         winline = vim.fn.winline(),
