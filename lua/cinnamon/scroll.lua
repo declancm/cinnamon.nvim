@@ -221,8 +221,8 @@ H.positions_are_close = function(p1, p2)
     -- stylua: ignore start
     if math.abs(p1.lnum - p2.lnum) > 1 then return false end
     if math.abs(p1.winline - p2.winline) > 1 then return false end
-    if math.abs(p1.col - p2.col) > 1 then return false end
-    if math.abs(p1.wincol - p2.wincol) > 1 then return false end
+    if math.abs(p1.col - p2.col) > 2 then return false end
+    if math.abs(p1.wincol - p2.wincol) > 2 then return false end
     -- stylua: ignore end
     return true
 end
