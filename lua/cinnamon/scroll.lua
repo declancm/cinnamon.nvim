@@ -38,7 +38,7 @@ M.scroll = function(command, options)
         or H.positions_are_close(original_position, final_position)
         or vim.fn.foldclosed(final_position.lnum) ~= -1
         or math.abs(original_position.lnum - final_position.lnum) > options.max_delta.lnum
-        or math.abs(original_position.virtcol - final_position.virtcol) > options.max_delta.col
+        or math.abs(original_position.col - final_position.col) > options.max_delta.col
     then
         H.cleanup(options)
         return
@@ -109,11 +109,11 @@ H.horizontal_scroller = function(target_position, options)
     local moved_left = false
 
     -- Move 2 columns at a time since the columns are around half the size of the lines
-    local virtcol_error = target_position.virtcol - initial_position.virtcol
-    if virtcol_error > 1 then
+    local col_error = target_position.col - initial_position.col
+    if col_error > 1 then
         H.move_cursor("right", 2)
         moved_right = true
-    elseif virtcol_error < -1 then
+    elseif col_error < -1 then
         H.move_cursor("left", 2)
         moved_left = true
     end
@@ -128,7 +128,7 @@ H.horizontal_scroller = function(target_position, options)
     H.horizontal_count = H.horizontal_count + 2
 
     local final_position = H.get_position()
-    local scroll_complete = final_position.virtcol == target_position.virtcol
+    local scroll_complete = final_position.col == target_position.col
         and final_position.wincol == target_position.wincol
     local scroll_failed = H.horizontal_count > options.max_delta.col + vim.api.nvim_win_get_width(0)
 
@@ -202,11 +202,9 @@ end
 
 H.get_position = function()
     local curpos = vim.fn.getcurpos()
-    local view = vim.fn.winsaveview()
     return {
         lnum = curpos[2],
-        col = curpos[3] + view.coladd, -- Account for 'virtualedit'
-        virtcol = vim.fn.virtcol("."),
+        col = vim.fn.virtcol("."),
         winline = vim.fn.winline(),
         wincol = vim.fn.wincol(),
     }
@@ -216,7 +214,7 @@ H.positions_are_close = function(p1, p2)
     -- stylua: ignore start
     if math.abs(p1.lnum - p2.lnum) > 1 then return false end
     if math.abs(p1.winline - p2.winline) > 1 then return false end
-    if math.abs(p1.virtcol - p2.virtcol) > 2 then return false end
+    if math.abs(p1.col - p2.col) > 2 then return false end
     if math.abs(p1.wincol - p2.wincol) > 2 then return false end
     -- stylua: ignore end
     return true
