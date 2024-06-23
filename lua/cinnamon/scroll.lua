@@ -36,7 +36,7 @@ M.scroll = function(command, options)
     if
         original_buffer == final_buffer
         and original_window == final_window
-        and not H.positions_are_close(original_position, final_position)
+        and not H.positions_within_threshold(original_position, final_position, 1, 2)
         and vim.fn.foldclosed(final_position.line) == -1
         and math.abs(original_position.line - final_position.line) <= options.max_delta.line
         and math.abs(original_position.col - final_position.col) <= options.max_delta.column
@@ -115,6 +115,8 @@ function H.scroller:start(target_position, target_view, options)
     self.target_view = target_view
     self.counter = 0
     self.options = options
+    self.win_height = vim.api.nvim_win_get_height(0)
+    self.win_width = vim.api.nvim_win_get_width(0)
 
     -- Virtual editing allows for clean diagonal scrolling
     H.vimopts:set("virtualedit", "wo", "all")
@@ -128,16 +130,10 @@ function H.scroller:scroll()
     self.counter = self.counter + 1
 
     local final_position = H.get_position()
-    local scroll_complete = (
-        final_position.line == self.target_position.line
-        and final_position.lineoffset == self.target_position.lineoffset
-        and final_position.col == self.target_position.col
-        and final_position.winline == self.target_position.winline
-        and final_position.wincol == self.target_position.wincol
-    )
+    local scroll_complete = H.positions_within_threshold(final_position, self.target_position, 0, 0)
     local scroll_failed = (
-        (self.counter > self.options.max_delta.line + vim.api.nvim_win_get_height(0))
-        or (self.counter > self.options.max_delta.column + vim.api.nvim_win_get_width(0))
+        (self.counter > self.options.max_delta.line + self.win_height)
+        or (self.counter > self.options.max_delta.column + self.win_width)
     )
 
     if not scroll_complete and not scroll_failed then
@@ -158,7 +154,7 @@ function H.scroller:move_step()
     local line_error = self.target_position.line - vim.fn.line(".")
     if line_error == 0 then
         -- If wrap is enabled, the lines might not be on the same visual line
-        line_error = self.target_position.lineoffset - H.lineoffset()
+        line_error = self.target_position.lineoff - H.visual_position().lineoff
     end
     if line_error < 0 then
         H.move_cursor("up")
@@ -169,7 +165,7 @@ function H.scroller:move_step()
     end
 
     -- Move 2 columns at a time since the columns are around half the size of the lines
-    local col_error = self.target_position.col - H.visualcol()
+    local col_error = self.target_position.col - H.visual_position().col
     if col_error < 0 then
         H.move_cursor("left", (col_error < -1) and 2 or 1)
         moved_left = true
@@ -217,36 +213,28 @@ H.cleanup = function(options)
 end
 
 H.get_position = function()
+    local visual_position = H.visual_position()
     return {
         line = vim.fn.line("."),
-        lineoffset = H.lineoffset(),
-        col = H.visualcol(),
+        lineoff = visual_position.lineoff,
+        col = visual_position.col,
         winline = vim.fn.winline(),
         wincol = vim.fn.wincol(),
     }
 end
 
-H.lineoffset = function()
-    local textwidth = H.textwidth()
+H.visual_position = function()
+    local textwidth = H.wrap_width()
     local col = vim.fn.virtcol(".")
-    local offset = 0
+    local lineoff = 0
     while vim.wo.wrap and col > textwidth do
         col = col - textwidth
-        offset = offset + 1
+        lineoff = lineoff + 1
     end
-    return offset
+    return { col = col, lineoff = lineoff }
 end
 
-H.visualcol = function()
-    local textwidth = H.textwidth()
-    local col = vim.fn.virtcol(".")
-    while vim.wo.wrap and col > textwidth do
-        col = col - textwidth
-    end
-    return col
-end
-
-H.textwidth = function()
+H.wrap_width = function()
     if cache.textwidth ~= nil then
         return cache.textwidth
     end
@@ -256,13 +244,13 @@ H.textwidth = function()
     return cache.textwidth
 end
 
-H.positions_are_close = function(p1, p2)
+H.positions_within_threshold = function(p1, p2, horizontal_threshold, vertical_threshold)
     -- stylua: ignore start
-    if math.abs(p1.line - p2.line) > 1 then return false end
-    if math.abs(p1.lineoffset - p2.lineoffset) > 1 then return false end
-    if math.abs(p1.col - p2.col) > 2 then return false end
-    if math.abs(p1.winline - p2.winline) > 1 then return false end
-    if math.abs(p1.wincol - p2.wincol) > 2 then return false end
+    if math.abs(p1.line - p2.line) > horizontal_threshold then return false end
+    if math.abs(p1.lineoff - p2.lineoff) > horizontal_threshold then return false end
+    if math.abs(p1.col - p2.col) > vertical_threshold then return false end
+    if math.abs(p1.winline - p2.winline) > horizontal_threshold then return false end
+    if math.abs(p1.wincol - p2.wincol) > vertical_threshold then return false end
     -- stylua: ignore end
     return true
 end
