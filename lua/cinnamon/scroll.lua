@@ -185,10 +185,14 @@ function H.scroller:move_step()
 end
 
 function H.scroller:cleanup()
-    -- Need to restore the final view in case something went wrong.
-    -- It also restores the 'curswant' required for movements with '$'.
-    -- FIX: This causes the cursor to move out of 'scrolloff' at the bottom of the window
-    vim.fn.winrestview(self.target_view)
+    -- The 'curswant' value has to be set with cursor() for the '$' movement.
+    -- Setting it with winrestview() causes issues when within 'scrolloff'.
+    vim.fn.cursor({
+        self.target_view.line,
+        self.target_view.col,
+        self.target_view.off,
+        self.target_view.curswant,
+    })
     H.vimopts:restore("virtualedit", "wo")
     H.cleanup(self.options)
 end
