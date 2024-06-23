@@ -1,6 +1,5 @@
 local M = {}
 local H = {}
-local cache = {}
 
 local config = require("cinnamon.config")
 
@@ -10,7 +9,6 @@ M.scroll = function(command, options)
         return
     end
     H.locked = true
-    cache = {}
     options = vim.tbl_deep_extend("force", options or {}, config.options)
 
     local original_view = vim.fn.winsaveview()
@@ -144,10 +142,16 @@ function H.scroller:move_step()
     local moved_left = false
     local moved_right = false
 
+    local winid = vim.api.nvim_get_current_win()
+    local textoff = vim.fn.getwininfo(winid)[1].textoff
+
     local line_error = self.target_position.line - vim.fn.line(".")
-    if line_error == 0 then
-        -- If wrap is enabled, the lines might not be on the same visual line
-        line_error = self.target_position.lineoff - H.get_visual_position().lineoff
+    if line_error == 0 and vim.wo.wrap then
+        -- Line error is not accurate when on a wrapped line
+        local col = vim.fn.virtcol(".")
+        if col ~= vim.fn.wincol() - textoff then
+            line_error = (col < self.target_position.col) and -1 or 1
+        end
     end
     if line_error < 0 then
         H.move_cursor("up")
@@ -158,7 +162,13 @@ function H.scroller:move_step()
     end
 
     -- Move 2 columns at a time since the columns are around half the size of the lines
-    local col_error = self.target_position.col - H.get_visual_position().col
+    local col_error = self.target_position.col - vim.fn.virtcol(".")
+    if col_error ~= 0 and vim.wo.wrap then
+        -- Column error is not accurate when on a wrapped line
+        if vim.fn.virtcol(".") ~= vim.fn.wincol() - textoff then
+            col_error = 0
+        end
+    end
     if col_error < 0 then
         H.move_cursor("left", (col_error < -1) and 2 or 1)
         moved_left = true
@@ -210,40 +220,17 @@ H.cleanup = function(options)
 end
 
 H.get_position = function()
-    local visual_position = H.get_visual_position()
     return {
         line = vim.fn.line("."),
-        lineoff = visual_position.lineoff,
-        col = visual_position.col,
+        col = vim.fn.virtcol("."),
         winline = vim.fn.winline(),
         wincol = vim.fn.wincol(),
     }
 end
 
-H.get_visual_position = function()
-    local wrap_width = H.get_wrap_width()
-    local col = vim.fn.virtcol(".")
-    local lineoff = 0
-    while vim.wo.wrap and col > wrap_width do
-        col = col - wrap_width
-        lineoff = lineoff + 1
-    end
-    return { col = col, lineoff = lineoff }
-end
-
-H.get_wrap_width = function()
-    if cache.wrap_width == nil then
-        local winid = vim.api.nvim_get_current_win()
-        local textoff = vim.fn.getwininfo(winid)[1].textoff
-        cache.wrap_width = vim.api.nvim_win_get_width(winid) - textoff
-    end
-    return cache.wrap_width
-end
-
 H.positions_within_threshold = function(p1, p2, horizontal_threshold, vertical_threshold)
     -- stylua: ignore start
     if math.abs(p1.line - p2.line) > horizontal_threshold then return false end
-    if math.abs(p1.lineoff - p2.lineoff) > horizontal_threshold then return false end
     if math.abs(p1.col - p2.col) > vertical_threshold then return false end
     if math.abs(p1.winline - p2.winline) > horizontal_threshold then return false end
     if math.abs(p1.wincol - p2.wincol) > vertical_threshold then return false end
