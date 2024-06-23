@@ -123,10 +123,36 @@ function H.scroller:start(target_position, target_view, options)
 end
 
 function H.scroller:scroll()
+    self:move_step()
+
+    self.counter = self.counter + 1
+
+    local final_position = H.get_position()
+    local scroll_complete = (
+        final_position.line == self.target_position.line
+        and final_position.col == self.target_position.col
+        and final_position.winline == self.target_position.winline
+        and final_position.wincol == self.target_position.wincol
+    )
+    local scroll_failed = (
+        (self.counter > self.options.max_delta.line + vim.api.nvim_win_get_height(0))
+        or (self.counter > self.options.max_delta.column + vim.api.nvim_win_get_width(0))
+    )
+
+    if not scroll_complete and not scroll_failed then
+        vim.defer_fn(function()
+            H.scroller:scroll()
+        end, self.options.delay)
+    else
+        self:cleanup()
+    end
+end
+
+function H.scroller:move_step()
     local moved_up = false
     local moved_down = false
-    local moved_right = false
     local moved_left = false
+    local moved_right = false
 
     local line_error = self.target_position.line - vim.fn.line(".")
     if line_error < 0 then
@@ -162,29 +188,6 @@ function H.scroller:scroll()
     elseif not moved_left and wincol_error < 0 then
         H.scroll_view("right", (wincol_error == -1) and 1 or 2)
     end
-
-    self.counter = self.counter + 1
-
-    local final_position = H.get_position()
-    local scroll_complete = (
-        final_position.line == self.target_position.line
-        and final_position.col == self.target_position.col
-        and final_position.winline == self.target_position.winline
-        and final_position.wincol == self.target_position.wincol
-    )
-    local scroll_failed = (
-        (self.counter > self.options.max_delta.line + vim.api.nvim_win_get_height(0))
-        or (self.counter > self.options.max_delta.column + vim.api.nvim_win_get_width(0))
-    )
-
-    if scroll_complete or scroll_failed then
-        self:cleanup()
-        return
-    end
-
-    vim.defer_fn(function()
-        H.scroller:scroll()
-    end, self.options.delay)
 end
 
 function H.scroller:cleanup()
