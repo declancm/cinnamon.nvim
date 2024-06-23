@@ -11,15 +11,7 @@ M.scroll = function(command, options)
     end
     H.locked = true
     cache = {}
-
-    options = vim.tbl_deep_extend("force", options or {}, {
-        callback = nil,
-        delay = 5,
-        max_delta = {
-            line = 150,
-            column = 200,
-        },
-    })
+    options = vim.tbl_deep_extend("force", options or {}, config.options)
 
     local original_view = vim.fn.winsaveview()
     local original_position = H.get_position()
@@ -34,7 +26,8 @@ M.scroll = function(command, options)
     local final_window = vim.api.nvim_get_current_win()
 
     if
-        original_buffer == final_buffer
+        not config.disabled
+        and original_buffer == final_buffer
         and original_window == final_window
         and not H.positions_within_threshold(original_position, final_position, 1, 2)
         and vim.fn.foldclosed(final_position.line) == -1

@@ -1,14 +1,15 @@
 return {
-  default_keymaps = true,
-  disabled = false,
-  extra_keymaps = false,
-  extended_keymaps = false,
-  override_keymaps = false,
-  always_scroll = false,
-  centered = true,
-  default_delay = 7,
-  hide_cursor = false,
-  horizontal_scroll = true,
-  max_length = -1,
-  scroll_limit = 150,
+    disabled = false,
+    keymaps = {
+        basic = true,
+        extra = false,
+    },
+    options = {
+        callback = nil,
+        delay = 5,
+        max_delta = {
+            line = 150,
+            column = 200,
+        },
+    },
 }

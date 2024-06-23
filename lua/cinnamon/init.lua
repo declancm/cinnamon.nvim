@@ -2,11 +2,7 @@ local M = {}
 
 M.setup = function(user_config)
     local config = require("cinnamon.config")
-
-    -- Set the config:
-    if user_config ~= nil then
-        config = vim.tbl_deep_extend("force", config, user_config or {})
-    end
+    config = vim.tbl_deep_extend("force", config, user_config or {})
 
     local s = require("cinnamon.scroll").scroll
 
@@ -21,17 +17,6 @@ M.setup = function(user_config)
         vim.keymap.set({ "n", "x" }, "<C-f>", function() s("<C-f>") end)
         vim.keymap.set({ "n", "x" }, "<PageUp>", function() s("<PageUp>") end)
         vim.keymap.set({ "n", "x" }, "<PageDown>", function() s("<PageDown>") end)
-    end
-
-    if config.extra_keymaps then
-        -- Start/end of file and line number movements:
-        vim.keymap.set({ "n", "x" }, "gg", function() s("gg") end)
-        vim.keymap.set({ "n", "x" }, "G", function() s("G") end)
-
-        -- Start/end of line:
-        vim.keymap.set({ "n", "x" }, "0", function() s("0") end)
-        vim.keymap.set({ "n", "x" }, "^", function() s("^") end)
-        vim.keymap.set({ "n", "x" }, "$", function() s("$") end)
 
         -- Paragraph movements:
         vim.keymap.set({ "n", "x" }, "{", function() s("{") end)
@@ -48,6 +33,18 @@ M.setup = function(user_config)
         -- Previous/next cursor location:
         vim.keymap.set("n", "<C-o>", function() s("<C-o>") end)
         vim.keymap.set("n", "<C-i>", function() s("<C-i>") end)
+
+    end
+
+    if config.extra_keymaps then
+        -- Start/end of file and line number movements:
+        vim.keymap.set({ "n", "x" }, "gg", function() s("gg") end)
+        vim.keymap.set({ "n", "x" }, "G", function() s("G") end)
+
+        -- Start/end of line:
+        vim.keymap.set({ "n", "x" }, "0", function() s("0") end)
+        vim.keymap.set({ "n", "x" }, "^", function() s("^") end)
+        vim.keymap.set({ "n", "x" }, "$", function() s("$") end)
 
         -- Screen scrolling:
         vim.keymap.set("n", "zz", function() s("zz") end)
@@ -68,9 +65,7 @@ M.setup = function(user_config)
         vim.keymap.set("n", "zL", function() s("zL") end)
         vim.keymap.set("n", "zs", function() s("zs") end)
         vim.keymap.set("n", "ze", function() s("ze") end)
-    end
 
-    if config.extended_keymaps then
         -- Up/down movements:
         vim.keymap.set({ "n", "x" }, "k", function() s("k") end)
         vim.keymap.set({ "n", "x" }, "j", function() s("j") end)
