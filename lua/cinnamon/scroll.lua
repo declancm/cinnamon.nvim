@@ -117,7 +117,7 @@ function H.scroller:start(target_position, target_view, options)
     self.options = options
 
     -- Virtual editing allows for clean diagonal scrolling
-    H.vimopts:set("virtualedit", "all", "wo")
+    H.vimopts:set("virtualedit", "wo", "all")
 
     H.scroller:scroll()
 end
@@ -231,15 +231,13 @@ H.positions_are_close = function(p1, p2)
 end
 
 H.vimopts = { _opts = {} }
-function H.vimopts:set(option, value, context)
+function H.vimopts:set(option, context, value)
     assert(self._opts[option] == nil, "Vim option '" .. option .. "' already saved")
-    context = context or "o"
     self._opts[option] = vim[context][option]
     vim[context][option] = value
 end
 function H.vimopts:restore(option, context)
     assert(self._opts[option] ~= nil, "Vim option '" .. option .. "' already restored")
-    context = context or "o"
     if vim[context][option] ~= self._opts[option] then
         vim[context][option] = self._opts[option]
     end
@@ -255,11 +253,11 @@ end
 H.with_lazyredraw = function(func, ...)
     -- Need to check if already set and restored in case of nested calls
     if not H.vimopts:is_set("lazyredraw") then
-        H.vimopts:set("lazyredraw", true)
+        H.vimopts:set("lazyredraw", "o", true)
     end
     func(...)
     if H.vimopts:is_set("lazyredraw") then
-        H.vimopts:restore("lazyredraw")
+        H.vimopts:restore("lazyredraw", "o")
     end
 end
 
