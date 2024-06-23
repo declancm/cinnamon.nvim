@@ -221,11 +221,11 @@ H.get_position = function()
 end
 
 H.get_visual_position = function()
-    local textwidth = H.get_wrap_width()
+    local wrap_width = H.get_wrap_width()
     local col = vim.fn.virtcol(".")
     local lineoff = 0
-    while vim.wo.wrap and col > textwidth do
-        col = col - textwidth
+    while vim.wo.wrap and col > wrap_width do
+        col = col - wrap_width
         lineoff = lineoff + 1
     end
     return { col = col, lineoff = lineoff }
