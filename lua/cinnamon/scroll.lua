@@ -33,19 +33,18 @@ M.scroll = function(command, options)
     local final_window = vim.api.nvim_get_current_win()
 
     if
-        original_buffer ~= final_buffer
-        or original_window ~= final_window
-        or H.positions_are_close(original_position, final_position)
-        or vim.fn.foldclosed(final_position.line) ~= -1
-        or math.abs(original_position.line - final_position.line) > options.max_delta.line
-        or math.abs(original_position.col - final_position.col) > options.max_delta.column
+        original_buffer == final_buffer
+        and original_window == final_window
+        and not H.positions_are_close(original_position, final_position)
+        and vim.fn.foldclosed(final_position.line) == -1
+        and math.abs(original_position.line - final_position.line) <= options.max_delta.line
+        and math.abs(original_position.col - final_position.col) <= options.max_delta.column
     then
+        H.with_lazyredraw(vim.fn.winrestview, original_view)
+        H.scroller:start(final_position, final_view, options)
+    else
         H.cleanup(options)
-        return
     end
-
-    H.with_lazyredraw(vim.fn.winrestview, original_view)
-    H.scroller:start(final_position, final_view, options)
 end
 
 H.execute_movement = function(command)
