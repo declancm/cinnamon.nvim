@@ -1,5 +1,6 @@
 local M = {}
 local H = {}
+local cache = {}
 
 local config = require("cinnamon.config")
 
@@ -9,10 +10,10 @@ M.scroll = function(command, options)
         return
     end
     H.locked = true
+    cache = {}
 
     options = vim.tbl_deep_extend("force", options or {}, {
         callback = nil,
-        center = false,
         delay = 5,
         max_delta = {
             line = 150,
@@ -129,6 +130,7 @@ function H.scroller:scroll()
     local final_position = H.get_position()
     local scroll_complete = (
         final_position.line == self.target_position.line
+        and final_position.lineoffset == self.target_position.lineoffset
         and final_position.col == self.target_position.col
         and final_position.winline == self.target_position.winline
         and final_position.wincol == self.target_position.wincol
@@ -154,6 +156,10 @@ function H.scroller:move_step()
     local moved_right = false
 
     local line_error = self.target_position.line - vim.fn.line(".")
+    if line_error == 0 then
+        -- If wrap is enabled, the lines might not be on the same visual line
+        line_error = self.target_position.lineoffset - H.lineoffset()
+    end
     if line_error < 0 then
         H.move_cursor("up")
         moved_up = true
@@ -163,7 +169,7 @@ function H.scroller:move_step()
     end
 
     -- Move 2 columns at a time since the columns are around half the size of the lines
-    local col_error = self.target_position.col - vim.fn.virtcol(".")
+    local col_error = self.target_position.col - H.visualcol()
     if col_error < 0 then
         H.move_cursor("left", (col_error < -1) and 2 or 1)
         moved_left = true
@@ -213,17 +219,49 @@ end
 H.get_position = function()
     return {
         line = vim.fn.line("."),
-        col = vim.fn.virtcol("."),
+        lineoffset = H.lineoffset(),
+        col = H.visualcol(),
         winline = vim.fn.winline(),
         wincol = vim.fn.wincol(),
     }
 end
 
+H.lineoffset = function()
+    local textwidth = H.textwidth()
+    local col = vim.fn.virtcol(".")
+    local offset = 0
+    while vim.wo.wrap and col > textwidth do
+        col = col - textwidth
+        offset = offset + 1
+    end
+    return offset
+end
+
+H.visualcol = function()
+    local textwidth = H.textwidth()
+    local col = vim.fn.virtcol(".")
+    while vim.wo.wrap and col > textwidth do
+        col = col - textwidth
+    end
+    return col
+end
+
+H.textwidth = function()
+    if cache.textwidth ~= nil then
+        return cache.textwidth
+    end
+    local winid = vim.api.nvim_get_current_win()
+    local textoff = vim.fn.getwininfo(winid)[1].textoff
+    cache.textwidth = vim.api.nvim_win_get_width(winid) - textoff
+    return cache.textwidth
+end
+
 H.positions_are_close = function(p1, p2)
     -- stylua: ignore start
     if math.abs(p1.line - p2.line) > 1 then return false end
-    if math.abs(p1.winline - p2.winline) > 1 then return false end
+    if math.abs(p1.lineoffset - p2.lineoffset) > 1 then return false end
     if math.abs(p1.col - p2.col) > 2 then return false end
+    if math.abs(p1.winline - p2.winline) > 1 then return false end
     if math.abs(p1.wincol - p2.wincol) > 2 then return false end
     -- stylua: ignore end
     return true
