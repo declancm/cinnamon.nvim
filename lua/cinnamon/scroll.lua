@@ -166,10 +166,10 @@ function H.scroller:move_step()
     -- Move 2 columns at a time since the columns are around half the size of the lines
     local col_error = self.target_position.col - vim.fn.virtcol(".")
     if col_error < 0 then
-        H.move_cursor("left", (col_error == -1) and 1 or 2)
+        H.move_cursor("left", (col_error < -1) and 2 or 1)
         moved_left = true
     elseif col_error > 0 then
-        H.move_cursor("right", (col_error == 1) and 1 or 2)
+        H.move_cursor("right", (col_error > 1) and 2 or 1)
         moved_right = true
     end
 
@@ -184,9 +184,9 @@ function H.scroller:move_step()
 
     local wincol_error = self.target_position.wincol - vim.fn.wincol()
     if not moved_right and wincol_error > 0 then
-        H.scroll_view("left", (wincol_error == 1) and 1 or 2)
+        H.scroll_view("left", (wincol_error > 1) and 2 or 1)
     elseif not moved_left and wincol_error < 0 then
-        H.scroll_view("right", (wincol_error == -1) and 1 or 2)
+        H.scroll_view("right", (wincol_error < -1) and 2 or 1)
     end
 end
 
