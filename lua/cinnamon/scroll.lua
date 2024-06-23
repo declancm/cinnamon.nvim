@@ -147,7 +147,7 @@ function H.scroller:move_step()
     local line_error = self.target_position.line - vim.fn.line(".")
     if line_error == 0 then
         -- If wrap is enabled, the lines might not be on the same visual line
-        line_error = self.target_position.lineoff - H.visual_position().lineoff
+        line_error = self.target_position.lineoff - H.get_visual_position().lineoff
     end
     if line_error < 0 then
         H.move_cursor("up")
@@ -158,7 +158,7 @@ function H.scroller:move_step()
     end
 
     -- Move 2 columns at a time since the columns are around half the size of the lines
-    local col_error = self.target_position.col - H.visual_position().col
+    local col_error = self.target_position.col - H.get_visual_position().col
     if col_error < 0 then
         H.move_cursor("left", (col_error < -1) and 2 or 1)
         moved_left = true
@@ -206,7 +206,7 @@ H.cleanup = function(options)
 end
 
 H.get_position = function()
-    local visual_position = H.visual_position()
+    local visual_position = H.get_visual_position()
     return {
         line = vim.fn.line("."),
         lineoff = visual_position.lineoff,
@@ -216,8 +216,8 @@ H.get_position = function()
     }
 end
 
-H.visual_position = function()
-    local textwidth = H.wrap_width()
+H.get_visual_position = function()
+    local textwidth = H.get_wrap_width()
     local col = vim.fn.virtcol(".")
     local lineoff = 0
     while vim.wo.wrap and col > textwidth do
@@ -227,14 +227,13 @@ H.visual_position = function()
     return { col = col, lineoff = lineoff }
 end
 
-H.wrap_width = function()
-    if cache.textwidth ~= nil then
-        return cache.textwidth
+H.get_wrap_width = function()
+    if cache.wrap_width == nil then
+        local winid = vim.api.nvim_get_current_win()
+        local textoff = vim.fn.getwininfo(winid)[1].textoff
+        cache.wrap_width = vim.api.nvim_win_get_width(winid) - textoff
     end
-    local winid = vim.api.nvim_get_current_win()
-    local textoff = vim.fn.getwininfo(winid)[1].textoff
-    cache.textwidth = vim.api.nvim_win_get_width(winid) - textoff
-    return cache.textwidth
+    return cache.wrap_width
 end
 
 H.positions_within_threshold = function(p1, p2, horizontal_threshold, vertical_threshold)
