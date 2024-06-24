@@ -162,12 +162,11 @@ function H.scroller:move_step()
     end
 
     -- Move 2 columns at a time since the columns are around half the size of the lines
-    local col_error = self.target_position.col - vim.fn.virtcol(".")
-    if col_error ~= 0 and vim.wo.wrap then
-        -- Column error is not accurate when on a wrapped line
-        if vim.fn.virtcol(".") ~= vim.fn.wincol() - textoff then
-            col_error = 0
-        end
+    local col_error
+    if vim.wo.wrap then
+        col_error = self.target_position.wincol - vim.fn.wincol()
+    else
+        col_error = self.target_position.col - vim.fn.virtcol(".")
     end
     if col_error < 0 then
         H.move_cursor("left", (col_error < -1) and 2 or 1)
@@ -180,17 +179,27 @@ function H.scroller:move_step()
     -- Don't scroll the view in the opposite direction of a cursor movement
     -- as the cursor will move twice.
     local winline_error = self.target_position.winline - vim.fn.winline()
+    if winline_error ~= 0 and vim.wo.wrap then
+        -- Only scroll when not on a wrapped section of a line because
+        -- vertical scroll movements move by entire lines
+        if vim.fn.virtcol(".") ~= vim.fn.wincol() - textoff then
+            winline_error = 0
+        end
+    end
     if not moved_down and winline_error > 0 then
         H.scroll_view("up")
     elseif not moved_up and winline_error < 0 then
         H.scroll_view("down")
     end
 
-    local wincol_error = self.target_position.wincol - vim.fn.wincol()
-    if not moved_right and wincol_error > 0 then
-        H.scroll_view("left", (wincol_error > 1) and 2 or 1)
-    elseif not moved_left and wincol_error < 0 then
-        H.scroll_view("right", (wincol_error < -1) and 2 or 1)
+    -- When text is wrapped, the view can't be horizontally scrolled
+    if not vim.wo.wrap then
+        local wincol_error = self.target_position.wincol - vim.fn.wincol()
+        if not moved_right and wincol_error > 0 then
+            H.scroll_view("left", (wincol_error > 1) and 2 or 1)
+        elseif not moved_left and wincol_error < 0 then
+            H.scroll_view("right", (wincol_error < -1) and 2 or 1)
+        end
     end
 end
 
