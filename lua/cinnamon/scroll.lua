@@ -113,7 +113,8 @@ function H.scroller:start(target_position, target_view, buffer_id, window_id, op
     self.counter = 0
 
     -- Virtual editing allows for clean diagonal scrolling
-    H.vimopts:set("virtualedit", "wo", "all")
+    self.saved_virtualedit = vim.wo.virtualedit
+    vim.wo.virtualedit = "all"
 
     H.scroller:scroll()
 end
@@ -217,7 +218,7 @@ function H.scroller:cleanup()
         self.target_view.coladd,
         self.target_view.curswant + 1,
     })
-    H.vimopts:restore("virtualedit", "wo")
+    vim.wo.virtualedit = self.saved_virtualedit
     H.cleanup(self.options)
 end
 
@@ -229,8 +230,6 @@ H.cleanup = function(options)
         end
     end
     H.locked = false
-
-    assert(not H.vimopts:are_set(), "Not all Vim options were restored")
 end
 
 H.get_position = function()
@@ -252,35 +251,11 @@ H.positions_within_threshold = function(p1, p2, horizontal_threshold, vertical_t
     return true
 end
 
-H.vimopts = { _opts = {} }
-function H.vimopts:set(option, context, value)
-    assert(self._opts[option] == nil, "Vim option '" .. option .. "' already saved")
-    self._opts[option] = vim[context][option]
-    vim[context][option] = value
-end
-function H.vimopts:restore(option, context)
-    assert(self._opts[option] ~= nil, "Vim option '" .. option .. "' already restored")
-    if vim[context][option] ~= self._opts[option] then
-        vim[context][option] = self._opts[option]
-    end
-    self._opts[option] = nil
-end
-function H.vimopts:is_set(option)
-    return self._opts[option] ~= nil
-end
-function H.vimopts:are_set()
-    return next(self._opts) ~= nil
-end
-
 H.with_lazyredraw = function(func, ...)
-    -- Need to check if already set and restored in case of nested calls
-    if not H.vimopts:is_set("lazyredraw") then
-        H.vimopts:set("lazyredraw", "o", true)
-    end
+    local saved_lazyredraw = vim.o.lazyredraw
+    vim.o.lazyredraw = true
     func(...)
-    if H.vimopts:is_set("lazyredraw") then
-        H.vimopts:restore("lazyredraw", "o")
-    end
+    vim.o.lazyredraw = saved_lazyredraw
 end
 
 return M
