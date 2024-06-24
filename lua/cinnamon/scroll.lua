@@ -33,7 +33,7 @@ M.scroll = function(command, options)
         and math.abs(original_position.col - final_position.col) <= options.max_delta.column
     then
         H.with_lazyredraw(vim.fn.winrestview, original_view)
-        H.scroller:start(final_position, final_view, options)
+        H.scroller:start(final_position, final_view, final_buffer, final_window, options)
     else
         H.cleanup(options)
     end
@@ -101,13 +101,16 @@ end
 
 H.scroller = {}
 
-function H.scroller:start(target_position, target_view, options)
+function H.scroller:start(target_position, target_view, buffer_id, window_id, options)
     self.target_position = target_position
     self.target_view = target_view
-    self.counter = 0
+    self.buffer_id = buffer_id
+    self.window_id = window_id
+    self.window_height = vim.api.nvim_win_get_height(0)
+    self.window_width = vim.api.nvim_win_get_width(0)
+    self.window_textoff = vim.fn.getwininfo(window_id)[1].textoff
     self.options = options
-    self.win_height = vim.api.nvim_win_get_height(0)
-    self.win_width = vim.api.nvim_win_get_width(0)
+    self.counter = 0
 
     -- Virtual editing allows for clean diagonal scrolling
     H.vimopts:set("virtualedit", "wo", "all")
@@ -122,12 +125,14 @@ function H.scroller:scroll()
 
     local final_position = H.get_position()
     local scroll_complete = H.positions_within_threshold(final_position, self.target_position, 0, 0)
-    local scroll_failed = (
-        (self.counter > self.options.max_delta.line + self.win_height)
-        or (self.counter > self.options.max_delta.column + self.win_width)
+    local scroll_error = (
+        (self.counter > self.options.max_delta.line + self.window_height)
+        or (self.counter > self.options.max_delta.column + self.window_width)
+        or (self.buffer_id ~= vim.api.nvim_get_current_buf())
+        or (self.window_id ~= vim.api.nvim_get_current_win())
     )
 
-    if not scroll_complete and not scroll_failed then
+    if not scroll_complete and not scroll_error then
         vim.defer_fn(function()
             H.scroller:scroll()
         end, self.options.delay)
@@ -142,15 +147,11 @@ function H.scroller:move_step()
     local moved_left = false
     local moved_right = false
 
-    local winid = vim.api.nvim_get_current_win()
-    local textoff = vim.fn.getwininfo(winid)[1].textoff
-
     local line_error = self.target_position.line - vim.fn.line(".")
     if line_error == 0 and vim.wo.wrap then
         -- Line error is not accurate when on a wrapped line
-        local col = vim.fn.virtcol(".")
-        if col ~= vim.fn.wincol() - textoff then
-            line_error = (col > self.target_position.col) and -1 or 1
+        if self:line_is_wrapped() then
+            line_error = (vim.fn.virtcol(".") > self.target_position.col) and -1 or 1
         end
     end
     if line_error < 0 then
@@ -182,7 +183,7 @@ function H.scroller:move_step()
     if winline_error ~= 0 and vim.wo.wrap then
         -- Only scroll when not on a wrapped section of a line because
         -- vertical scroll movements move by entire lines
-        if vim.fn.virtcol(".") ~= vim.fn.wincol() - textoff then
+        if self:line_is_wrapped() then
             winline_error = 0
         end
     end
@@ -201,6 +202,10 @@ function H.scroller:move_step()
             H.scroll_view("right", (wincol_error < -1) and 2 or 1)
         end
     end
+end
+
+function H.scroller:line_is_wrapped()
+    return vim.fn.virtcol(".") ~= vim.fn.wincol() - self.window_textoff
 end
 
 function H.scroller:cleanup()
