@@ -2,7 +2,6 @@
 
 Smooth scrolling for __ANY__ movement command 🤯. A
 highly customizable Neovim plugin written in Lua!
-Now rewritten 
 
 __Features:__
 * Can add smooth scrolling to any normal mode movement, command, or Lua function.
@@ -50,9 +49,9 @@ return {
         extra = false,          -- Enable the extra keymaps
     },
     options = {
-        callback = function()   -- Optional callback function
+        callback = function()   -- Post-movement callback
         end,
-        delay = 5,              -- Delay between each line (in ms)
+        delay = 5,              -- Delay between each movement step (in ms)
         max_delta = {
             line = 150,         -- Maximum delta for line movements
             column = 200,       -- Maximum delta for column movements
@@ -109,7 +108,7 @@ require('cinnamon').scroll(command, options)
     ```lua
     require('cinnamon').scroll("<C-]>")
     ```
-  * Command-line command when appended with a semicolon
+  * Command-line command when prefixed with a semicolon
     ```lua
     require('cinnamon').scroll(":keepjumps normal! <C-]>")
     ```
