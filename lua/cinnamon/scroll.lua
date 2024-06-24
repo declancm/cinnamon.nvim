@@ -150,7 +150,7 @@ function H.scroller:move_step()
         -- Line error is not accurate when on a wrapped line
         local col = vim.fn.virtcol(".")
         if col ~= vim.fn.wincol() - textoff then
-            line_error = (col < self.target_position.col) and -1 or 1
+            line_error = (col > self.target_position.col) and -1 or 1
         end
     end
     if line_error < 0 then
