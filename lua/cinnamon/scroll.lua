@@ -161,34 +161,41 @@ function H.scroller:move_step()
     local moved_left = false
     local moved_right = false
 
-    local line_error = self.target_position.line - vim.fn.line(".")
-    if line_error == 0 then
-        -- Line error is not accurate when on a wrapped line
-        if self:line_is_wrapped() then
-            line_error = (vim.fn.virtcol(".") > self.target_position.col) and -1 or 1
-        end
+    local horizontal_error
+    if self.wrap_enabled then
+        horizontal_error = self.target_position.wincol - vim.fn.wincol()
+    else
+        horizontal_error = self.target_position.col - vim.fn.virtcol(".")
     end
-    if line_error < 0 then
-        H.move_cursor("up")
-        moved_up = true
-    elseif line_error > 0 then
-        H.move_cursor("down")
-        moved_down = true
+    -- Move 2 columns per step when possible since the columns
+    -- are around half the size of lines.
+    if horizontal_error < 0 then
+        H.move_cursor("left", (horizontal_error < -1) and 2 or 1)
+        moved_left = true
+    elseif horizontal_error > 0 then
+        H.move_cursor("right", (horizontal_error > 1) and 2 or 1)
+        moved_right = true
     end
 
-    -- Move 2 columns at a time since the columns are around half the size of the lines
-    local col_error
-    if self.wrap_enabled then
-        col_error = self.target_position.wincol - vim.fn.wincol()
-    else
-        col_error = self.target_position.col - vim.fn.virtcol(".")
+    local vertical_error = self.target_position.line - vim.fn.line(".")
+    if vertical_error == 0 then
+        if horizontal_error == 0 and self:line_is_wrapped() then
+            -- If the column is not correct but the window column
+            -- is, the cursor is on the wrong visual line.
+            local col_diff = self.target_position.col - vim.fn.virtcol(".")
+            if col_diff < 0 then
+                vertical_error = -1
+            elseif col_diff > 0 then
+                vertical_error = 1
+            end
+        end
     end
-    if col_error < 0 then
-        H.move_cursor("left", (col_error < -1) and 2 or 1)
-        moved_left = true
-    elseif col_error > 0 then
-        H.move_cursor("right", (col_error > 1) and 2 or 1)
-        moved_right = true
+    if vertical_error < 0 then
+        H.move_cursor("up")
+        moved_up = true
+    elseif vertical_error > 0 then
+        H.move_cursor("down")
+        moved_down = true
     end
 
     -- Don't scroll the view in the opposite direction of a cursor movement
@@ -196,7 +203,7 @@ function H.scroller:move_step()
     local winline_error = self.target_position.winline - vim.fn.winline()
     if winline_error ~= 0 then
         -- Only scroll when not on a wrapped section of a line because
-        -- vertical scroll movements move by entire lines
+        -- vertical scroll movements move by entire lines.
         if self:line_is_wrapped() then
             winline_error = 0
         end
@@ -210,6 +217,8 @@ function H.scroller:move_step()
     -- When text is wrapped, the view can't be horizontally scrolled
     if not self.wrap_enabled then
         local wincol_error = self.target_position.wincol - vim.fn.wincol()
+        -- Move 2 columns per step when possible since the columns
+        -- are around half the size of lines.
         if not moved_right and wincol_error > 0 then
             H.scroll_view("left", (wincol_error > 1) and 2 or 1)
         elseif not moved_left and wincol_error < 0 then
