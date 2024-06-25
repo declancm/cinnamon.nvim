@@ -25,6 +25,7 @@ M.scroll = function(command, options)
 
     if
         not config.disabled
+        and vim.fn.reg_executing() == "" -- A macro is not being executed
         and original_buffer == final_buffer
         and original_window == final_window
         and not H.positions_within_threshold(original_position, final_position, 1, 2)
