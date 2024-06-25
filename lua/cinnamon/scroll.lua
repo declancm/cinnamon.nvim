@@ -11,19 +11,22 @@ M.scroll = function(command, options)
     H.locked = true
     options = vim.tbl_deep_extend("force", options or {}, config.options)
 
+    local saved_lazyredraw = vim.o.lazyredraw
+    vim.o.lazyredraw = true
+
     local original_view = vim.fn.winsaveview()
     local original_position = H.get_position()
     local original_buffer = vim.api.nvim_get_current_buf()
     local original_window = vim.api.nvim_get_current_win()
 
-    H.with_lazyredraw(H.execute_movement, command)
+    H.execute_movement(command)
 
     local final_view = vim.fn.winsaveview()
     local final_position = H.get_position()
     local final_buffer = vim.api.nvim_get_current_buf()
     local final_window = vim.api.nvim_get_current_win()
 
-    if
+    local is_scrollable = (
         not config.disabled
         and vim.fn.reg_executing() == "" -- A macro is not being executed
         and original_buffer == final_buffer
@@ -32,8 +35,15 @@ M.scroll = function(command, options)
         and not H.positions_within_threshold(original_position, final_position, 1, 2)
         and math.abs(original_position.line - final_position.line) <= options.max_delta.line
         and math.abs(original_position.col - final_position.col) <= options.max_delta.column
-    then
-        H.with_lazyredraw(vim.fn.winrestview, original_view)
+    )
+
+    if is_scrollable then
+        vim.fn.winrestview(original_view)
+    end
+
+    vim.o.lazyredraw = saved_lazyredraw
+
+    if is_scrollable then
         H.scroller:start(final_position, final_view, final_buffer, final_window, options)
     else
         H.cleanup(options)
@@ -255,13 +265,6 @@ H.positions_within_threshold = function(p1, p2, horizontal_threshold, vertical_t
     if math.abs(p1.wincol - p2.wincol) > vertical_threshold then return false end
     -- stylua: ignore end
     return true
-end
-
-H.with_lazyredraw = function(func, ...)
-    local saved_lazyredraw = vim.o.lazyredraw
-    vim.o.lazyredraw = true
-    func(...)
-    vim.o.lazyredraw = saved_lazyredraw
 end
 
 return M
