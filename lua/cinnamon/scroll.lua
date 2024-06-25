@@ -28,8 +28,8 @@ M.scroll = function(command, options)
         and vim.fn.reg_executing() == "" -- A macro is not being executed
         and original_buffer == final_buffer
         and original_window == final_window
+        and vim.fn.foldclosed(final_position.line) == -1 -- Not within a closed fold
         and not H.positions_within_threshold(original_position, final_position, 1, 2)
-        and vim.fn.foldclosed(final_position.line) == -1
         and math.abs(original_position.line - final_position.line) <= options.max_delta.line
         and math.abs(original_position.col - final_position.col) <= options.max_delta.column
     then
@@ -107,29 +107,31 @@ function H.scroller:start(target_position, target_view, buffer_id, window_id, op
     self.target_view = target_view
     self.buffer_id = buffer_id
     self.window_id = window_id
+    self.options = options
+
+    -- Cache values for performance
     self.window_height = vim.api.nvim_win_get_height(0)
     self.window_width = vim.api.nvim_win_get_width(0)
     self.window_textoff = vim.fn.getwininfo(window_id)[1].textoff
-    self.options = options
-    self.counter = 0
+    self.wrap_enabled = vim.wo.wrap
 
     -- Virtual editing allows for clean diagonal scrolling
     self.saved_virtualedit = vim.wo.virtualedit
     vim.wo.virtualedit = "all"
 
+    self.step_counter = 0
     H.scroller:scroll()
 end
 
 function H.scroller:scroll()
     self:move_step()
-
-    self.counter = self.counter + 1
+    self.step_counter = self.step_counter + 1
 
     local final_position = H.get_position()
     local scroll_complete = H.positions_within_threshold(final_position, self.target_position, 0, 0)
     local scroll_error = (
-        (self.counter > self.options.max_delta.line + self.window_height)
-        or (self.counter > self.options.max_delta.column + self.window_width)
+        (self.step_counter > self.options.max_delta.line + self.window_height)
+        or (self.step_counter > self.options.max_delta.column + self.window_width)
         or (self.buffer_id ~= vim.api.nvim_get_current_buf())
         or (self.window_id ~= vim.api.nvim_get_current_win())
     )
@@ -150,7 +152,7 @@ function H.scroller:move_step()
     local moved_right = false
 
     local line_error = self.target_position.line - vim.fn.line(".")
-    if line_error == 0 and vim.wo.wrap then
+    if line_error == 0 then
         -- Line error is not accurate when on a wrapped line
         if self:line_is_wrapped() then
             line_error = (vim.fn.virtcol(".") > self.target_position.col) and -1 or 1
@@ -166,7 +168,7 @@ function H.scroller:move_step()
 
     -- Move 2 columns at a time since the columns are around half the size of the lines
     local col_error
-    if vim.wo.wrap then
+    if self.wrap_enabled then
         col_error = self.target_position.wincol - vim.fn.wincol()
     else
         col_error = self.target_position.col - vim.fn.virtcol(".")
@@ -182,7 +184,7 @@ function H.scroller:move_step()
     -- Don't scroll the view in the opposite direction of a cursor movement
     -- as the cursor will move twice.
     local winline_error = self.target_position.winline - vim.fn.winline()
-    if winline_error ~= 0 and vim.wo.wrap then
+    if winline_error ~= 0 then
         -- Only scroll when not on a wrapped section of a line because
         -- vertical scroll movements move by entire lines
         if self:line_is_wrapped() then
@@ -196,7 +198,7 @@ function H.scroller:move_step()
     end
 
     -- When text is wrapped, the view can't be horizontally scrolled
-    if not vim.wo.wrap then
+    if not self.wrap_enabled then
         local wincol_error = self.target_position.wincol - vim.fn.wincol()
         if not moved_right and wincol_error > 0 then
             H.scroll_view("left", (wincol_error > 1) and 2 or 1)
@@ -207,7 +209,10 @@ function H.scroller:move_step()
 end
 
 function H.scroller:line_is_wrapped()
-    return vim.fn.virtcol(".") ~= vim.fn.wincol() - self.window_textoff
+    if self.wrap_enabled then
+        return vim.fn.virtcol(".") ~= vim.fn.wincol() - self.window_textoff
+    end
+    return false
 end
 
 function H.scroller:cleanup()
