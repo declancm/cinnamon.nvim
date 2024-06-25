@@ -88,6 +88,8 @@ M.scroll = require("cinnamon.scroll").scroll
 
 -- For backward compatibility:
 function Scroll(...)
+    vim.notify_once("[cinnamon] The 'Scroll()' API function is now deprecated. Please use 'require('cinnamon').scroll()' instead.", vim.log.levels.WARN)
+
     local args = { ... }
 
     local command = args[1]
