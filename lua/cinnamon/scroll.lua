@@ -1,7 +1,7 @@
 local M = {}
 local H = {}
 
-local config = require("cinnamon.config")
+local config = require("cinnamon.config").config
 
 M.scroll = function(command, options)
     -- Lock the function to prevent re-entrancy. Must be first.
