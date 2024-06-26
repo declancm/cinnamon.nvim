@@ -4,6 +4,8 @@
 Table of Contents                            *cinnamon.nvim-table-of-contents*
 
 1. Cinnamon Scroll                            |cinnamon.nvim-cinnamon-scroll-|
+  - Features                         |cinnamon.nvim-cinnamon-scroll--features|
+  - Requirements                 |cinnamon.nvim-cinnamon-scroll--requirements|
   - Installation                 |cinnamon.nvim-cinnamon-scroll--installation|
   - Configuration               |cinnamon.nvim-cinnamon-scroll--configuration|
   - Keymaps                           |cinnamon.nvim-cinnamon-scroll--keymaps|
@@ -15,12 +17,20 @@ Table of Contents                            *cinnamon.nvim-table-of-contents*
 Smoothscrolling for **ANY** command. A highly customizable Neovim plugin
 written in Lua!
 
-**Features:** Can add smooth scrolling to any normal mode movement, command, or
-Lua function. Optional custom callbacks per movement. Horizontal, vertical, and
-diagonal scrolling. Non-blocking delays using luv. Scroll over folds. Scroll
-over wrapped lines.
 
-**Requirements:** Neovim >= 0.8.0
+FEATURES                             *cinnamon.nvim-cinnamon-scroll--features*
+
+- Can add smooth scrolling to any normal mode movement, command, or Lua function.
+- Optional custom callbacks per movement.
+- Horizontal, vertical, and diagonal scrolling.
+- Non-blocking delays using luv.
+- Scroll over folds.
+- Scroll over wrapped lines.
+
+
+REQUIREMENTS                     *cinnamon.nvim-cinnamon-scroll--requirements*
+
+- Neovim >= 0.8.0
 
 
 INSTALLATION                     *cinnamon.nvim-cinnamon-scroll--installation*
