@@ -143,13 +143,16 @@ require("cinnamon").setup {
 ### Example Keymaps
 
 ```lua
-local scroll = require('cinnamon').scroll
+local cinnamon = require("cinnamon")
+
+-- Setup the plugin with default options
+cinnamon.setup()
 
 -- Centered scrolling:
-vim.keymap.set("n", "<C-U>", scroll("<C-U>zz"))
-vim.keymap.set("n", "<C-D>", scroll("<C-D>zz"))
+vim.keymap.set("n", "<C-U>", function() cinnamon.scroll("<C-U>zz") end)
+vim.keymap.set("n", "<C-D>", function() cinnamon.scroll("<C-D>zz") end)
 
 -- LSP:
-vim.keymap.set("n", "gd", scroll(vim.lsp.buf.definition))
-vim.keymap.set("n", "gD", scroll(vim.lsp.buf.declaration))
+vim.keymap.set("n", "gd", function() cinnamon.scroll(vim.lsp.buf.definition) end)
+vim.keymap.set("n", "gD", function() cinnamon.scroll(vim.lsp.buf.declaration) end)
 ```
