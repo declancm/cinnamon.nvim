@@ -1,169 +1,292 @@
 local M = {}
+local H = {}
 
-local config = require('cinnamon.config')
-local utils = require('cinnamon.utils')
-local fn = require('cinnamon.functions')
-local motions = require('cinnamon.motions')
+local config = require("cinnamon.config")
 
-local saved_guicursor = vim.opt.guicursor:get()
-local warning_given = false
+M.scroll = function(command, options)
+    -- Lock the function to prevent re-entrancy. Must be first.
+    if H.locked then
+        return
+    end
+    H.locked = true
 
-M.scroll = function(command, scroll_win, use_count, delay_length, deprecated_arg)
-  -- Check if plugin is disabled.
-  if config.disabled then
-    vim.cmd('norm! ' .. command)
-    return
-  end
+    options = vim.tbl_deep_extend("keep", options or {}, config.get().options)
 
-  if deprecated_arg ~= nil and not warning_given then
-    utils.error_msg('Argument 5 for the Cinnamon Scroll API function is now deprecated.', 'Warning', 'WARN')
-    warning_given = true
-  end
+    local saved_lazyredraw = vim.o.lazyredraw
+    vim.o.lazyredraw = true
 
-  -- Convert arguments to boolean:
-  local int_to_bool = function(val)
-    if val == 0 then
-      return false
+    local original_view = vim.fn.winsaveview()
+    local original_position = H.get_position()
+    local original_buffer = vim.api.nvim_get_current_buf()
+    local original_window = vim.api.nvim_get_current_win()
+
+    H.execute_movement(command)
+
+    local final_view = vim.fn.winsaveview()
+    local final_position = H.get_position()
+    local final_buffer = vim.api.nvim_get_current_buf()
+    local final_window = vim.api.nvim_get_current_win()
+
+    local is_scrollable = (
+        not config.disabled
+        and vim.fn.reg_executing() == "" -- A macro is not being executed
+        and original_buffer == final_buffer
+        and original_window == final_window
+        and vim.fn.foldclosed(final_position.line) == -1 -- Not within a closed fold
+        and not H.positions_within_threshold(original_position, final_position, 1, 2)
+        and math.abs(original_position.line - final_position.line) <= options.max_delta.line
+        and math.abs(original_position.col - final_position.col) <= options.max_delta.column
+    )
+
+    if is_scrollable then
+        vim.fn.winrestview(original_view)
+    end
+
+    vim.o.lazyredraw = saved_lazyredraw
+
+    if is_scrollable then
+        H.scroller:start(final_position, final_view, final_buffer, final_window, options)
     else
-      return true
+        H.cleanup(options)
     end
-  end
+end
 
-  -- Setting argument defaults:
-  if not command then
-    utils.error_msg('The command argument cannot be nil')
-    return
-  end
-  scroll_win = int_to_bool(scroll_win or 0)
-  use_count = int_to_bool(use_count or 0)
-  if not delay_length or delay_length == -1 then
-    delay_length = config.default_delay
-  end
-
-  -- Execute command if only moving one line/char.
-  if vim.tbl_contains(motions.no_scroll, command) and vim.v.count1 == 1 then
-    vim.cmd('norm! ' .. command)
-    return
-  end
-
-  -- Check if command is a mouse wheel scroll.
-  local scroll_wheel = false
-  if vim.tbl_contains(motions.scroll_wheel, command) then
-    scroll_wheel = true
-  end
-
-  -- Check for any errors with the command.
-  if fn.check_command_errors(command) then
-    return
-  end
-
-  -- Save and set options.
-  local saved = {}
-  saved.lazyredraw = vim.opt.lazyredraw:get()
-  vim.opt.lazyredraw = true
-  local restore_options = function()
-    vim.opt.lazyredraw = saved.lazyredraw
-  end
-
-  -- Get initial position values.
-  local saved_view = vim.fn.winsaveview()
-  local prev_filepath = vim.fn.getreg('%')
-  local _, prev_lnum, prev_column, _, prev_curswant = unpack(vim.fn.getcurpos())
-  local prev_winline = vim.fn.winline()
-  local prev_wincol = vim.fn.wincol()
-
-  -- Perform the command.
-  if command == 'definition' or command == 'declaration' then
-    require('vim.lsp.buf')[command]()
-    vim.cmd('sleep 100m')
-  elseif use_count and vim.v.count > 0 then
-    vim.cmd('norm! ' .. vim.v.count .. command)
-  else
-    vim.cmd('norm! ' .. command)
-  end
-
-  -- Get final position values.
-  local curpos = vim.fn.getcurpos()
-  local filepath = vim.fn.getreg('%')
-  local _, lnum, column, _, curswant = unpack(curpos)
-  local winline = vim.fn.winline()
-  local wincol = vim.fn.wincol()
-  local distance = fn.get_visual_distance(prev_lnum, lnum)
-
-  -- Check if the file changed or the scroll limit exceeded.
-  if prev_filepath ~= filepath or (math.abs(distance) > config.scroll_limit and config.scroll_limit ~= -1) then
-    if scroll_win and config.centered then
-      vim.cmd('norm! zz')
+H.execute_movement = function(command)
+    if type(command) == "string" then
+        if command[1] == ":" then
+            -- Ex (command-line) command
+            vim.cmd(vim.keycode(command:sub(2)))
+        elseif command ~= "" then
+            -- Normal mode command
+            if vim.v.count ~= 0 then
+                vim.cmd("silent! normal! " .. vim.v.count .. vim.keycode(command))
+            else
+                vim.cmd("silent! normal! " .. vim.keycode(command))
+            end
+        end
+    elseif type(command) == "function" then
+        -- Lua function
+        local success, message = pcall(command)
+        if not success then
+            vim.notify(message)
+        end
     end
-    restore_options()
-    return
-  end
+end
 
-  -- Restore the original view.
-  vim.fn.winrestview(saved_view)
-
-  -- Check if scrolled vertically and/or horizontally.
-  local scrolled_window_vertically = false
-  if winline - lnum ~= prev_winline - prev_lnum then
-    scrolled_window_vertically = true
-  end
-  local scrolled_view_horizontally = false
-  if wincol - column ~= prev_wincol - prev_column then
-    scrolled_view_horizontally = true
-  end
-
-  -- Check if values have changed.
-  if curswant == prev_curswant then
-    column = -1
-  end
-  if wincol == prev_wincol then
-    wincol = -1
-  end
-
-  -- Hide the cursor.
-  local cursor_hidden = false
-  if config.hide_cursor and vim.opt.termguicolors:get() then
-    if vim.opt.guicursor:get() ~= 'a:CinnamonHideCursor' then
-      saved_guicursor = vim.opt.guicursor:get()
+H.move_cursor = function(direction, count)
+    local command = "normal! "
+    if count then
+        command = command .. count
     end
-    vim.opt.guicursor = 'a:CinnamonHideCursor'
-    cursor_hidden = true
-  end
-
-  -- Calculate the delay length.
-  if config.max_length ~= -1 then
-    if math.abs(distance) * delay_length > config.max_length then
-      delay_length = math.floor((config.max_length / math.abs(distance)) + 0.5)
+    if direction == "up" then
+        command = command .. "gk"
+    elseif direction == "down" then
+        command = command .. "gj"
+    elseif direction == "left" then
+        command = command .. "h"
+    elseif direction == "right" then
+        command = command .. "l"
+    else
+        error("Invalid direction: " .. direction)
     end
-  end
+    vim.cmd(command)
+end
 
-  -- Scroll vertically.
-  if scroll_wheel then
-    fn.scroll_wheel_vertically(command, distance, curpos, winline, delay_length)
-  elseif scrolled_window_vertically or config.always_scroll or scroll_win or scroll_wheel then
-    fn.scroll_vertically(distance, curpos, winline, scroll_win, delay_length)
-  else
-    fn.scroll_vertically(distance, curpos, winline, scroll_win, 0)
-  end
+H.scroll_view = function(direction, count)
+    local command = "normal! "
+    if count then
+        command = command .. count
+    end
+    if direction == "up" then
+        command = command .. vim.keycode("<c-y>")
+    elseif direction == "down" then
+        command = command .. vim.keycode("<c-e>")
+    elseif direction == "left" then
+        command = command .. "zh"
+    elseif direction == "right" then
+        command = command .. "zl"
+    else
+        error("Invalid direction: " .. direction)
+    end
+    vim.cmd(command)
+end
 
-  -- Scroll horizontally.
-  if
-    (scrolled_view_horizontally and config.horizontal_scroll or config.always_scroll) and vim.fn.foldclosed('.') == -1
-  then
-    fn.scroll_horizontally(column, wincol, math.ceil(delay_length / 3))
-  else
-    fn.scroll_horizontally(column, wincol, 0)
-  end
+H.scroller = {}
 
-  -- Restore the curswant for movements like '$'.
-  vim.fn.winrestview { curswant = curswant }
+function H.scroller:start(target_position, target_view, buffer_id, window_id, options)
+    self.target_position = target_position
+    self.target_view = target_view
+    self.buffer_id = buffer_id
+    self.window_id = window_id
+    self.options = options
 
-  -- Restore the cursor style.
-  if cursor_hidden then
-    vim.opt.guicursor = saved_guicursor
-  end
+    -- Cache values for performance
+    self.window_height = vim.api.nvim_win_get_height(0)
+    self.window_width = vim.api.nvim_win_get_width(0)
+    self.window_textoff = vim.fn.getwininfo(window_id)[1].textoff
+    self.wrap_enabled = vim.wo.wrap
 
-  restore_options()
+    -- Virtual editing allows for clean diagonal scrolling
+    self.saved_virtualedit = vim.wo.virtualedit
+    vim.wo.virtualedit = "all"
+
+    self.initial_changedtick = vim.b.changedtick
+    self.cancel_scroll = false
+
+    self.watcher_autocmd = vim.api.nvim_create_autocmd({
+        "BufLeave",
+        "WinLeave",
+        "WinResized",
+    }, {
+        callback = function()
+            self.cancel_scroll = true
+        end,
+    })
+
+    self.step_counter = 0
+    H.scroller:scroll()
+end
+
+function H.scroller:scroll()
+    local scroll_failed = (self.cancel_scroll or (self.initial_changedtick ~= vim.b.changedtick))
+    local position = H.get_position()
+    local scroll_complete = (not scroll_failed and H.positions_within_threshold(position, self.target_position, 0, 0))
+
+    if not scroll_complete and not scroll_failed then
+        self:move_step()
+        self.step_counter = self.step_counter + 1
+        vim.defer_fn(function()
+            H.scroller:scroll()
+        end, self.options.delay)
+    else
+        self:cleanup()
+    end
+end
+
+function H.scroller:move_step()
+    local moved_up = false
+    local moved_down = false
+    local moved_left = false
+    local moved_right = false
+
+    local horizontal_error
+    if self.wrap_enabled then
+        horizontal_error = self.target_position.wincol - vim.fn.wincol()
+    else
+        horizontal_error = self.target_position.col - vim.fn.virtcol(".")
+    end
+    -- Move 2 columns per step when possible since the columns
+    -- are around half the size of lines.
+    if horizontal_error < 0 then
+        H.move_cursor("left", (horizontal_error < -1) and 2 or 1)
+        moved_left = true
+    elseif horizontal_error > 0 then
+        H.move_cursor("right", (horizontal_error > 1) and 2 or 1)
+        moved_right = true
+    end
+
+    local vertical_error = self.target_position.line - vim.fn.line(".")
+    if vertical_error == 0 then
+        if horizontal_error == 0 and self:line_is_wrapped() then
+            -- If the column is not correct but the window column
+            -- is, the cursor is on the wrong visual line.
+            local col_diff = self.target_position.col - vim.fn.virtcol(".")
+            if col_diff < 0 then
+                vertical_error = -1
+            elseif col_diff > 0 then
+                vertical_error = 1
+            end
+        end
+    end
+    if vertical_error < 0 then
+        H.move_cursor("up")
+        moved_up = true
+    elseif vertical_error > 0 then
+        H.move_cursor("down")
+        moved_down = true
+    end
+
+    -- Don't scroll the view in the opposite direction of a cursor movement
+    -- as the cursor will move twice.
+    local winline_error = self.target_position.winline - vim.fn.winline()
+    if winline_error ~= 0 then
+        -- Only scroll when not on a wrapped section of a line because
+        -- vertical scroll movements move by entire lines.
+        if self:line_is_wrapped() then
+            winline_error = 0
+        end
+    end
+    if not moved_down and winline_error > 0 then
+        H.scroll_view("up")
+    elseif not moved_up and winline_error < 0 then
+        H.scroll_view("down")
+    end
+
+    -- When text is wrapped, the view can't be horizontally scrolled
+    if not self.wrap_enabled then
+        local wincol_error = self.target_position.wincol - vim.fn.wincol()
+        -- Move 2 columns per step when possible since the columns
+        -- are around half the size of lines.
+        if not moved_right and wincol_error > 0 then
+            H.scroll_view("left", (wincol_error > 1) and 2 or 1)
+        elseif not moved_left and wincol_error < 0 then
+            H.scroll_view("right", (wincol_error < -1) and 2 or 1)
+        end
+    end
+end
+
+function H.scroller:line_is_wrapped()
+    if self.wrap_enabled then
+        return vim.fn.virtcol(".") ~= vim.fn.wincol() - self.window_textoff
+    end
+    return false
+end
+
+function H.scroller:cleanup()
+    vim.api.nvim_del_autocmd(self.watcher_autocmd)
+
+    -- The 'curswant' value has to be set with cursor() for the '$' movement.
+    -- Setting it with winrestview() causes issues when within 'scrolloff'.
+    vim.api.nvim_win_call(self.window_id, function()
+        vim.fn.cursor({
+            self.target_view.lnum,
+            self.target_view.col + 1,
+            self.target_view.coladd,
+            self.target_view.curswant + 1,
+        })
+        vim.cmd("redraw") -- Cursor isn't redrawn if the window was exited
+    end)
+    vim.wo[self.window_id].virtualedit = self.saved_virtualedit
+    H.cleanup(self.options)
+end
+
+H.cleanup = function(options)
+    if options.callback ~= nil then
+        local success, message = pcall(options.callback)
+        if not success then
+            vim.notify(message)
+        end
+    end
+    H.locked = false
+end
+
+H.get_position = function()
+    return {
+        line = vim.fn.line("."),
+        col = vim.fn.virtcol("."),
+        winline = vim.fn.winline(),
+        wincol = vim.fn.wincol(),
+    }
+end
+
+H.positions_within_threshold = function(p1, p2, horizontal_threshold, vertical_threshold)
+    -- stylua: ignore start
+    if math.abs(p1.line - p2.line) > horizontal_threshold then return false end
+    if math.abs(p1.col - p2.col) > vertical_threshold then return false end
+    if math.abs(p1.winline - p2.winline) > horizontal_threshold then return false end
+    if math.abs(p1.wincol - p2.wincol) > vertical_threshold then return false end
+    -- stylua: ignore end
+    return true
 end
 
 return M

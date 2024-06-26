@@ -1,0 +1,20 @@
+name: panvimdoc
+
+on: [push]
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    name: pandoc to vimdoc
+    steps:
+      - uses: actions/checkout@v4
+      - uses: kdheepak/panvimdoc@main
+        with:
+          vimdoc: cinnamon.nvim
+          version: "Neovim >= 0.8.0"
+          demojify: true
+          treesitter: true
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "chore(docs): auto-generate vimdoc"
+          branch: ${{ github.head_ref }}
