@@ -1,0 +1,175 @@
+*cinnamon.nvim.txt*             For 1.0.0            Last change: 2024 June 26
+
+==============================================================================
+Table of Contents                            *cinnamon.nvim-table-of-contents*
+
+1. Cinnamon Scroll                            |cinnamon.nvim-cinnamon-scroll-|
+  - Installation                 |cinnamon.nvim-cinnamon-scroll--installation|
+  - Configuration               |cinnamon.nvim-cinnamon-scroll--configuration|
+  - Keymaps                           |cinnamon.nvim-cinnamon-scroll--keymaps|
+  - API                                   |cinnamon.nvim-cinnamon-scroll--api|
+
+==============================================================================
+1. Cinnamon Scroll                            *cinnamon.nvim-cinnamon-scroll-*
+
+Smoothscrolling for **ANY** command. A highly customizable Neovim plugin
+written in Lua!
+
+**Features:** Can add smooth scrolling to any normal mode movement, command, or
+Lua function. Optional custom callbacks per movement. Horizontal, vertical, and
+diagonal scrolling. Non-blocking delays using luv. Scroll over folds. Scroll
+over wrapped lines.
+
+
+INSTALLATION                     *cinnamon.nvim-cinnamon-scroll--installation*
+
+Just install with your favorite package manager and run the setup function.
+
+
+PACKER ~
+
+>lua
+    use {
+      "declancm/cinnamon.nvim",
+      config = function() require("cinnamon").setup() end
+    }
+<
+
+
+LAZY ~
+
+>lua
+    {
+      "declancm/cinnamon.nvim",
+      config = true
+    }
+<
+
+
+CONFIGURATION                   *cinnamon.nvim-cinnamon-scroll--configuration*
+
+A settings table can be passed into the setup function for custom options.
+
+
+DEFAULT SETTINGS ~
+
+>lua
+    return {
+        disabled = false,           -- Disable the plugin
+        keymaps = {
+            basic = true,           -- Enable the basic keymaps
+            extra = false,          -- Enable the extra keymaps
+        },
+        options = {
+            callback = function()   -- Post-movement callback
+            end,
+            delay = 5,              -- Delay between each movement step (in ms)
+            max_delta = {
+                line = 150,         -- Maximum delta for line movements
+                column = 200,       -- Maximum delta for column movements
+            },
+        },
+    }
+<
+
+
+EXAMPLE CONFIGURATION ~
+
+>lua
+    require("cinnamon").setup {
+        keymaps = { extra = true }, -- Enable the 'extra' keymaps
+    }
+<
+
+
+KEYMAPS                               *cinnamon.nvim-cinnamon-scroll--keymaps*
+
+
+BASIC KEYMAPS ~
+
+**Smooth scrolling for …**
+
+  -----------------------------------------------------------------------
+  Movement Type                       Keys
+  ----------------------------------- -----------------------------------
+  Half-window movements               <C-U> and <C-D>
+
+  Page movements                      <C-B>, <C-F>, <PageUp> and
+                                      <PageDown>
+
+  Paragraph movements                 { and }
+
+  Prev/next search result             n, N, *, #, g* and g#
+
+  Prev/next cursor location           <C-O> and <C-I>
+  -----------------------------------------------------------------------
+
+EXTRA KEYMAPS ~
+
+**Smooth scrolling for …**
+
+  -----------------------------------------------------------------------
+  Movement Type                       Keys
+  ----------------------------------- -----------------------------------
+  Start/end of file                   gg and G
+
+  Line number                         [count]gg and [count]G
+
+  Start/end of line                   0, ^ and $
+
+  Screen scrolling                    zz, zt, zb, z., z<CR>, z-, z^, z+,
+                                      <C-Y> and <C-E>
+
+  Horizontal scrolling                zH, zL, zs, ze, zh and zl
+
+  Up/down movements                   [count]j, [count]k, [count]<Up>,
+                                      [count]<Down>, [count]gj,
+                                      [count]gk, [count]g<Up> and
+                                      [count]g<Down>
+
+  Left/right movements                [count]h, [count]l, [count]<Left>
+                                      and [count]<Right>
+  -----------------------------------------------------------------------
+
+API                                       *cinnamon.nvim-cinnamon-scroll--api*
+
+`require("cinnamon").scroll(command, options?)`
+
+- `command`Can be any of the following:
+    - Normal mode movement command
+        >lua
+            require("cinnamon").scroll("<C-]>")
+        <
+    - Command-line (Ex) command when prefixed with a semicolon
+        >lua
+            require("cinnamon").scroll(":keepjumps normal! <C-]>")
+        <
+    - A Lua function
+        >lua
+            require("cinnamon").scroll(function()
+                vim.lsp.buf.definition({ loclist = true })
+            end)
+        <
+- `options`An optional table to overwrite options from the configuration table.
+    >lua
+        require("cinnamon").scroll("<C-]>", { delay = 3 })
+    <
+
+
+EXAMPLE KEYMAPS ~
+
+>lua
+    local scroll = require('cinnamon').scroll
+    
+    -- Centered scrolling:
+    vim.keymap.set("n", "<C-U>", scroll("<C-U>zz"))
+    vim.keymap.set("n", "<C-D>", scroll("<C-D>zz"))
+    
+    -- LSP:
+    vim.keymap.set("n", "gd", scroll(vim.lsp.buf.definition))
+    vim.keymap.set("n", "gD", scroll(vim.lsp.buf.declaration))
+<
+
+Generated by panvimdoc <https://github.com/kdheepak/panvimdoc>
+
+vim:tw=78:ts=8:noet:ft=help:norl:
