@@ -11,11 +11,15 @@ __Features:__
 * Scroll over folds.
 * Scroll over wrapped lines.
 
+<!-- panvimdoc-ignore-start -->
+
 __Petition for a cinnamon roll emoji:__<https://www.change.org/p/apple-cinnamon-roll-emoji>
 
 ## 🎥 Demo
 
 https://github.com/declancm/cinnamon.nvim/assets/90937622/3a107151-a92f-47b9-be26-2afb949c9fe8
+
+<!-- panvimdoc-ignore-end -->
 
 ## 📦 Installation
 
