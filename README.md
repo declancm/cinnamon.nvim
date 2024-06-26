@@ -13,6 +13,10 @@ __Features:__
 
 __Petition for a cinnamon roll emoji:__<https://www.change.org/p/apple-cinnamon-roll-emoji>
 
+## 🎥 Demo
+
+https://github.com/declancm/cinnamon.nvim/assets/90937622/3a107151-a92f-47b9-be26-2afb949c9fe8
+
 ## 📦 Installation
 
 Just install with your favorite package manager and run the setup function to get the basic keymaps or to adjust the settings.
