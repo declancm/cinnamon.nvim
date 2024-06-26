@@ -4,9 +4,10 @@ local config = require("cinnamon.config")
 
 M.setup = function(user_config)
     config.setup(user_config)
+    local keymaps = require("cinnamon.config").get().keymaps
 
     -- stylua: ignore start
-    if config.config.keymaps.basic then
+    if keymaps.basic then
         -- Half-window movements:
         vim.keymap.set({ "n", "x" }, "<C-u>", function() M.scroll("<C-u>") end)
         vim.keymap.set({ "n", "x" }, "<C-d>", function() M.scroll("<C-d>") end)
@@ -35,7 +36,7 @@ M.setup = function(user_config)
 
     end
 
-    if config.config.keymaps.extra then
+    if keymaps.extra then
         -- Start/end of file and line number movements:
         vim.keymap.set({ "n", "x" }, "gg", function() M.scroll("gg") end)
         vim.keymap.set({ "n", "x" }, "G", function() M.scroll("G") end)

@@ -1,6 +1,6 @@
 local M = {}
 
-M.config = {
+local defaults = {
     disabled = false,
     keymaps = {
         basic = true,
@@ -30,51 +30,53 @@ local deprecated = {
     ["scroll_limit"] = "The 'scroll_limit' option has been deprecated. Use 'options.max_delta'.",
 }
 
-function M.setup(config)
-    if config == nil then
-        return
-    end
+local config = {}
 
+M.get = function()
+    return config
+end
+
+function M.setup(user_config)
     -- Check for deprecated options.
     for option, message in pairs(deprecated) do
         local keys = vim.split(option, ".", { plain = true })
-        if vim.tbl_get(config, unpack(keys)) ~= nil then
+        if vim.tbl_get(user_config, unpack(keys)) ~= nil then
             vim.notify("[cinnamon.config] " .. message, vim.log.levels.WARN)
         end
     end
 
     -- Convert deprecated options to new options.
-    if config.default_keymaps ~= nil then
-        config.keymaps = {
-            basic = config.default_keymaps,
+    if user_config.default_keymaps ~= nil then
+        user_config.keymaps = {
+            basic = user_config.default_keymaps,
         }
     end
-    if config.extra_keymaps ~= nil then
-        config.keymaps = {
-            basic = config.extra_keymaps,
-            extra = config.extra_keymaps,
+    if user_config.extra_keymaps ~= nil then
+        user_config.keymaps = {
+            basic = user_config.extra_keymaps,
+            extra = user_config.extra_keymaps,
         }
     end
-    if config.extended_keymaps == true then
-        config.keymaps = {
+    if user_config.extended_keymaps == true then
+        user_config.keymaps = {
             extra = true,
         }
     end
-    if config.default_delay ~= nil then
-        config.options = {
-            delay = config.default_delay,
+    if user_config.default_delay ~= nil then
+        user_config.options = {
+            delay = user_config.default_delay,
         }
     end
-    if config.scroll_limit ~= nil then
-        config.options = {
+    if user_config.scroll_limit ~= nil then
+        user_config.options = {
             max_delta = {
-                line = (config.scroll_limit <= 0) and 9999 or config.scroll_limit,
+                line = (user_config.scroll_limit <= 0) and 9999 or user_config.scroll_limit,
             },
         }
     end
 
     -- Merge user options with defaults.
-    M.config = vim.tbl_deep_extend("force", {}, M.config, config)
+    config = vim.tbl_deep_extend("force", {}, defaults, user_config or {})
 end
 
 return M

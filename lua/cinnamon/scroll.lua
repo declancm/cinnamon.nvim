@@ -1,7 +1,7 @@
 local M = {}
 local H = {}
 
-local config = require("cinnamon.config").config
+local config = require("cinnamon.config")
 
 M.scroll = function(command, options)
     -- Lock the function to prevent re-entrancy. Must be first.
@@ -9,7 +9,8 @@ M.scroll = function(command, options)
         return
     end
     H.locked = true
-    options = vim.tbl_deep_extend("keep", options or {}, config.options)
+
+    options = vim.tbl_deep_extend("keep", options or {}, config.get().options)
 
     local saved_lazyredraw = vim.o.lazyredraw
     vim.o.lazyredraw = true
