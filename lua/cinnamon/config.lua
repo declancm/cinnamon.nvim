@@ -8,7 +8,7 @@ local defaults = {
     },
     options = {
         callback = nil,
-        delay = 5,
+        delay = 7,
         max_delta = {
             line = 150,
             column = 200,

@@ -64,7 +64,7 @@ return {
     options = {
         callback = function()   -- Post-movement callback
         end,
-        delay = 5,              -- Delay between each movement step (in ms)
+        delay = 7,              -- Delay between each movement step (in ms)
         max_delta = {
             line = 150,         -- Maximum delta for line movements
             column = 200,       -- Maximum delta for column movements
