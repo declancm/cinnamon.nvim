@@ -37,6 +37,8 @@ M.get = function()
 end
 
 function M.setup(user_config)
+    user_config = user_config or {}
+
     -- Check for deprecated options.
     for option, message in pairs(deprecated) do
         local keys = vim.split(option, ".", { plain = true })
@@ -76,7 +78,7 @@ function M.setup(user_config)
     end
 
     -- Merge user options with defaults.
-    config = vim.tbl_deep_extend("force", {}, defaults, user_config or {})
+    config = vim.tbl_deep_extend("force", {}, defaults, user_config)
 end
 
 return M
