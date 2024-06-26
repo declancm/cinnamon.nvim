@@ -3,22 +3,14 @@
 ==============================================================================
 Table of Contents                            *cinnamon.nvim-table-of-contents*
 
-1. Cinnamon Scroll                            |cinnamon.nvim-cinnamon-scroll-|
-  - Features                         |cinnamon.nvim-cinnamon-scroll--features|
-  - Requirements                 |cinnamon.nvim-cinnamon-scroll--requirements|
-  - Installation                 |cinnamon.nvim-cinnamon-scroll--installation|
-  - Configuration               |cinnamon.nvim-cinnamon-scroll--configuration|
-  - Keymaps                           |cinnamon.nvim-cinnamon-scroll--keymaps|
-  - API                                   |cinnamon.nvim-cinnamon-scroll--api|
+  - Features                                          |cinnamon.nvim-features|
+  - Requirements                                  |cinnamon.nvim-requirements|
+  - Installation                                  |cinnamon.nvim-installation|
+  - Configuration                                |cinnamon.nvim-configuration|
+  - Keymaps                                            |cinnamon.nvim-keymaps|
+  - API                                                    |cinnamon.nvim-api|
 
-==============================================================================
-1. Cinnamon Scroll                            *cinnamon.nvim-cinnamon-scroll-*
-
-Smoothscrolling for **ANY** command. A highly customizable Neovim plugin
-written in Lua!
-
-
-FEATURES                             *cinnamon.nvim-cinnamon-scroll--features*
+FEATURES                                              *cinnamon.nvim-features*
 
 - Can add smooth scrolling to any normal mode movement, command, or Lua function.
 - Optional custom callbacks per movement.
@@ -28,12 +20,12 @@ FEATURES                             *cinnamon.nvim-cinnamon-scroll--features*
 - Scroll over wrapped lines.
 
 
-REQUIREMENTS                     *cinnamon.nvim-cinnamon-scroll--requirements*
+REQUIREMENTS                                      *cinnamon.nvim-requirements*
 
 - Neovim >= 0.8.0
 
 
-INSTALLATION                     *cinnamon.nvim-cinnamon-scroll--installation*
+INSTALLATION                                      *cinnamon.nvim-installation*
 
 Just install with your favorite package manager and run the setup function.
 
@@ -58,7 +50,7 @@ LAZY ~
 <
 
 
-CONFIGURATION                   *cinnamon.nvim-cinnamon-scroll--configuration*
+CONFIGURATION                                    *cinnamon.nvim-configuration*
 
 A settings table can be passed into the setup function for custom options.
 
@@ -94,7 +86,7 @@ EXAMPLE CONFIGURATION ~
 <
 
 
-KEYMAPS                               *cinnamon.nvim-cinnamon-scroll--keymaps*
+KEYMAPS                                                *cinnamon.nvim-keymaps*
 
 
 BASIC KEYMAPS ~
@@ -143,7 +135,7 @@ EXTRA KEYMAPS ~
                                       and [count]<Right>
   -----------------------------------------------------------------------
 
-API                                       *cinnamon.nvim-cinnamon-scroll--api*
+API                                                        *cinnamon.nvim-api*
 
 
 DESCRIPTION ~
