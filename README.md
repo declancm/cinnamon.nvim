@@ -127,6 +127,10 @@ require('cinnamon').scroll(command, options)
 
 * __options__ = An optional table to overwrite options from the configuration table.
 
+    ```lua
+    require('cinnamon').scroll("<C-]>", { delay = 3 })
+    ```
+
 ### Example Keymaps
 
 ```lua
