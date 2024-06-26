@@ -1,4 +1,4 @@
-*cinnamon.nvim.txt*             For 1.0.0            Last change: 2024 June 26
+*cinnamon.nvim.txt*        For Neovim >= 0.8.0       Last change: 2024 June 26
 
 ==============================================================================
 Table of Contents                            *cinnamon.nvim-table-of-contents*
@@ -19,6 +19,8 @@ written in Lua!
 Lua function. Optional custom callbacks per movement. Horizontal, vertical, and
 diagonal scrolling. Non-blocking delays using luv. Scroll over folds. Scroll
 over wrapped lines.
+
+**Requirements:** Neovim >= 0.8.0
 
 
 INSTALLATION                     *cinnamon.nvim-cinnamon-scroll--installation*
