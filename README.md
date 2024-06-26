@@ -1,7 +1,11 @@
+<!-- panvimdoc-ignore-start -->
+
 # Cinnamon Scroll 🍥
 
 Smooth scrolling for __ANY__ command 🤯. A highly
 customizable Neovim plugin written in Lua!
+
+<!-- panvimdoc-ignore-end -->
 
 ## ✨ Features
 
