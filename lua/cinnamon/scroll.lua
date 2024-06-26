@@ -135,7 +135,6 @@ function H.scroller:start(target_position, target_view, buffer_id, window_id, op
     self.watcher_autocmd = vim.api.nvim_create_autocmd({
         "BufLeave",
         "WinLeave",
-        "WinClosed",
         "WinResized",
     }, {
         callback = function()
