@@ -107,7 +107,9 @@ require("cinnamon").setup {
 | Up/down movements    | `[count]j`,  `[count]k`,  `[count]<Up>`,  `[count]<Down>`, `[count]gj`, `[count]gk`, `[count]g<Up>`  and `[count]g<Down>` |
 | Left/right movements | `[count]h`,  `[count]l`,  `[count]<Left>` and `[count]<Right>` |
 
-## ℹ️ API
+## 🔌 API
+
+### Description
 
 `require("cinnamon").scroll(command, options?)`
 
@@ -138,7 +140,7 @@ require("cinnamon").setup {
     require("cinnamon").scroll("<C-]>", { delay = 3 })
     ```
 
-### Example Keymaps
+### Examples
 
 ```lua
 local cinnamon = require("cinnamon")
