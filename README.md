@@ -1,7 +1,7 @@
 # Cinnamon Scroll 🍥
 
-Smooth scrolling for __ANY__ movement command 🤯. A
-highly customizable Neovim plugin written in Lua!
+Smooth scrolling for __ANY__ command 🤯. A highly
+customizable Neovim plugin written in Lua!
 
 __Features:__
 * Can add smooth scrolling to any normal mode movement, command, or Lua function.
@@ -19,14 +19,14 @@ https://github.com/declancm/cinnamon.nvim/assets/90937622/3a107151-a92f-47b9-be2
 
 ## 📦 Installation
 
-Just install with your favorite package manager and run the setup function to get the basic keymaps or to adjust the settings.
+Just install with your favorite package manager and run the setup function.
 
 ### Packer
 
 ```lua
 use {
-  'declancm/cinnamon.nvim',
-  config = function() require('cinnamon').setup() end
+  "declancm/cinnamon.nvim",
+  config = function() require("cinnamon").setup() end
 }
 ```
 
@@ -34,7 +34,7 @@ use {
 
 ```lua
 {
-  'declancm/cinnamon.nvim',
+  "declancm/cinnamon.nvim",
   config = true
 }
 ```
@@ -67,7 +67,7 @@ return {
 ### Example Configuration
 
 ```lua
-require('cinnamon').setup {
+require("cinnamon").setup {
     keymaps = { extra = true }, -- Enable the 'extra' keymaps
 }
 ```
@@ -102,37 +102,33 @@ require('cinnamon').setup {
 
 ## ℹ️ API
 
-```lua
-require('cinnamon').scroll(command, options)
-```
+`require("cinnamon").scroll(command, options?)`
 
-* __command__ = Can be any of the following:
+* `command`: Can be any of the following:
   * Normal mode movement command
 
     ```lua
-    require('cinnamon').scroll("<C-]>")
+    require("cinnamon").scroll("<C-]>")
     ```
 
   * Command-line (Ex) command when prefixed with a semicolon
 
     ```lua
-    require('cinnamon').scroll(":keepjumps normal! <C-]>")
+    require("cinnamon").scroll(":keepjumps normal! <C-]>")
     ```
 
   * A Lua function
 
     ```lua
-    require('cinnamon').scroll(function()
+    require("cinnamon").scroll(function()
         vim.lsp.buf.definition({ loclist = true })
     end)
-    -- OR
-    require('cinnamon').scroll(vim.lsp.buf.definition)
     ```
 
-* __options__ = An optional table to overwrite options from the configuration table.
+* `options`: An optional table to overwrite options from the configuration table.
 
     ```lua
-    require('cinnamon').scroll("<C-]>", { delay = 3 })
+    require("cinnamon").scroll("<C-]>", { delay = 3 })
     ```
 
 ### Example Keymaps
@@ -141,10 +137,10 @@ require('cinnamon').scroll(command, options)
 local scroll = require('cinnamon').scroll
 
 -- Centered scrolling:
-vim.keymap.set('n', '<C-U>', scroll('<C-U>zz'))
-vim.keymap.set('n', '<C-D>', scroll('<C-D>zz'))
+vim.keymap.set("n", "<C-U>", scroll("<C-U>zz"))
+vim.keymap.set("n", "<C-D>", scroll("<C-D>zz"))
 
 -- LSP:
-vim.keymap.set('n', 'gd', scroll(vim.lsp.buf.definition))
-vim.keymap.set('n', 'gD', scroll(vim.lsp.buf.declaration))
+vim.keymap.set("n", "gd", scroll(vim.lsp.buf.definition))
+vim.keymap.set("n", "gD", scroll(vim.lsp.buf.declaration))
 ```
