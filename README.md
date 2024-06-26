@@ -72,30 +72,29 @@ require('cinnamon').setup {
 
 ### Basic Keymaps
 
-```
-Smooth scrolling for ...
+**Smooth scrolling for ...**
 
-Half-window movements:      <C-U> and <C-D>
-Page movements:             <C-B>, <C-F>, <PageUp> and <PageDown>
-Paragraph movements:        { and }
-Prev/next search result:    n, N, *, #, g* and g#
-Prev/next cursor location:  <C-O> and <C-I>
-```
+| Movement Type | Keys |
+|-|-|
+| Half-window movements     | `<C-U>` and `<C-D>` |
+| Page movements            | `<C-B>`, `<C-F>`, `<PageUp>` and `<PageDown>` |
+| Paragraph movements       | `{` and `}` |
+| Prev/next search result   | `n`, `N`, `*`, `#`, `g*` and `g#` |
+| Prev/next cursor location | `<C-O>` and `<C-I>` |
 
 ### Extra Keymaps
 
-```
-Smooth scrolling for ...
+**Smooth scrolling for ...**
 
-Start/end of file:          gg and G
-Line number:                [count]gg and [count]G
-Start/end of line:          0, ^ and $
-Screen scrolling:           zz, zt, zb, z., z<CR>, z-, z^, z+, <C-Y> and <C-E>
-Horizontal scrolling:       zH, zL, zs, ze, zh and zl
-Up/down movements:          [count]j,  [count]k,  [count]<Up>,  [count]<Down>,
-                            [count]gj, [count]gk, [count]g<Up>  and [count]g<Down>
-Left/right movements:       [count]h,  [count]l,  [count]<Left> and [count]<Right>
-```
+| Movement Type | Keys |
+|-|-|
+| Start/end of file    | `gg` and `G` |
+| Line number          | `[count]gg` and `[count]G` |
+| Start/end of line    | `0`, `^` and `$` |
+| Screen scrolling     | `zz`, `zt`, `zb`, `z.`, `z<CR>`, `z-`, `z^`, `z+`, `<C-Y>` and `<C-E>` |
+| Horizontal scrolling | `zH`, `zL`, `zs`, `ze`, `zh` and `zl` |
+| Up/down movements    | `[count]j`,  `[count]k`,  `[count]<Up>`,  `[count]<Down>`, `[count]gj`, `[count]gk`, `[count]g<Up>`  and `[count]g<Down>` |
+| Left/right movements | `[count]h`,  `[count]l`,  `[count]<Left>` and `[count]<Right>` |
 
 ## ℹ️ API
 
@@ -105,21 +104,27 @@ require('cinnamon').scroll(command, options)
 
 * __command__ = Can be any of the following:
   * Normal mode movement command
+
     ```lua
     require('cinnamon').scroll("<C-]>")
     ```
-  * Command-line command when prefixed with a semicolon
+
+  * Command-line (Ex) command when prefixed with a semicolon
+
     ```lua
     require('cinnamon').scroll(":keepjumps normal! <C-]>")
     ```
+
   * A Lua function
+
     ```lua
     require('cinnamon').scroll(function()
-      vim.lsp.buf.definition()
+        vim.lsp.buf.definition({ loclist = true })
     end)
     -- OR
     require('cinnamon').scroll(vim.lsp.buf.definition)
     ```
+
 * __options__ = An optional table to overwrite options from the configuration table.
 
 ### Example Keymaps
