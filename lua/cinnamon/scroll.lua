@@ -238,7 +238,7 @@ function H.scroller:cleanup()
     -- The 'curswant' value has to be set with cursor() for the '$' movement.
     -- Setting it with winrestview() causes issues when within 'scrolloff'.
     vim.fn.cursor({
-        self.target_view.line,
+        self.target_view.lnum,
         self.target_view.col + 1,
         self.target_view.coladd,
         self.target_view.curswant + 1,
