@@ -3,7 +3,8 @@
 Smooth scrolling for __ANY__ command 🤯. A highly
 customizable Neovim plugin written in Lua!
 
-__Features:__
+## ✨ Features
+
 * Can add smooth scrolling to any normal mode movement, command, or Lua function.
 * Optional custom callbacks per movement.
 * Horizontal, vertical, and diagonal scrolling.
@@ -11,7 +12,8 @@ __Features:__
 * Scroll over folds.
 * Scroll over wrapped lines.
 
-__Requirements:__
+## 📋 Requirements
+
 * Neovim >= 0.8.0
 
 <!-- panvimdoc-ignore-start -->
