@@ -11,6 +11,9 @@ __Features:__
 * Scroll over folds.
 * Scroll over wrapped lines.
 
+__Requirements:__
+* Neovim >= 0.8.0
+
 <!-- panvimdoc-ignore-start -->
 
 __Petition for a cinnamon roll emoji:__<https://www.change.org/p/apple-cinnamon-roll-emoji>
