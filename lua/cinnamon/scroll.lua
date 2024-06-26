@@ -129,24 +129,32 @@ function H.scroller:start(target_position, target_view, buffer_id, window_id, op
     self.saved_virtualedit = vim.wo.virtualedit
     vim.wo.virtualedit = "all"
 
+    self.initial_changedtick = vim.b.changedtick
+    self.cancel_scroll = false
+
+    self.watcher_autocmd = vim.api.nvim_create_autocmd({
+        "BufLeave",
+        "WinLeave",
+        "WinClosed",
+        "WinResized",
+    }, {
+        callback = function()
+            self.cancel_scroll = true
+        end,
+    })
+
     self.step_counter = 0
     H.scroller:scroll()
 end
 
 function H.scroller:scroll()
-    self:move_step()
-    self.step_counter = self.step_counter + 1
+    local scroll_failed = (self.cancel_scroll or (self.initial_changedtick ~= vim.b.changedtick))
+    local position = H.get_position()
+    local scroll_complete = (not scroll_failed and H.positions_within_threshold(position, self.target_position, 0, 0))
 
-    local final_position = H.get_position()
-    local scroll_complete = H.positions_within_threshold(final_position, self.target_position, 0, 0)
-    local scroll_error = (
-        (self.step_counter > self.options.max_delta.line + self.window_height)
-        or (self.step_counter > self.options.max_delta.column + self.window_width)
-        or (self.buffer_id ~= vim.api.nvim_get_current_buf())
-        or (self.window_id ~= vim.api.nvim_get_current_win())
-    )
-
-    if not scroll_complete and not scroll_error then
+    if not scroll_complete and not scroll_failed then
+        self:move_step()
+        self.step_counter = self.step_counter + 1
         vim.defer_fn(function()
             H.scroller:scroll()
         end, self.options.delay)
@@ -235,15 +243,20 @@ function H.scroller:line_is_wrapped()
 end
 
 function H.scroller:cleanup()
+    vim.api.nvim_del_autocmd(self.watcher_autocmd)
+
     -- The 'curswant' value has to be set with cursor() for the '$' movement.
     -- Setting it with winrestview() causes issues when within 'scrolloff'.
-    vim.fn.cursor({
-        self.target_view.lnum,
-        self.target_view.col + 1,
-        self.target_view.coladd,
-        self.target_view.curswant + 1,
-    })
-    vim.wo.virtualedit = self.saved_virtualedit
+    vim.api.nvim_win_call(self.window_id, function()
+        vim.fn.cursor({
+            self.target_view.lnum,
+            self.target_view.col + 1,
+            self.target_view.coladd,
+            self.target_view.curswant + 1,
+        })
+        vim.cmd("redraw") -- Cursor isn't redrawn if the window was exited
+    end)
+    vim.wo[self.window_id].virtualedit = self.saved_virtualedit
     H.cleanup(self.options)
 end
 
