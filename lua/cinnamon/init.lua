@@ -38,8 +38,8 @@ M.setup = function(user_config)
 
     if keymaps.extra then
         -- Start/end of file and line number movements:
-        vim.keymap.set({ "n", "x" }, "gg", function() M.scroll("gg") end)
-        vim.keymap.set({ "n", "x" }, "G", function() M.scroll("G") end)
+        vim.keymap.set({ "n", "x" }, "gg", function() M.scroll("gg", { delay = 5 }) end)
+        vim.keymap.set({ "n", "x" }, "G", function() M.scroll("G", { delay = 5 }) end)
 
         -- Start/end of line:
         vim.keymap.set({ "n", "x" }, "0", function() M.scroll("0") end)
