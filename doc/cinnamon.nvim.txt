@@ -12,12 +12,12 @@ Table of Contents                            *cinnamon.nvim-table-of-contents*
 
 FEATURES                                              *cinnamon.nvim-features*
 
-- Can add smooth scrolling to any normal mode movement, command, or Lua function.
-- Optional custom callbacks per movement.
-- Horizontal, vertical, and diagonal scrolling.
-- Non-blocking delays using luv.
-- Scroll over folds.
-- Scroll over wrapped lines.
+- Can add smooth scrolling to any normal mode movement, command, or Lua function
+- Optional custom callbacks per movement
+- Horizontal, vertical, and diagonal scrolling
+- Non-blocking delays using luv
+- Scroll over folds
+- Scroll over wrapped lines
 
 
 REQUIREMENTS                                      *cinnamon.nvim-requirements*
@@ -94,7 +94,7 @@ BASIC KEYMAPS ~
 **Smooth scrolling for …**
 
   -----------------------------------------------------------------------
-  Movement Type                       Keys
+  Category                            Keys
   ----------------------------------- -----------------------------------
   Half-window movements               <C-U> and <C-D>
 
@@ -113,7 +113,7 @@ EXTRA KEYMAPS ~
 **Smooth scrolling for …**
 
   -----------------------------------------------------------------------
-  Movement Type                       Keys
+  Category                            Keys
   ----------------------------------- -----------------------------------
   Start/end of file                   gg and G
 
@@ -142,7 +142,7 @@ DESCRIPTION ~
 
 `require("cinnamon").scroll(command, options?)`
 
-- `command`Can be any of the following:
+- `command` - Can be any of the following:
     - Normal mode movement command
         >lua
             require("cinnamon").scroll("<C-]>")
@@ -157,7 +157,8 @@ DESCRIPTION ~
                 vim.lsp.buf.definition({ loclist = true })
             end)
         <
-- `options`An optional table to overwrite options from the configuration table.
+- `options` - An optional table to overwrite options from the configuration
+    table.
     >lua
         require("cinnamon").scroll("<C-]>", { delay = 3 })
     <
