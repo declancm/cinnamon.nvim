@@ -45,7 +45,7 @@ M.scroll = function(command, options)
     vim.o.lazyredraw = saved_lazyredraw
 
     if is_scrollable then
-        H.scroller:start(final_position, final_view, final_buffer, final_window, options)
+        H.scroller:start(final_position, final_view, final_window, options)
     else
         H.cleanup(options)
     end
@@ -113,10 +113,9 @@ end
 
 H.scroller = {}
 
-function H.scroller:start(target_position, target_view, buffer_id, window_id, options)
+function H.scroller:start(target_position, target_view, window_id, options)
     self.target_position = target_position
     self.target_view = target_view
-    self.buffer_id = buffer_id
     self.window_id = window_id
     self.options = options
 
