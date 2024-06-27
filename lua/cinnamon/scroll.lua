@@ -142,7 +142,6 @@ function H.scroller:start(target_position, target_view, window_id, options)
         end,
     })
 
-    self.step_counter = 0
     H.scroller:scroll()
 end
 
@@ -153,7 +152,6 @@ function H.scroller:scroll()
 
     if not scroll_complete and not scroll_failed then
         self:move_step()
-        self.step_counter = self.step_counter + 1
         vim.defer_fn(function()
             H.scroller:scroll()
         end, self.options.delay)
