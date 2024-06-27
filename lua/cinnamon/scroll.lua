@@ -142,6 +142,11 @@ function H.scroller:start(target_position, target_view, window_id, options)
         end,
     })
 
+    self.timeout_timer = vim.uv.new_timer()
+    self.timeout_timer:start(10 * 1000, 0, function()
+        self.cancel_scroll = true
+    end)
+
     H.scroller:scroll()
 end
 
@@ -241,6 +246,7 @@ end
 
 function H.scroller:cleanup()
     vim.api.nvim_del_autocmd(self.watcher_autocmd)
+    self.timeout_timer:close()
 
     -- The 'curswant' value has to be set with cursor() for the '$' movement.
     -- Setting it with winrestview() causes issues when within 'scrolloff'.
