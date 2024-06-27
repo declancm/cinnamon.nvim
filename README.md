@@ -9,12 +9,12 @@ customizable Neovim plugin written in Lua!
 
 ## ✨ Features
 
-* Can add smooth scrolling to any normal mode movement, command, or Lua function.
-* Optional custom callbacks per movement.
-* Horizontal, vertical, and diagonal scrolling.
-* Non-blocking delays using luv.
-* Scroll over folds.
-* Scroll over wrapped lines.
+* Can add smooth scrolling to any normal mode movement, command, or Lua function
+* Optional custom callbacks per movement
+* Horizontal, vertical, and diagonal scrolling
+* Non-blocking delays using luv
+* Scroll over folds
+* Scroll over wrapped lines
 
 ## 📋 Requirements
 
@@ -89,7 +89,7 @@ require("cinnamon").setup {
 
 **Smooth scrolling for ...**
 
-| Movement Type | Keys |
+| Category | Keys |
 |-|-|
 | Half-window movements     | `<C-U>` and `<C-D>` |
 | Page movements            | `<C-B>`, `<C-F>`, `<PageUp>` and `<PageDown>` |
@@ -101,7 +101,7 @@ require("cinnamon").setup {
 
 **Smooth scrolling for ...**
 
-| Movement Type | Keys |
+| Category | Keys |
 |-|-|
 | Start/end of file    | `gg` and `G` |
 | Line number          | `[count]gg` and `[count]G` |
@@ -117,7 +117,7 @@ require("cinnamon").setup {
 
 `require("cinnamon").scroll(command, options?)`
 
-* `command`: Can be any of the following:
+* `command` - Can be any of the following:
   * Normal mode movement command
 
     ```lua
@@ -138,7 +138,7 @@ require("cinnamon").setup {
     end)
     ```
 
-* `options`: An optional table to overwrite options from the configuration table.
+* `options` - An optional table to overwrite options from the configuration table.
 
     ```lua
     require("cinnamon").scroll("<C-]>", { delay = 3 })
