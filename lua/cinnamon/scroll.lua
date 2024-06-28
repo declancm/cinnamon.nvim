@@ -27,6 +27,10 @@ M.scroll = function(command, options)
     local final_buffer = vim.api.nvim_get_current_buf()
     local final_window = vim.api.nvim_get_current_win()
 
+    -- TODO: Factor in folds, wrapped lines, virtual text etc in delta calculations
+    local line_delta = math.abs(final_position.line - original_position.line)
+    local column_delta = math.abs(final_position.col - original_position.col)
+
     local is_scrollable = (
         not config.disabled
         and vim.fn.reg_executing() == "" -- A macro is not being executed
@@ -34,8 +38,8 @@ M.scroll = function(command, options)
         and original_window == final_window
         and vim.fn.foldclosed(final_position.line) == -1 -- Not within a closed fold
         and not H.positions_within_threshold(original_position, final_position, 1, 2)
-        and math.abs(original_position.line - final_position.line) <= options.max_delta.line
-        and math.abs(original_position.col - final_position.col) <= options.max_delta.column
+        and (options.max_delta.line == nil or (line_delta <= options.max_delta.line))
+        and (options.max_delta.column == nil or (column_delta <= options.max_delta.column))
     )
 
     if is_scrollable then
@@ -45,6 +49,9 @@ M.scroll = function(command, options)
     vim.o.lazyredraw = saved_lazyredraw
 
     if is_scrollable then
+        -- TODO: Move this to a better place
+        options.delay =
+            math.min(options.delay, options.max_delta.time / line_delta, options.max_delta.time / column_delta)
         H.scroller:start(final_position, final_view, final_window, options)
     else
         H.cleanup(options)
@@ -149,8 +156,9 @@ function H.scroller:start(target_position, target_view, window_id, options)
         end,
     })
 
+    local timeout = options.max_delta.time + 1000
     self.timeout_timer = vim.uv.new_timer()
-    self.timeout_timer:start(10 * 1000, 0, function()
+    self.timeout_timer:start(timeout, 0, function()
         self.cancel_scroll = true
     end)
 

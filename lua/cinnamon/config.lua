@@ -7,11 +7,12 @@ local defaults = {
         extra = false,
     },
     options = {
-        callback = nil,
+        callback = nil, ---@type function?
         delay = 7,
         max_delta = {
-            line = 150,
-            column = 200,
+            line = nil, ---@type number?
+            column = nil, ---@type number?
+            time = 1000, ---@type number
         },
         mode = "cursor", ---@type "cursor" | "window"
     },
@@ -27,8 +28,8 @@ local deprecated = {
     ["default_delay"] = "The 'default_delay' option has been deprecated. Please use 'options.delay' instead",
     ["hide_cursor"] = "The 'hide_cursor' option has been removed. The cursor is hidden when using 'options.mode = \"window\"",
     ["horizontal_scroll"] = "The 'horizontal_scroll' option has been removed. Horizontal scrolling is always enabled",
-    ["max_length"] = "The 'max_length' option has been deprecated. Please use 'options.max_delta' instead",
-    ["scroll_limit"] = "The 'scroll_limit' option has been deprecated. Please use 'options.max_delta' instead",
+    ["max_length"] = "The 'max_length' option has been deprecated. Please use 'options.max_delta.time' instead",
+    ["scroll_limit"] = "The 'scroll_limit' option has been deprecated. Please use 'options.max_delta.line' instead",
 }
 
 local config = {}
