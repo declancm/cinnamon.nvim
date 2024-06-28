@@ -56,7 +56,7 @@ CONFIGURATION                                    *cinnamon.nvim-configuration*
 A settings table can be passed into the setup function for custom options.
 
 
-DEFAULT SETTINGS ~
+DEFAULT OPTIONS ~
 
 >lua
     return {
@@ -64,7 +64,7 @@ DEFAULT SETTINGS ~
         disabled = false,
         keymaps = {
             -- Enable the provided 'basic' keymaps
-            basic = true,
+            basic = false,
             -- Enable the provided 'extra' keymaps
             extra = false,
         },
@@ -94,7 +94,13 @@ EXAMPLE CONFIGURATION ~
 
 >lua
     require("cinnamon").setup {
-        keymaps = { extra = true }, -- Enable the 'extra' keymaps
+        -- Enable all provided keymaps
+        keymaps = {
+            basic = true,
+            extra = true,
+        },
+        -- Only scroll the window
+        options = { mode = "window" },
     }
 <
 
