@@ -159,9 +159,9 @@ API                                                        *cinnamon.nvim-api*
 
 DESCRIPTION ~
 
-`require("cinnamon").scroll(command, options?)`
+`require("cinnamon").scroll({command}, {options})`
 
-- `command` - Can be any of the following:
+- `{command}` **(string|function)** Can be any of the following:
     - Normal mode movement command
         >lua
             require("cinnamon").scroll("<C-]>")
@@ -176,8 +176,8 @@ DESCRIPTION ~
                 vim.lsp.buf.definition({ loclist = true })
             end)
         <
-- `options` - An optional table to overwrite options from the configuration
-    table.
+- `{options}` **(table?)** An optional table to overwrite options from the
+    configuration table.
     >lua
         require("cinnamon").scroll("<C-]>", { delay = 3 })
     <
