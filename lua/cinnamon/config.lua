@@ -63,7 +63,6 @@ function M.setup(user_config)
             user_config.options.max_delta.line = user_config.scroll_limit
         end
     end
-    vim.print(user_config)
 
     -- Merge user options with defaults.
     config = vim.tbl_deep_extend("force", {}, defaults, user_config)
