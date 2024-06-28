@@ -3,7 +3,7 @@ local M = {}
 local defaults = {
     disabled = false,
     keymaps = {
-        basic = true,
+        basic = false,
         extra = false,
     },
     options = {

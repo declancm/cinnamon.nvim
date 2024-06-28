@@ -55,7 +55,7 @@ use {
 
 A settings table can be passed into the setup function for custom options.
 
-### Default Settings
+### Default Options
 
 ```lua
 return {
@@ -63,7 +63,7 @@ return {
     disabled = false,
     keymaps = {
         -- Enable the provided 'basic' keymaps
-        basic = true,
+        basic = false,
         -- Enable the provided 'extra' keymaps
         extra = false,
     },
@@ -92,7 +92,13 @@ return {
 
 ```lua
 require("cinnamon").setup {
-    keymaps = { extra = true }, -- Enable the 'extra' keymaps
+    -- Enable all provided keymaps
+    keymaps = {
+        basic = true,
+        extra = true,
+    },
+    -- Only scroll the window
+    options = { mode = "window" },
 }
 ```
 
