@@ -70,19 +70,21 @@ DEFAULT SETTINGS ~
         },
         options = {
             -- Post-movement callback
-            callback = function() end,
+            callback = nil, ---@type function?
             -- Delay between each movement step (in ms)
             delay = 7,
             max_delta = {
-                -- Maximum delta for line movements
-                line = 150,
-                -- Maximum delta for column movements
-                column = 200,
+                -- Maximum distance for line movements. Set to `nil` to disable
+                line = nil, ---@type number?
+                -- Maximum distance for column movements. Set to `nil` to disable
+                column = nil, ---@type number?
+                -- Maximum duration for a movement. Automatically adjusts the line delay
+                time = 1000, ---@type number
             },
             -- The scrolling mode
             -- `cursor`: Smoothly scrolls the cursor for any movement
             -- `window`: Smoothly scrolls the window only when the cursor moves out of view
-            mode = "cursor",
+            mode = "cursor", ---@type "cursor" | "window"
         },
     }
 <
