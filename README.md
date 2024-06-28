@@ -77,7 +77,7 @@ return {
             line = nil, ---@type number?
             -- Maximum distance for column movements. Set to `nil` to disable
             column = nil, ---@type number?
-            -- Maximum duration for a movement. Automatically adjusts the line delay
+            -- Maximum duration for a movement (in ms). Automatically adjusts the line delay
             time = 1000, ---@type number
         },
         -- The scrolling mode
