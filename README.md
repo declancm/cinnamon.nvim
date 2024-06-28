@@ -59,19 +59,29 @@ A settings table can be passed into the setup function for custom options.
 
 ```lua
 return {
-    disabled = false,           -- Disable the plugin
+    -- Disable the plugin
+    disabled = false,
     keymaps = {
-        basic = true,           -- Enable the basic keymaps
-        extra = false,          -- Enable the extra keymaps
+        -- Enable the provided 'basic' keymaps
+        basic = true,
+        -- Enable the provided 'extra' keymaps
+        extra = false,
     },
     options = {
-        callback = function()   -- Post-movement callback
-        end,
-        delay = 7,              -- Delay between each movement step (in ms)
+        -- Post-movement callback
+        callback = function() end,
+        -- Delay between each movement step (in ms)
+        delay = 7,
         max_delta = {
-            line = 150,         -- Maximum delta for line movements
-            column = 200,       -- Maximum delta for column movements
+            -- Maximum delta for line movements
+            line = 150,
+            -- Maximum delta for column movements
+            column = 200,
         },
+        -- The scrolling mode
+        -- `cursor`: Smoothly scrolls the cursor for any movement
+        -- `screen`: Smoothly scrolls the screen only when the cursor moves out of view
+        mode = "cursor",
     },
 }
 ```

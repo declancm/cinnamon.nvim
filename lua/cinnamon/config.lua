@@ -13,6 +13,7 @@ local defaults = {
             line = 150,
             column = 200,
         },
+        mode = "cursor", ---@type "cursor" | "screen"
     },
 }
 
@@ -21,10 +22,10 @@ local deprecated = {
     ["extra_keymaps"] = "The 'extra_keymaps' option has beeen deprecated. Use 'keymaps.basic' and/or 'keymaps.extra'.",
     ["extended_keymaps"] = "The 'extended_keymaps' option has been deprecated. Use 'keymaps.extra'.",
     ["override_keymaps"] = "The 'override_keymaps' option has been removed.",
-    ["always_scroll"] = "The 'always_scroll' option has been removed. The cursor is always scrolled.",
+    ["always_scroll"] = "The 'always_scroll' option has been deprecated. Use 'options.mode == \"screen\"'.",
     ["centered"] = "The 'centered' option has been deprecated. Append 'zz' to your command to replicate.",
     ["default_delay"] = "The 'default_delay' option has been deprecated. Use 'options.delay'.",
-    ["hide_cursor"] = "The 'hide_cursor' option has been removed.",
+    ["hide_cursor"] = "The 'hide_cursor' option has been removed. The cursor is hidden when using 'options.mode = \"screen\".",
     ["horizontal_scroll"] = "The 'horizontal_scroll' option has been removed. Horizontal scrolling is always enabled.",
     ["max_length"] = "The 'max_length' option has been deprecated. Use 'options.max_delta'.",
     ["scroll_limit"] = "The 'scroll_limit' option has been deprecated. Use 'options.max_delta'.",

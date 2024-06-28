@@ -118,6 +118,13 @@ function H.scroller:start(target_position, target_view, window_id, options)
     self.target_view = target_view
     self.window_id = window_id
     self.options = options
+    self.screen_only = (options.mode == "screen")
+
+    if self.screen_only then
+        -- Hide the cursor
+        vim.cmd("highlight Cursor blend=100")
+        vim.opt.guicursor:append({ "a:Cursor/lCursor" })
+    end
 
     -- Cache values for performance
     self.window_height = vim.api.nvim_win_get_height(0)
@@ -156,10 +163,15 @@ function H.scroller:scroll()
     local scroll_complete = (not scroll_failed and H.positions_within_threshold(position, self.target_position, 0, 0))
 
     if not scroll_complete and not scroll_failed then
+        local top_line = vim.fn.line("w0")
         self:move_step()
-        vim.defer_fn(function()
+        if self.screen_only and top_line == vim.fn.line("w0") then
             H.scroller:scroll()
-        end, self.options.delay)
+        else
+            vim.defer_fn(function()
+                H.scroller:scroll()
+            end, self.options.delay)
+        end
     else
         self:cleanup()
     end
@@ -247,6 +259,12 @@ end
 function H.scroller:cleanup()
     vim.api.nvim_del_autocmd(self.watcher_autocmd)
     self.timeout_timer:close()
+
+    if self.screen_only then
+        -- Restore the cursor
+        vim.cmd("highlight Cursor blend=0")
+        vim.opt.guicursor:remove({ "a:Cursor/lCursor" })
+    end
 
     -- The 'curswant' value has to be set with cursor() for the '$' movement.
     -- Setting it with winrestview() causes issues when within 'scrolloff'.
