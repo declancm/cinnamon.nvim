@@ -13,7 +13,7 @@ local defaults = {
             line = 150,
             column = 200,
         },
-        mode = "cursor", ---@type "cursor" | "screen"
+        mode = "cursor", ---@type "cursor" | "window"
     },
 }
 

@@ -80,7 +80,7 @@ return {
         },
         -- The scrolling mode
         -- `cursor`: Smoothly scrolls the cursor for any movement
-        -- `screen`: Smoothly scrolls the screen only when the cursor moves out of view
+        -- `window`: Smoothly scrolls the window only when the cursor moves out of view
         mode = "cursor",
     },
 }

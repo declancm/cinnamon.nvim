@@ -118,9 +118,9 @@ function H.scroller:start(target_position, target_view, window_id, options)
     self.target_view = target_view
     self.window_id = window_id
     self.options = options
-    self.screen_only = (options.mode == "screen")
+    self.scroll_cursor = (options.mode == "cursor")
 
-    if self.screen_only then
+    if not self.scroll_cursor then
         -- Hide the cursor
         vim.cmd("highlight Cursor blend=100")
         vim.opt.guicursor:append({ "a:Cursor/lCursor" })
@@ -165,7 +165,7 @@ function H.scroller:scroll()
     if not scroll_complete and not scroll_failed then
         local top_line = vim.fn.line("w0")
         self:move_step()
-        if self.screen_only and top_line == vim.fn.line("w0") then
+        if not self.scroll_cursor and top_line == vim.fn.line("w0") then
             H.scroller:scroll()
         else
             vim.defer_fn(function()
@@ -260,7 +260,7 @@ function H.scroller:cleanup()
     vim.api.nvim_del_autocmd(self.watcher_autocmd)
     self.timeout_timer:close()
 
-    if self.screen_only then
+    if not self.scroll_cursor then
         -- Restore the cursor
         vim.cmd("highlight Cursor blend=0")
         vim.opt.guicursor:remove({ "a:Cursor/lCursor" })
