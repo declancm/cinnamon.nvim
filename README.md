@@ -134,9 +134,9 @@ require("cinnamon").setup {
 
 ### Description
 
-`require("cinnamon").scroll(command, options?)`
+`require("cinnamon").scroll({command}, {options})`
 
-* `command` - Can be any of the following:
+* `{command}` __(string|function)__ Can be any of the following:
   * Normal mode movement command
 
     ```lua
@@ -157,7 +157,7 @@ require("cinnamon").setup {
     end)
     ```
 
-* `options` - An optional table to overwrite options from the configuration table.
+* `{options}` __(table?)__ An optional table to overwrite options from the configuration table.
 
     ```lua
     require("cinnamon").scroll("<C-]>", { delay = 3 })
