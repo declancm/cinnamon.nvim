@@ -165,12 +165,13 @@ function H.scroller:scroll()
     if not scroll_complete and not scroll_failed then
         local top_line = vim.fn.line("w0")
         self:move_step()
-        if not self.scroll_cursor and top_line == vim.fn.line("w0") then
-            H.scroller:scroll()
-        else
+        local window_moved = (top_line ~= vim.fn.line("w0"))
+        if self.scroll_cursor or window_moved then
             vim.defer_fn(function()
                 H.scroller:scroll()
             end, self.options.delay)
+        else
+            H.scroller:scroll()
         end
     else
         self:cleanup()
