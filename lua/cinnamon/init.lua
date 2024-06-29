@@ -1,10 +1,12 @@
+local config = require("cinnamon.config")
+local scroll = require("cinnamon.scroll")
 local M = {}
 
-local config = require("cinnamon.config")
+M.scroll = scroll.scroll
 
 M.setup = function(user_config)
     config.setup(user_config)
-    local keymaps = require("cinnamon.config").get().keymaps
+    local keymaps = config.get().keymaps
 
     -- stylua: ignore start
     if keymaps.basic then
@@ -84,8 +86,6 @@ M.setup = function(user_config)
     end
     --stylua: ignore end
 end
-
-M.scroll = require("cinnamon.scroll").scroll
 
 -- For backward compatibility:
 function Scroll(...)

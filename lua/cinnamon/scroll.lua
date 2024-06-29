@@ -1,7 +1,6 @@
+local config = require("cinnamon.config")
 local M = {}
 local H = {}
-
-local config = require("cinnamon.config")
 
 ---@class Position
 ---@field line number
@@ -276,6 +275,7 @@ function H.scroller:move_step()
     end
 end
 
+---@return boolean
 function H.scroller:line_is_wrapped()
     if self.wrap_enabled then
         return vim.fn.virtcol(".") ~= vim.fn.wincol() - self.window_textoff
