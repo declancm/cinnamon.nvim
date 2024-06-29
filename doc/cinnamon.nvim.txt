@@ -1,4 +1,4 @@
-*cinnamon.nvim.txt*        For Neovim >= 0.8.0       Last change: 2024 June 28
+*cinnamon.nvim.txt*        For Neovim >= 0.8.0       Last change: 2024 June 29
 
 ==============================================================================
 Table of Contents                            *cinnamon.nvim-table-of-contents*
@@ -59,6 +59,7 @@ A settings table can be passed into the setup function for custom options.
 DEFAULT OPTIONS ~
 
 >lua
+    ---@class CinnamonOptions
     return {
         -- Disable the plugin
         disabled = false,
@@ -68,6 +69,7 @@ DEFAULT OPTIONS ~
             -- Enable the provided 'extra' keymaps
             extra = false,
         },
+        ---@class ScrollOptions
         options = {
             -- Post-movement callback
             callback = nil, ---@type function?
@@ -176,8 +178,8 @@ DESCRIPTION ~
                 vim.lsp.buf.definition({ loclist = true })
             end)
         <
-- `{options}` **(table?)** An optional table to overwrite options from the
-    configuration table.
+- `{options}` **(ScrollOptions?)** An optional table to overwrite options from
+    the configuration table.
     >lua
         require("cinnamon").scroll("<C-]>", { delay = 3 })
     <
