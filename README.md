@@ -159,10 +159,11 @@ require("cinnamon").setup {
     end)
     ```
 
-* `{options}` __(ScrollOptions?)__ An optional table to overwrite options from the configuration table.
+* `{options}` __(ScrollOptions?)__ Override the default scroll options.
+See the [Default Options](#default-options) for more information.
 
     ```lua
-    require("cinnamon").scroll("<C-]>", { delay = 3 })
+    require("cinnamon").scroll("<C-]>", { mode = "window" })
     ```
 
 ### Examples
