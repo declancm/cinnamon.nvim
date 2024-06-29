@@ -58,6 +58,7 @@ A settings table can be passed into the setup function for custom options.
 ### Default Options
 
 ```lua
+---@class CinnamonOptions
 return {
     -- Disable the plugin
     disabled = false,
@@ -67,6 +68,7 @@ return {
         -- Enable the provided 'extra' keymaps
         extra = false,
     },
+    ---@class ScrollOptions
     options = {
         -- Post-movement callback
         callback = nil, ---@type function?
@@ -157,7 +159,7 @@ require("cinnamon").setup {
     end)
     ```
 
-* `{options}` __(table?)__ An optional table to overwrite options from the configuration table.
+* `{options}` __(ScrollOptions?)__ An optional table to overwrite options from the configuration table.
 
     ```lua
     require("cinnamon").scroll("<C-]>", { delay = 3 })

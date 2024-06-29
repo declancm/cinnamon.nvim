@@ -3,6 +3,14 @@ local H = {}
 
 local config = require("cinnamon.config")
 
+---@class Position
+---@field line number
+---@field col number
+---@field winline number
+---@field wincol number
+
+---@param command string | function
+---@param options? ScrollOptions
 M.scroll = function(command, options)
     -- Lock the function to prevent re-entrancy. Must be first.
     if H.locked then
@@ -49,15 +57,13 @@ M.scroll = function(command, options)
     vim.o.lazyredraw = saved_lazyredraw
 
     if is_scrollable then
-        -- TODO: Move this to a better place
-        options.delay =
-            math.min(options.delay, options.max_delta.time / line_delta, options.max_delta.time / column_delta)
-        H.scroller:start(final_position, final_view, final_window, options)
+        H.scroller:start(final_position, final_view, final_window, line_delta, column_delta, options)
     else
         H.cleanup(options)
     end
 end
 
+---@param command string | function
 H.execute_movement = function(command)
     if type(command) == "string" then
         if command[1] == ":" then
@@ -80,6 +86,8 @@ H.execute_movement = function(command)
     end
 end
 
+---@param direction "up" | "down" | "left" | "right"
+---@param count? number
 H.move_cursor = function(direction, count)
     local command = "normal! "
     if count then
@@ -99,6 +107,8 @@ H.move_cursor = function(direction, count)
     vim.cmd(command)
 end
 
+---@param direction "up" | "down" | "left" | "right"
+---@param count? number
 H.scroll_view = function(direction, count)
     local command = "normal! "
     if count then
@@ -120,12 +130,20 @@ end
 
 H.scroller = {}
 
-function H.scroller:start(target_position, target_view, window_id, options)
+---@param target_position Position
+---@param target_view table
+---@param window_id number
+---@param line_delta number
+---@param column_delta number
+---@param options ScrollOptions
+function H.scroller:start(target_position, target_view, window_id, line_delta, column_delta, options)
     self.target_position = target_position
     self.target_view = target_view
     self.window_id = window_id
     self.options = options
     self.scroll_cursor = (options.mode == "cursor")
+    self.step_delay =
+        math.min(options.delay, (options.max_delta.time / line_delta), (options.max_delta.time / column_delta))
 
     if not self.scroll_cursor then
         -- Hide the cursor
@@ -177,7 +195,7 @@ function H.scroller:scroll()
         if self.scroll_cursor or window_moved then
             vim.defer_fn(function()
                 H.scroller:scroll()
-            end, self.options.delay)
+            end, self.step_delay)
         else
             H.scroller:scroll()
         end
@@ -290,6 +308,7 @@ function H.scroller:cleanup()
     H.cleanup(self.options)
 end
 
+---@param options ScrollOptions
 H.cleanup = function(options)
     if options.callback ~= nil then
         local success, message = pcall(options.callback)
@@ -300,6 +319,7 @@ H.cleanup = function(options)
     H.locked = false
 end
 
+---@return Position
 H.get_position = function()
     return {
         line = vim.fn.line("."),
@@ -309,6 +329,10 @@ H.get_position = function()
     }
 end
 
+---@param p1 Position
+---@param p2 Position
+---@param horizontal_threshold number
+---@param vertical_threshold number
 H.positions_within_threshold = function(p1, p2, horizontal_threshold, vertical_threshold)
     -- stylua: ignore start
     if math.abs(p1.line - p2.line) > horizontal_threshold then return false end

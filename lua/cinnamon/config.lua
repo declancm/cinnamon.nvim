@@ -1,14 +1,16 @@
 local M = {}
 
+---@class CinnamonOptions
 local defaults = {
-    disabled = false,
+    disabled = false, ---@type boolean
     keymaps = {
-        basic = false,
-        extra = false,
+        basic = false, ---@type boolean
+        extra = false, ---@type boolean
     },
+    ---@class ScrollOptions
     options = {
         callback = nil, ---@type function?
-        delay = 7,
+        delay = 7, ---@type number
         max_delta = {
             line = nil, ---@type number?
             column = nil, ---@type number?
@@ -32,8 +34,10 @@ local deprecated = {
     ["scroll_limit"] = "The 'scroll_limit' option has been deprecated. Please use 'options.max_delta.line' instead",
 }
 
+---@type CinnamonOptions
 local config = {}
 
+---@return CinnamonOptions
 M.get = function()
     return config
 end
