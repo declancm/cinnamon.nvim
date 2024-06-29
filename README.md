@@ -10,12 +10,10 @@ customizable Neovim plugin written in Lua!
 ## ✨ Features
 
 * Can add smooth scrolling to any normal mode movement, command, or Lua function
-* Optional custom callbacks per movement
 * Horizontal, vertical, and diagonal scrolling
+* Adjusts scroll speed based on movement distance
 * Non-blocking delays using luv
-* Scroll over folds
-* Scroll over wrapped lines
-* Respects `scrolloff`
+* Optional custom callbacks per movement
 
 ## 📋 Requirements
 
@@ -79,7 +77,7 @@ return {
             line = nil, ---@type number?
             -- Maximum distance for column movements. Set to `nil` to disable
             column = nil, ---@type number?
-            -- Maximum duration for a movement (in ms). Automatically adjusts the line delay
+            -- Maximum duration for a movement (in ms). Automatically adjusts the step delay
             time = 1000, ---@type number
         },
         -- The scrolling mode
