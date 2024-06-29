@@ -156,9 +156,10 @@ function H.scroller:start(target_position, target_view, window_id, line_delta, c
     self.window_textoff = vim.fn.getwininfo(window_id)[1].textoff
     self.wrap_enabled = vim.wo.wrap
 
-    -- Virtual editing allows for clean diagonal scrolling
     self.saved_virtualedit = vim.wo.virtualedit
-    vim.wo.virtualedit = "all"
+    vim.wo.virtualedit = "all" -- Allow the cursor to move anywhere
+    self.saved_scrolloff = vim.wo.scrolloff
+    vim.wo.scrolloff = 0 -- Don't scroll the view when the cursor is near the edge
 
     self.initial_changedtick = vim.b.changedtick
     self.cancel_scroll = false
@@ -293,6 +294,9 @@ function H.scroller:cleanup()
         vim.opt.guicursor:remove({ "a:Cursor/lCursor" })
     end
 
+    vim.wo[self.window_id].scrolloff = self.saved_scrolloff
+    vim.wo[self.window_id].virtualedit = self.saved_virtualedit
+
     -- The 'curswant' value has to be set with cursor() for the '$' movement.
     -- Setting it with winrestview() causes issues when within 'scrolloff'.
     vim.api.nvim_win_call(self.window_id, function()
@@ -304,7 +308,6 @@ function H.scroller:cleanup()
         })
         vim.cmd("redraw") -- Cursor isn't redrawn if the window was exited
     end)
-    vim.wo[self.window_id].virtualedit = self.saved_virtualedit
     H.cleanup(self.options)
 end
 
