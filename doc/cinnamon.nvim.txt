@@ -178,10 +178,10 @@ DESCRIPTION ~
                 vim.lsp.buf.definition({ loclist = true })
             end)
         <
-- `{options}` **(ScrollOptions?)** An optional table to overwrite options from
-    the configuration table.
+- `{options}` **(ScrollOptions?)** Override the default scroll options. See the
+    |cinnamon.nvim-default-options| for more information.
     >lua
-        require("cinnamon").scroll("<C-]>", { delay = 3 })
+        require("cinnamon").scroll("<C-]>", { mode = "window" })
     <
 
 
@@ -202,8 +202,8 @@ EXAMPLES ~
     vim.keymap.set("n", "gD", function() cinnamon.scroll(vim.lsp.buf.declaration) end)
     
     -- Flash.nvim integration:
-    local flash = require('flash')
-    local jump = require('flash.jump')
+    local flash = require("flash")
+    local jump = require("flash.jump")
     
     flash.setup({
       action = function(match, state)
