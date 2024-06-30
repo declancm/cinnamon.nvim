@@ -39,6 +39,8 @@ M.scroll = function(command, options)
     -- TODO: Factor in folds, wrapped lines, virtual text etc in delta calculations
     local line_delta = math.abs(final_position.line - original_position.line)
     local column_delta = math.abs(final_position.col - original_position.col)
+    local step_delay =
+        math.floor(math.min(options.delay, options.max_delta.time / line_delta, options.max_delta.time / column_delta))
 
     local is_scrollable = (
         not config.disabled
@@ -49,6 +51,7 @@ M.scroll = function(command, options)
         and not H.positions_within_threshold(original_position, final_position, 1, 2)
         and (options.max_delta.line == nil or (line_delta <= options.max_delta.line))
         and (options.max_delta.column == nil or (column_delta <= options.max_delta.column))
+        and step_delay > 0
     )
 
     if is_scrollable then
@@ -58,7 +61,7 @@ M.scroll = function(command, options)
     vim.o.lazyredraw = saved_lazyredraw
 
     if is_scrollable then
-        H.scroller:start(final_position, final_view, final_window, line_delta, column_delta, options)
+        H.scroller:start(final_position, final_view, final_window, step_delay, options)
     else
         H.cleanup(options)
     end
@@ -134,17 +137,15 @@ H.scroller = {}
 ---@param target_position Position
 ---@param target_view table
 ---@param window_id number
----@param line_delta number
----@param column_delta number
+---@param step_delay number
 ---@param options ScrollOptions
-function H.scroller:start(target_position, target_view, window_id, line_delta, column_delta, options)
+function H.scroller:start(target_position, target_view, window_id, step_delay, options)
     self.target_position = target_position
     self.target_view = target_view
     self.window_id = window_id
     self.options = options
     self.scroll_cursor = (options.mode == "cursor")
-    self.step_delay =
-        math.min(options.delay, (options.max_delta.time / line_delta), (options.max_delta.time / column_delta))
+    self.step_delay = step_delay
 
     if not self.scroll_cursor then
         -- Hide the cursor
@@ -166,6 +167,12 @@ function H.scroller:start(target_position, target_view, window_id, line_delta, c
     self.initial_changedtick = vim.b.changedtick
     self.cancel_scroll = false
 
+    local timeout = options.max_delta.time + 1000
+    self.timeout_timer = vim.uv.new_timer()
+    self.timeout_timer:start(timeout, 0, function()
+        self.cancel_scroll = true
+    end)
+
     self.watcher_autocmd = vim.api.nvim_create_autocmd({
         "BufLeave",
         "WinLeave",
@@ -176,35 +183,43 @@ function H.scroller:start(target_position, target_view, window_id, line_delta, c
         end,
     })
 
-    local timeout = options.max_delta.time + 1000
-    self.timeout_timer = vim.uv.new_timer()
-    self.timeout_timer:start(timeout, 0, function()
-        self.cancel_scroll = true
-    end)
-
     vim.api.nvim_exec_autocmds("User", { pattern = "CinnamonScrollPre" })
-    H.scroller:scroll()
+
+    self.busy = false
+    self.scroll_timer = vim.uv.new_timer()
+    self.scroll_timer:start(0, self.step_delay, function()
+        -- TODO: when the scroller is busy, the next scroll should move an additional step
+        if not self.busy then
+            self.busy = true
+            vim.schedule(function()
+                H.scroller:scroll()
+            end)
+        end
+    end)
 end
 
 function H.scroller:scroll()
-    local scroll_failed = (self.cancel_scroll or (self.initial_changedtick ~= vim.b.changedtick))
-    local position = H.get_position()
-    local scroll_complete = (not scroll_failed and H.positions_within_threshold(position, self.target_position, 0, 0))
+    while true do
+        local scroll_failed = (self.cancel_scroll or (self.initial_changedtick ~= vim.b.changedtick))
+        local position = H.get_position()
+        local scroll_complete = (
+            not scroll_failed and H.positions_within_threshold(position, self.target_position, 0, 0)
+        )
 
-    if not scroll_complete and not scroll_failed then
-        local top_line = vim.fn.line("w0")
-        self:move_step()
-        local window_moved = (top_line ~= vim.fn.line("w0"))
-        if self.scroll_cursor or window_moved then
-            vim.defer_fn(function()
-                H.scroller:scroll()
-            end, self.step_delay)
+        if not scroll_complete and not scroll_failed then
+            local top_line = vim.fn.line("w0")
+            self:move_step()
+            local window_moved = (top_line ~= vim.fn.line("w0"))
+            if self.scroll_cursor or window_moved then
+                break
+            end
         else
-            H.scroller:scroll()
+            self:cleanup()
+            break
         end
-    else
-        self:cleanup()
     end
+
+    self.busy = false
 end
 
 function H.scroller:move_step()
@@ -288,8 +303,9 @@ function H.scroller:line_is_wrapped()
 end
 
 function H.scroller:cleanup()
-    vim.api.nvim_del_autocmd(self.watcher_autocmd)
+    self.scroll_timer:close()
     self.timeout_timer:close()
+    vim.api.nvim_del_autocmd(self.watcher_autocmd)
 
     if not self.scroll_cursor then
         -- Restore the cursor
