@@ -14,11 +14,6 @@ H.notify = function(message, level)
     vim.notify("[cinnamon] " .. message, vim.log.levels[level])
 end
 
----@param message string
-H.error = function(message)
-    error("[cinnamon] " .. message)
-end
-
 ---@param command string | function
 ---@param options? ScrollOptions
 M.scroll = function(command, options)
@@ -117,7 +112,7 @@ H.move_cursor = function(direction, count)
     elseif direction == "right" then
         command = command .. "l"
     else
-        H.error("Invalid direction: " .. direction)
+        error("Invalid direction: " .. direction)
     end
     vim.cmd(command)
 end
@@ -138,7 +133,7 @@ H.scroll_view = function(direction, count)
     elseif direction == "right" then
         command = command .. "zl"
     else
-        H.error("Invalid direction: " .. direction)
+        error("Invalid direction: " .. direction)
     end
     vim.cmd(command)
 end
