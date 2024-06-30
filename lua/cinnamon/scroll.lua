@@ -214,7 +214,7 @@ function H.scroller:scroll()
                 break
             end
         else
-            self:cleanup()
+            self:stop()
             break
         end
     end
@@ -302,7 +302,7 @@ function H.scroller:line_is_wrapped()
     return false
 end
 
-function H.scroller:cleanup()
+function H.scroller:stop()
     self.scroll_timer:close()
     self.timeout_timer:close()
     vim.api.nvim_del_autocmd(self.watcher_autocmd)
