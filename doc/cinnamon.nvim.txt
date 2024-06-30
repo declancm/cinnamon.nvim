@@ -1,4 +1,4 @@
-*cinnamon.nvim.txt*        For Neovim >= 0.8.0       Last change: 2024 June 29
+*cinnamon.nvim.txt*        For Neovim >= 0.8.0       Last change: 2024 June 30
 
 ==============================================================================
 Table of Contents                            *cinnamon.nvim-table-of-contents*
