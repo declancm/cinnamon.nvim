@@ -1,5 +1,6 @@
 local config = require("cinnamon.config")
 local scroll = require("cinnamon.scroll")
+local utils = require("cinnamon.utils")
 local M = {}
 
 M.scroll = scroll.scroll
@@ -90,7 +91,10 @@ end
 
 ---@deprecated
 function Scroll(...)
-    vim.notify_once("[cinnamon] The 'Scroll()' API function is now deprecated. Please use 'require('cinnamon').scroll()' instead.", vim.log.levels.WARN)
+    utils.notify(
+        "The 'Scroll()' API function is now deprecated. Please use 'require('cinnamon').scroll()' instead",
+        { level = "warn", once = true }
+    )
 
     local args = { ... }
 

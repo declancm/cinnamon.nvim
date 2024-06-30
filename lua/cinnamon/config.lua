@@ -1,3 +1,4 @@
+local utils = require("cinnamon.utils")
 local M = {}
 
 ---@class CinnamonOptions
@@ -49,7 +50,7 @@ function M.setup(user_config)
     for option, message in pairs(deprecated) do
         local keys = vim.split(option, ".", { plain = true })
         if vim.tbl_get(user_config, unpack(keys)) ~= nil then
-            vim.notify("[cinnamon.config] " .. message, vim.log.levels.WARN)
+            utils.notify(message, { level = "warn" })
         end
     end
 

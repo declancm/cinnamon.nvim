@@ -1,4 +1,5 @@
 local config = require("cinnamon.config")
+local utils = require("cinnamon.utils")
 local M = {}
 local H = {}
 
@@ -7,12 +8,6 @@ local H = {}
 ---@field col number
 ---@field winline number
 ---@field wincol number
-
----@param message string
----@param level string
-H.notify = function(message, level)
-    vim.notify("[cinnamon] " .. message, vim.log.levels[level])
-end
 
 ---@param command string | function
 ---@param options? ScrollOptions
@@ -91,7 +86,7 @@ H.execute_command = function(command)
         -- Lua function
         local success, message = pcall(command)
         if not success then
-            vim.notify(message)
+            utils.notify("Error executing command: " .. message, { level = "warn" })
         end
     end
 end
@@ -177,9 +172,7 @@ function H.scroller:start(target_position, target_view, window_id, step_delay, o
     self.timeout_timer = vim.uv.new_timer()
     self.timeout_timer:start(timeout, 0, function()
         self.cancel_scroll = true
-        vim.schedule(function()
-            H.notify("Scroll timed out", "ERROR")
-        end)
+        utils.notify("Scroll timed out", { level = "error", schedule = true })
     end)
 
     self.watcher_autocmd = vim.api.nvim_create_autocmd({
@@ -346,7 +339,7 @@ H.cleanup = function(options)
     if options.callback ~= nil then
         local success, message = pcall(options.callback)
         if not success then
-            vim.notify(message)
+            utils.notify("Error executing callback: " .. message, { level = "warn" })
         end
     end
     H.locked = false
