@@ -4,6 +4,7 @@ local M = {}
 
 M.scroll = scroll.scroll
 
+---@param user_config? CinnamonOptions
 M.setup = function(user_config)
     config.setup(user_config)
     local keymaps = config.get().keymaps
@@ -87,7 +88,7 @@ M.setup = function(user_config)
     --stylua: ignore end
 end
 
--- For backward compatibility:
+---@deprecated
 function Scroll(...)
     vim.notify_once("[cinnamon] The 'Scroll()' API function is now deprecated. Please use 'require('cinnamon').scroll()' instead.", vim.log.levels.WARN)
 
