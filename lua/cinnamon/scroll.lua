@@ -186,8 +186,8 @@ function H.scroller:start(target_position, target_view, window_id, step_delay, o
     vim.api.nvim_exec_autocmds("User", { pattern = "CinnamonScrollPre" })
 
     self.busy = false
-    self.scroll_timer = vim.uv.new_timer()
-    self.scroll_timer:start(0, self.step_delay, function()
+    self.scroll_scheduler = vim.uv.new_timer()
+    self.scroll_scheduler:start(0, self.step_delay, function()
         -- TODO: when the scroller is busy, the next scroll should move an additional step
         if not self.busy then
             self.busy = true
@@ -303,7 +303,7 @@ function H.scroller:line_is_wrapped()
 end
 
 function H.scroller:stop()
-    self.scroll_timer:close()
+    self.scroll_scheduler:close()
     self.timeout_timer:close()
     vim.api.nvim_del_autocmd(self.watcher_autocmd)
 
