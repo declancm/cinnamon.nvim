@@ -8,6 +8,17 @@ local H = {}
 ---@field winline number
 ---@field wincol number
 
+---@param message string
+---@param level string
+H.notify = function(message, level)
+    vim.notify("[cinnamon] " .. message, vim.log.levels[level])
+end
+
+---@param message string
+H.error = function(message)
+    error("[cinnamon] " .. message)
+end
+
 ---@param command string | function
 ---@param options? ScrollOptions
 M.scroll = function(command, options)
@@ -106,7 +117,7 @@ H.move_cursor = function(direction, count)
     elseif direction == "right" then
         command = command .. "l"
     else
-        error("Invalid direction: " .. direction)
+        H.error("Invalid direction: " .. direction)
     end
     vim.cmd(command)
 end
@@ -127,7 +138,7 @@ H.scroll_view = function(direction, count)
     elseif direction == "right" then
         command = command .. "zl"
     else
-        error("Invalid direction: " .. direction)
+        H.error("Invalid direction: " .. direction)
     end
     vim.cmd(command)
 end
@@ -171,6 +182,9 @@ function H.scroller:start(target_position, target_view, window_id, step_delay, o
     self.timeout_timer = vim.uv.new_timer()
     self.timeout_timer:start(timeout, 0, function()
         self.cancel_scroll = true
+        vim.schedule(function()
+            H.notify("Scroll timed out", "ERROR")
+        end)
     end)
 
     self.watcher_autocmd = vim.api.nvim_create_autocmd({
