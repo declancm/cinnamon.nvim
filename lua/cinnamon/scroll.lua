@@ -27,7 +27,9 @@ M.scroll = function(command, options)
     local original_buffer = vim.api.nvim_get_current_buf()
     local original_window = vim.api.nvim_get_current_win()
 
-    H.execute_movement(command)
+    vim.api.nvim_exec_autocmds("User", { pattern = "CinnamonCmdPre" })
+    H.execute_command(command)
+    vim.api.nvim_exec_autocmds("User", { pattern = "CinnamonCmdPost" })
 
     local final_view = vim.fn.winsaveview()
     local final_position = H.get_position()
@@ -63,7 +65,7 @@ M.scroll = function(command, options)
 end
 
 ---@param command string | function
-H.execute_movement = function(command)
+H.execute_command = function(command)
     if type(command) == "string" then
         if command[1] == ":" then
             -- Ex (command-line) command
@@ -180,6 +182,7 @@ function H.scroller:start(target_position, target_view, window_id, line_delta, c
         self.cancel_scroll = true
     end)
 
+    vim.api.nvim_exec_autocmds("User", { pattern = "CinnamonScrollPre" })
     H.scroller:scroll()
 end
 
@@ -308,6 +311,8 @@ function H.scroller:cleanup()
         })
         vim.cmd("redraw") -- Cursor isn't redrawn if the window was exited
     end)
+
+    vim.api.nvim_exec_autocmds("User", { pattern = "CinnamonScrollPost" })
     H.cleanup(self.options)
 end
 
