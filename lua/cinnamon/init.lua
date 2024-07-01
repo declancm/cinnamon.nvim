@@ -36,7 +36,7 @@ M.setup = function(user_config)
 
         -- Previous/next cursor location:
         vim.keymap.set("n", "<C-o>", function() M.scroll("<C-o>") end)
-        vim.keymap.set("n", "<C-i>", function() M.scroll("<C-i>") end)
+        vim.keymap.set("n", "<C-i>", function() M.scroll("<C-S-i>") end)
 
     end
 
