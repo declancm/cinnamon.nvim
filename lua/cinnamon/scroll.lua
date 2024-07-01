@@ -190,6 +190,9 @@ function H.scroller:start(target_position, target_view, buffer_id, window_id, st
 end
 
 function H.scroller:scroll()
+    local saved_lazyredraw = vim.o.lazyredraw
+    vim.o.lazyredraw = true
+
     while true do
         local scroll_failed = (
             self.timed_out
@@ -215,6 +218,7 @@ function H.scroller:scroll()
         end
     end
 
+    vim.o.lazyredraw = saved_lazyredraw
     self.busy = false
 end
 
