@@ -89,6 +89,9 @@ H.execute_command = function(command)
             utils.notify("Error executing command: " .. message, { level = "warn" })
         end
     end
+
+    -- Some plugins rely on this event to modify the final cursor position
+    vim.api.nvim_exec_autocmds("CursorMoved", {})
 end
 
 ---@param direction "up" | "down" | "left" | "right"
