@@ -177,9 +177,10 @@ function H.scroller:start(target_position, target_view, buffer_id, window_id, st
     vim.api.nvim_exec_autocmds("User", { pattern = "CinnamonScrollPre" })
 
     self.busy = false
+    self.queued_steps = 0
     self.scroll_scheduler = vim.uv.new_timer()
     self.scroll_scheduler:start(0, self.step_delay, function()
-        -- TODO: when the scroller is busy, the next scroll should move an additional step
+        self.queued_steps = self.queued_steps + 1
         if not self.busy then
             self.busy = true
             vim.schedule(function()
@@ -210,7 +211,10 @@ function H.scroller:scroll()
             self:move_step()
             local window_moved = (topline ~= vim.fn.line("w0"))
             if self.scroll_cursor or window_moved then
-                break
+                self.queued_steps = self.queued_steps - 1
+                if self.queued_steps < 1 then
+                    break
+                end
             end
         else
             self:stop()
