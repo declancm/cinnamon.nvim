@@ -50,7 +50,7 @@ function M.setup(user_config)
     for option, message in pairs(deprecated) do
         local keys = vim.split(option, ".", { plain = true })
         if vim.tbl_get(user_config, unpack(keys)) ~= nil then
-            utils.notify(message, { level = "warn" })
+            utils.notify(message, "warn")
         end
     end
 

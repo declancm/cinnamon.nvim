@@ -93,7 +93,8 @@ end
 function Scroll(...)
     utils.notify(
         "The 'Scroll()' API function is now deprecated. Please use 'require('cinnamon').scroll()' instead",
-        { level = "warn", once = true }
+        "warn",
+        { once = true }
     )
 
     local args = { ... }

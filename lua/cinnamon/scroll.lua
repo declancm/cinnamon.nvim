@@ -86,7 +86,7 @@ H.execute_command = function(command)
         -- Lua function
         local success, message = pcall(command)
         if not success then
-            utils.notify("Error executing command: " .. message, { level = "warn" })
+            utils.notify("Error executing command: " .. message, "warn")
         end
     end
 
@@ -171,7 +171,7 @@ function H.scroller:start(target_position, target_view, buffer_id, window_id, st
     self.timeout_timer = vim.uv.new_timer()
     self.timeout_timer:start(timeout, 0, function()
         self.timed_out = true
-        utils.notify("Scroll timed out", { level = "error", schedule = true })
+        utils.notify("Scroll timed out", "error", { schedule = true })
     end)
 
     vim.api.nvim_exec_autocmds("User", { pattern = "CinnamonScrollPre" })
@@ -333,7 +333,7 @@ H.cleanup = function(options)
     if options.callback ~= nil then
         local success, message = pcall(options.callback)
         if not success then
-            utils.notify("Error executing callback: " .. message, { level = "warn" })
+            utils.notify("Error executing callback: " .. message, "warn")
         end
     end
     H.locked = false
