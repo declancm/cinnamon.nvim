@@ -62,7 +62,7 @@ M.scroll = function(command, options)
     vim.o.lazyredraw = saved_lazyredraw
 
     if is_scrollable then
-        H.scroller:start(final_position, final_view, final_window, step_delay, options)
+        H.scroller:start(final_position, final_view, final_buffer, final_window, step_delay, options)
     else
         H.cleanup(options)
     end
@@ -137,12 +137,14 @@ H.scroller = {}
 
 ---@param target_position Position
 ---@param target_view table
+---@param buffer_id number
 ---@param window_id number
 ---@param step_delay number
 ---@param options ScrollOptions
-function H.scroller:start(target_position, target_view, window_id, step_delay, options)
+function H.scroller:start(target_position, target_view, buffer_id, window_id, step_delay, options)
     self.target_position = target_position
     self.target_view = target_view
+    self.buffer_id = buffer_id
     self.window_id = window_id
     self.options = options
     self.scroll_cursor = (options.mode == "cursor")
@@ -154,36 +156,20 @@ function H.scroller:start(target_position, target_view, window_id, step_delay, o
         vim.opt.guicursor:append({ "a:Cursor/lCursor" })
     end
 
-    -- Cache values for performance
-    self.window_height = vim.api.nvim_win_get_height(0)
-    self.window_width = vim.api.nvim_win_get_width(0)
-    self.window_textoff = vim.fn.getwininfo(window_id)[1].textoff
-    self.wrap_enabled = vim.wo.wrap
-
     self.saved_virtualedit = vim.wo.virtualedit
     vim.wo.virtualedit = "all" -- Allow the cursor to move anywhere
     self.saved_scrolloff = vim.wo.scrolloff
     vim.wo.scrolloff = 0 -- Don't scroll the view when the cursor is near the edge
 
     self.initial_changedtick = vim.b.changedtick
-    self.cancel_scroll = false
 
     local timeout = options.max_delta.time + 1000
+    self.timed_out = false
     self.timeout_timer = vim.uv.new_timer()
     self.timeout_timer:start(timeout, 0, function()
-        self.cancel_scroll = true
+        self.timed_out = true
         utils.notify("Scroll timed out", { level = "error", schedule = true })
     end)
-
-    self.watcher_autocmd = vim.api.nvim_create_autocmd({
-        "BufLeave",
-        "WinLeave",
-        "WinResized",
-    }, {
-        callback = function()
-            self.cancel_scroll = true
-        end,
-    })
 
     vim.api.nvim_exec_autocmds("User", { pattern = "CinnamonScrollPre" })
 
@@ -202,16 +188,21 @@ end
 
 function H.scroller:scroll()
     while true do
-        local scroll_failed = (self.cancel_scroll or (self.initial_changedtick ~= vim.b.changedtick))
+        local scroll_failed = (
+            self.timed_out
+            or (self.initial_changedtick ~= vim.b.changedtick)
+            or (self.buffer_id ~= vim.api.nvim_get_current_buf())
+            or (self.window_id ~= vim.api.nvim_get_current_win())
+        )
         local position = H.get_position()
         local scroll_complete = (
             not scroll_failed and H.positions_within_threshold(position, self.target_position, 0, 0)
         )
 
         if not scroll_complete and not scroll_failed then
-            local top_line = vim.fn.line("w0")
+            local topline = vim.fn.line("w0")
             self:move_step()
-            local window_moved = (top_line ~= vim.fn.line("w0"))
+            local window_moved = (topline ~= vim.fn.line("w0"))
             if self.scroll_cursor or window_moved then
                 break
             end
@@ -231,7 +222,7 @@ function H.scroller:move_step()
     local moved_right = false
 
     local horizontal_error
-    if self.wrap_enabled then
+    if vim.wo.wrap then
         horizontal_error = self.target_position.wincol - vim.fn.wincol()
     else
         horizontal_error = self.target_position.col - vim.fn.virtcol(".")
@@ -284,7 +275,7 @@ function H.scroller:move_step()
     end
 
     -- When text is wrapped, the view can't be horizontally scrolled
-    if not self.wrap_enabled then
+    if not vim.wo.wrap then
         local wincol_error = self.target_position.wincol - vim.fn.wincol()
         -- Move 2 columns per step when possible since the columns
         -- are around half the size of lines.
@@ -298,8 +289,9 @@ end
 
 ---@return boolean
 function H.scroller:line_is_wrapped()
-    if self.wrap_enabled then
-        return vim.fn.virtcol(".") ~= vim.fn.wincol() - self.window_textoff
+    if vim.wo.wrap then
+        local textoff = vim.fn.getwininfo(self.window_id)[1].textoff
+        return vim.fn.virtcol(".") ~= vim.fn.wincol() - textoff
     end
     return false
 end
@@ -307,7 +299,6 @@ end
 function H.scroller:stop()
     self.scroll_scheduler:close()
     self.timeout_timer:close()
-    vim.api.nvim_del_autocmd(self.watcher_autocmd)
 
     if not self.scroll_cursor then
         -- Restore the cursor
