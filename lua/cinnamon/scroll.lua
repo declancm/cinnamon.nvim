@@ -150,10 +150,10 @@ function H.scroller:start(target_position, target_view, buffer_id, window_id, st
     self.buffer_id = buffer_id
     self.window_id = window_id
     self.options = options
-    self.scroll_cursor = (options.mode == "cursor")
+    self.window_only = (options.mode ~= "cursor")
     self.step_delay = step_delay
 
-    if not self.scroll_cursor then
+    if self.window_only then
         -- Hide the cursor
         vim.cmd("highlight Cursor blend=100")
         vim.opt.guicursor:append({ "a:Cursor/lCursor" })
@@ -165,6 +165,7 @@ function H.scroller:start(target_position, target_view, buffer_id, window_id, st
     vim.wo.scrolloff = 0 -- Don't scroll the view when the cursor is near the edge
 
     self.initial_changedtick = vim.b.changedtick
+    self.previous_position = nil
 
     local timeout = options.max_delta.time + 1000
     self.timed_out = false
@@ -195,22 +196,28 @@ function H.scroller:scroll()
     vim.o.lazyredraw = true
 
     while true do
+        local current_position = H.get_position()
         local scroll_failed = (
             self.timed_out
             or (self.initial_changedtick ~= vim.b.changedtick)
             or (self.buffer_id ~= vim.api.nvim_get_current_buf())
             or (self.window_id ~= vim.api.nvim_get_current_win())
+            or (
+                self.previous_position ~= nil
+                and H.positions_within_threshold(current_position, self.previous_position, 0, 0)
+            ) -- Deadlock
         )
-        local position = H.get_position()
         local scroll_complete = (
-            not scroll_failed and H.positions_within_threshold(position, self.target_position, 0, 0)
+            not scroll_failed and H.positions_within_threshold(current_position, self.target_position, 0, 0)
         )
+        self.previous_position = current_position
 
         if not scroll_complete and not scroll_failed then
             local topline = vim.fn.line("w0")
             self:move_step()
             local window_moved = (topline ~= vim.fn.line("w0"))
-            if self.scroll_cursor or window_moved then
+            local step_complete = not self.window_only or window_moved
+            if step_complete then
                 self.queued_steps = self.queued_steps - 1
                 if self.queued_steps < 1 then
                     break
@@ -311,7 +318,7 @@ function H.scroller:stop()
     self.scroll_scheduler:close()
     self.timeout_timer:close()
 
-    if not self.scroll_cursor then
+    if self.window_only then
         -- Restore the cursor
         vim.cmd("highlight Cursor blend=0")
         vim.opt.guicursor:remove({ "a:Cursor/lCursor" })
