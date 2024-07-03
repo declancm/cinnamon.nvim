@@ -72,17 +72,20 @@ end
 ---@return number
 H.get_line_delta = function(line1, line2)
     local distance = 0
+    local max_distance = math.abs(line2 - line1)
     local direction = (line2 > line1) and 1 or -1
     local get_fold_end = (direction == 1) and vim.fn.foldclosedend or vim.fn.foldclosed
 
     local line = line1
     local line2_fold_end = get_fold_end(line2)
-    while line ~= line2 do
+    while line ~= line2 and distance < max_distance do
         local fold_end = get_fold_end(line)
         if fold_end ~= -1 then
             if (line2_fold_end ~= -1) and (fold_end == line2_fold_end) then
+                -- The end line is within the same fold so the delta is the same
                 return distance
             else
+                -- Skip over the fold
                 line = fold_end
             end
         end
