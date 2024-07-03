@@ -177,15 +177,17 @@ function H.scroller:start(target_position, target_view, buffer_id, window_id, st
 
     vim.api.nvim_exec_autocmds("User", { pattern = "CinnamonScrollPre" })
 
-    self.busy = false
-    self.queued_steps = 0
     self.scroll_scheduler = vim.uv.new_timer()
+    self.queued_steps = 0
+    local scroller_busy = false
+
     self.scroll_scheduler:start(0, self.step_delay, function()
         self.queued_steps = self.queued_steps + 1
-        if not self.busy then
-            self.busy = true
+        if not scroller_busy then
+            scroller_busy = true
             vim.schedule(function()
                 H.scroller:scroll()
+                scroller_busy = false
             end)
         end
     end)
@@ -230,7 +232,6 @@ function H.scroller:scroll()
     end
 
     vim.o.lazyredraw = saved_lazyredraw
-    self.busy = false
 end
 
 function H.scroller:move_step()
