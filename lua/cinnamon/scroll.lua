@@ -37,9 +37,9 @@ M.scroll = function(command, options)
     local final_buffer = vim.api.nvim_get_current_buf()
     local final_window = vim.api.nvim_get_current_win()
 
-    -- TODO: Factor in folds, wrapped lines, virtual text etc in delta calculations
-    local line_delta = math.abs(final_position.line - original_position.line)
-    local column_delta = math.abs(final_position.col - original_position.col)
+    local line_delta = H.get_line_delta(original_position.line, final_position.line)
+    local column_delta = H.get_column_delta(original_position.col, final_position.col)
+    vim.print(line_delta, column_delta)
     local step_delay =
         math.floor(math.min(options.delay, options.max_delta.time / line_delta, options.max_delta.time / column_delta))
 
@@ -66,6 +66,40 @@ M.scroll = function(command, options)
     else
         H.cleanup(options)
     end
+end
+
+---@param line1 number
+---@param line2 number
+---@return number
+H.get_line_delta = function(line1, line2)
+    local distance = 0
+    local direction = (line2 > line1) and 1 or -1
+    local get_fold_end = (direction == 1) and vim.fn.foldclosedend or vim.fn.foldclosed
+
+    local line = line1
+    local line2_fold_end = get_fold_end(line2)
+    while line ~= line2 do
+        local fold_end = get_fold_end(line)
+        if fold_end ~= -1 then
+            if (line2_fold_end ~= -1) and (fold_end == line2_fold_end) then
+                return distance
+            else
+                line = fold_end
+            end
+        end
+        distance = distance + 1
+        line = line + direction
+    end
+
+    return distance
+end
+
+---@param col1 number
+---@param col2 number
+---@return number
+H.get_column_delta = function(col1, col2)
+    -- TODO: handle wrapped lines
+    return math.abs(col2 - col1)
 end
 
 ---@param command string | function
@@ -186,7 +220,7 @@ function H.scroller:start(target_position, target_view, buffer_id, window_id, st
         if not scroller_busy then
             scroller_busy = true
             vim.schedule(function()
-                H.scroller:scroll()
+                self:scroll()
                 scroller_busy = false
             end)
         end
