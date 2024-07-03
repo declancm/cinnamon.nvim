@@ -39,7 +39,6 @@ M.scroll = function(command, options)
 
     local line_delta = H.get_line_delta(original_position.line, final_position.line)
     local column_delta = H.get_column_delta(original_position.col, final_position.col)
-    vim.print(line_delta, column_delta)
     local step_delay =
         math.floor(math.min(options.delay, options.max_delta.time / line_delta, options.max_delta.time / column_delta))
 
