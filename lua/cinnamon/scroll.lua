@@ -39,8 +39,15 @@ M.scroll = function(command, options)
 
     local line_delta = H.get_line_delta(original_position.line, final_position.line)
     local column_delta = H.get_column_delta(original_position.col, final_position.col)
+    local step_size = 1
     local step_delay =
-        math.floor(math.min(options.delay, options.max_delta.time / line_delta, options.max_delta.time / column_delta))
+        math.min(options.delay, options.max_delta.time / line_delta, options.max_delta.time / column_delta)
+    if step_delay < 1 then
+        -- Skip steps so that there is always a smooth scroll
+        step_size = math.floor(1 / step_delay)
+        step_delay = 1
+    end
+    step_delay = math.floor(step_delay)
 
     local is_scrollable = (
         not config.disabled
@@ -52,6 +59,7 @@ M.scroll = function(command, options)
         and (options.max_delta.line == nil or (line_delta <= options.max_delta.line))
         and (options.max_delta.column == nil or (column_delta <= options.max_delta.column))
         and step_delay > 0
+        and step_size < math.huge
     )
 
     if is_scrollable then
@@ -61,7 +69,7 @@ M.scroll = function(command, options)
     vim.o.lazyredraw = saved_lazyredraw
 
     if is_scrollable then
-        H.scroller:start(final_position, final_view, final_buffer, final_window, step_delay, options)
+        H.scroller:start(final_position, final_view, final_buffer, final_window, step_delay, step_size, options)
     else
         H.cleanup(options)
     end
@@ -71,13 +79,14 @@ end
 ---@param line2 number
 ---@return number
 H.get_line_delta = function(line1, line2)
+    -- TODO: handle wrapped lines
     local distance = 0
     local max_distance = math.abs(line2 - line1)
     local direction = (line2 > line1) and 1 or -1
     local get_fold_end = (direction == 1) and vim.fn.foldclosedend or vim.fn.foldclosed
+    local line2_fold_end = get_fold_end(line2)
 
     local line = line1
-    local line2_fold_end = get_fold_end(line2)
     while line ~= line2 and distance < max_distance do
         local fold_end = get_fold_end(line)
         if fold_end ~= -1 then
@@ -180,7 +189,7 @@ H.scroller = {}
 ---@param window_id number
 ---@param step_delay number
 ---@param options ScrollOptions
-function H.scroller:start(target_position, target_view, buffer_id, window_id, step_delay, options)
+function H.scroller:start(target_position, target_view, buffer_id, window_id, step_delay, step_size, options)
     self.target_position = target_position
     self.target_view = target_view
     self.buffer_id = buffer_id
@@ -188,6 +197,8 @@ function H.scroller:start(target_position, target_view, buffer_id, window_id, st
     self.options = options
     self.window_only = (options.mode ~= "cursor")
     self.step_delay = step_delay
+    self.vertical_step_size = step_size
+    self.horizontal_step_size = step_size * 2
 
     if self.window_only then
         -- Hide the cursor
@@ -216,7 +227,6 @@ function H.scroller:start(target_position, target_view, buffer_id, window_id, st
     self.scroll_scheduler = vim.uv.new_timer()
     self.queued_steps = 0
     local scroller_busy = false
-
     self.scroll_scheduler:start(0, self.step_delay, function()
         self.queued_steps = self.queued_steps + 1
         if not scroller_busy then
@@ -275,6 +285,7 @@ function H.scroller:move_step()
     local moved_down = false
     local moved_left = false
     local moved_right = false
+    local step_size
 
     local horizontal_error
     if vim.wo.wrap then
@@ -282,13 +293,16 @@ function H.scroller:move_step()
     else
         horizontal_error = self.target_position.col - vim.fn.virtcol(".")
     end
-    -- Move 2 columns per step when possible since the columns
-    -- are around half the size of lines.
+    if math.abs(horizontal_error) > self.horizontal_step_size then
+        step_size = self.horizontal_step_size
+    else
+        step_size = math.abs(horizontal_error)
+    end
     if horizontal_error < 0 then
-        H.move_cursor("left", (horizontal_error < -1) and 2 or 1)
+        H.move_cursor("left", step_size)
         moved_left = true
     elseif horizontal_error > 0 then
-        H.move_cursor("right", (horizontal_error > 1) and 2 or 1)
+        H.move_cursor("right", step_size)
         moved_right = true
     end
 
@@ -305,11 +319,16 @@ function H.scroller:move_step()
             end
         end
     end
+    if math.abs(vertical_error) > self.vertical_step_size then
+        step_size = self.vertical_step_size
+    else
+        step_size = math.abs(vertical_error)
+    end
     if vertical_error < 0 then
-        H.move_cursor("up")
+        H.move_cursor("up", step_size)
         moved_up = true
     elseif vertical_error > 0 then
-        H.move_cursor("down")
+        H.move_cursor("down", step_size)
         moved_down = true
     end
 
@@ -323,21 +342,29 @@ function H.scroller:move_step()
             winline_error = 0
         end
     end
+    if math.abs(winline_error) > self.vertical_step_size then
+        step_size = self.vertical_step_size
+    else
+        step_size = math.abs(winline_error)
+    end
     if not moved_down and winline_error > 0 then
-        H.scroll_view("up")
+        H.scroll_view("up", step_size)
     elseif not moved_up and winline_error < 0 then
-        H.scroll_view("down")
+        H.scroll_view("down", step_size)
     end
 
     -- When text is wrapped, the view can't be horizontally scrolled
     if not vim.wo.wrap then
         local wincol_error = self.target_position.wincol - vim.fn.wincol()
-        -- Move 2 columns per step when possible since the columns
-        -- are around half the size of lines.
+        if math.abs(wincol_error) > self.horizontal_step_size then
+            step_size = self.horizontal_step_size
+        else
+            step_size = math.abs(wincol_error)
+        end
         if not moved_right and wincol_error > 0 then
-            H.scroll_view("left", (wincol_error > 1) and 2 or 1)
+            H.scroll_view("left", step_size)
         elseif not moved_left and wincol_error < 0 then
-            H.scroll_view("right", (wincol_error < -1) and 2 or 1)
+            H.scroll_view("right", step_size)
         end
     end
 end
