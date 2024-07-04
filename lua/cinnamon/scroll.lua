@@ -140,11 +140,15 @@ H.execute_command = function(command)
 end
 
 ---@param direction "up" | "down" | "left" | "right"
----@param count? number
-H.move_cursor = function(direction, count)
+---@param cursor_error number
+---@param step_size number
+H.move_cursor = function(direction, cursor_error, step_size)
     local command = "normal! "
-    if count then
-        command = command .. count
+    if step_size > cursor_error then
+        step_size = cursor_error
+    end
+    if step_size > 1 then
+        command = command .. step_size
     end
     if direction == "up" then
         command = command .. "gk"
@@ -161,11 +165,15 @@ H.move_cursor = function(direction, count)
 end
 
 ---@param direction "up" | "down" | "left" | "right"
----@param count? number
-H.scroll_view = function(direction, count)
+---@param view_error number
+---@param step_size number
+H.scroll_view = function(direction, view_error, step_size)
     local command = "normal! "
-    if count then
-        command = command .. count
+    if step_size > view_error then
+        step_size = view_error
+    end
+    if step_size > 1 then
+        command = command .. step_size
     end
     if direction == "up" then
         command = command .. vim.keycode("<c-y>")
@@ -198,7 +206,7 @@ function H.scroller:start(target_position, target_view, buffer_id, window_id, st
     self.window_only = (options.mode ~= "cursor")
     self.step_delay = step_delay
     self.vertical_step_size = step_size
-    self.horizontal_step_size = step_size * 2
+    self.horizontal_step_size = step_size * 2 -- Columns are around half the size of lines
 
     if self.window_only then
         -- Hide the cursor
@@ -285,7 +293,6 @@ function H.scroller:move_step()
     local moved_down = false
     local moved_left = false
     local moved_right = false
-    local step_size
 
     local horizontal_error
     if vim.wo.wrap then
@@ -293,16 +300,11 @@ function H.scroller:move_step()
     else
         horizontal_error = self.target_position.col - vim.fn.virtcol(".")
     end
-    if math.abs(horizontal_error) > self.horizontal_step_size then
-        step_size = self.horizontal_step_size
-    else
-        step_size = math.abs(horizontal_error)
-    end
     if horizontal_error < 0 then
-        H.move_cursor("left", step_size)
+        H.move_cursor("left", -horizontal_error, self.horizontal_step_size)
         moved_left = true
     elseif horizontal_error > 0 then
-        H.move_cursor("right", step_size)
+        H.move_cursor("right", horizontal_error, self.horizontal_step_size)
         moved_right = true
     end
 
@@ -319,16 +321,11 @@ function H.scroller:move_step()
             end
         end
     end
-    if math.abs(vertical_error) > self.vertical_step_size then
-        step_size = self.vertical_step_size
-    else
-        step_size = math.abs(vertical_error)
-    end
     if vertical_error < 0 then
-        H.move_cursor("up", step_size)
+        H.move_cursor("up", -vertical_error, self.vertical_step_size)
         moved_up = true
     elseif vertical_error > 0 then
-        H.move_cursor("down", step_size)
+        H.move_cursor("down", vertical_error, self.vertical_step_size)
         moved_down = true
     end
 
@@ -342,29 +339,19 @@ function H.scroller:move_step()
             winline_error = 0
         end
     end
-    if math.abs(winline_error) > self.vertical_step_size then
-        step_size = self.vertical_step_size
-    else
-        step_size = math.abs(winline_error)
-    end
     if not moved_down and winline_error > 0 then
-        H.scroll_view("up", step_size)
+        H.scroll_view("up", winline_error, self.vertical_step_size)
     elseif not moved_up and winline_error < 0 then
-        H.scroll_view("down", step_size)
+        H.scroll_view("down", -winline_error, self.vertical_step_size)
     end
 
     -- When text is wrapped, the view can't be horizontally scrolled
     if not vim.wo.wrap then
         local wincol_error = self.target_position.wincol - vim.fn.wincol()
-        if math.abs(wincol_error) > self.horizontal_step_size then
-            step_size = self.horizontal_step_size
-        else
-            step_size = math.abs(wincol_error)
-        end
         if not moved_right and wincol_error > 0 then
-            H.scroll_view("left", step_size)
+            H.scroll_view("left", wincol_error, self.horizontal_step_size)
         elseif not moved_left and wincol_error < 0 then
-            H.scroll_view("right", step_size)
+            H.scroll_view("right", -wincol_error, self.horizontal_step_size)
         end
     end
 end
