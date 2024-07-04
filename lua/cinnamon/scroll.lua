@@ -44,7 +44,7 @@ M.scroll = function(command, options)
         math.min(options.delay, options.max_delta.time / line_delta, options.max_delta.time / column_delta)
     if step_delay < 1 then
         -- Skip steps so that there is always a smooth scroll
-        step_size = math.floor(1 / step_delay)
+        step_size = math.ceil(1 / step_delay)
         step_delay = 1
     end
     step_delay = math.floor(step_delay)
