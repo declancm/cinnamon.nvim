@@ -193,3 +193,10 @@ flash.setup({
   end,
 })
 ```
+
+## 📅 User Events
+
+- `CinnamonCmdPre` - Triggered before the given command is executed
+- `CinnamonCmdPost` - Triggered after the given command is executed
+- `CinnamonScrollPre` - Triggered before the smooth scroll movement
+- `CinnamonScrollPost` - Triggered after the smooth scroll movement
