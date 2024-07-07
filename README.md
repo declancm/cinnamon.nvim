@@ -2,6 +2,8 @@
 
 # Cinnamon Scroll 🍥
 
+[![LuaRocks](https://img.shields.io/luarocks/v/declancm/cinnamon.nvim?logo=lua&color=purple)](https://luarocks.org/modules/declancm/cinnamon.nvim)
+
 Smooth scrolling for __ANY__ command 🤯. A highly
 customizable Neovim plugin written in Lua!
 
