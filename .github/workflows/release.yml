@@ -1,8 +1,9 @@
-name: "release"
+name: LuaRocks release
 on:
   push:
     tags:
       - "*"
+  pull_request:
 
 jobs:
   luarocks-release:
