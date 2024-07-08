@@ -1,4 +1,4 @@
-*cinnamon.nvim.txt*        For Neovim >= 0.8.0       Last change: 2024 July 07
+*cinnamon.nvim.txt*        For Neovim >= 0.8.0       Last change: 2024 July 08
 
 ==============================================================================
 Table of Contents                            *cinnamon.nvim-table-of-contents*
@@ -17,7 +17,9 @@ FEATURES                                              *cinnamon.nvim-features*
 - Horizontal, vertical, and diagonal scrolling
 - Adjusts scroll speed based on movement distance
 - Non-blocking delays using luv
-- Optional custom callbacks per movement
+- Two scrolling modes:
+    - `cursor`Smoothly scrolls the cursor for any movement
+    - `window`Smoothly scrolls the window ONLY when the cursor moves out of view
 
 
 REQUIREMENTS                                      *cinnamon.nvim-requirements*
@@ -84,7 +86,7 @@ DEFAULT OPTIONS ~
             },
             -- The scrolling mode
             -- `cursor`: Smoothly scrolls the cursor for any movement
-            -- `window`: Smoothly scrolls the window only when the cursor moves out of view
+            -- `window`: Smoothly scrolls the window ONLY when the cursor moves out of view
             mode = "cursor", ---@type "cursor" | "window"
         },
     }
