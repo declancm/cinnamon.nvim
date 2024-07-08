@@ -15,7 +15,9 @@ customizable Neovim plugin written in Lua!
 * Horizontal, vertical, and diagonal scrolling
 * Adjusts scroll speed based on movement distance
 * Non-blocking delays using luv
-* Optional custom callbacks per movement
+* Two scrolling modes:
+    * `cursor`: Smoothly scrolls the cursor for any movement
+    * `window`: Smoothly scrolls the window ONLY when the cursor moves out of view
 
 ## 📋 Requirements
 
@@ -84,7 +86,7 @@ return {
         },
         -- The scrolling mode
         -- `cursor`: Smoothly scrolls the cursor for any movement
-        -- `window`: Smoothly scrolls the window only when the cursor moves out of view
+        -- `window`: Smoothly scrolls the window ONLY when the cursor moves out of view
         mode = "cursor", ---@type "cursor" | "window"
     },
 }
