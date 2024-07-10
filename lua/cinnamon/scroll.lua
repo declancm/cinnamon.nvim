@@ -221,6 +221,7 @@ function H.scroller:start(target_position, target_view, buffer_id, window_id, st
 
     self.initial_changedtick = vim.b.changedtick
     self.previous_position = nil
+    self.visited_positions = {}
 
     local timeout = options.max_delta.time + 1000
     self.timed_out = false
@@ -252,21 +253,21 @@ function H.scroller:scroll()
     vim.o.lazyredraw = true
 
     while true do
-        local current_position = H.get_position()
+        local position = H.get_position()
+        local position_key = position.line .. "," .. position.col .. "," .. position.winline .. "," .. position.wincol
         local scroll_failed = (
             self.timed_out
             or (self.initial_changedtick ~= vim.b.changedtick)
             or (self.buffer_id ~= vim.api.nvim_get_current_buf())
             or (self.window_id ~= vim.api.nvim_get_current_win())
-            or (
-                self.previous_position ~= nil
-                and H.positions_within_threshold(current_position, self.previous_position, 0, 0)
-            ) -- Deadlock
+            or (self.previous_position ~= nil and H.positions_within_threshold(position, self.previous_position, 0, 0)) -- Deadlock
+            or self.visited_positions[position_key] -- Loop
         )
         local scroll_complete = (
-            not scroll_failed and H.positions_within_threshold(current_position, self.target_position, 0, 0)
+            not scroll_failed and H.positions_within_threshold(position, self.target_position, 0, 0)
         )
-        self.previous_position = current_position
+        self.visited_positions[position_key] = true
+        self.previous_position = position
 
         if not scroll_complete and not scroll_failed then
             local topline = vim.fn.line("w0")
