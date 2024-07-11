@@ -1,4 +1,4 @@
-*cinnamon.nvim.txt*        For Neovim >= 0.8.0       Last change: 2024 July 10
+*cinnamon.nvim.txt*        For Neovim >= 0.8.0       Last change: 2024 July 11
 
 ==============================================================================
 Table of Contents                            *cinnamon.nvim-table-of-contents*
@@ -32,22 +32,15 @@ INSTALLATION                                      *cinnamon.nvim-installation*
 Just install with your favorite package manager and run the setup function.
 
 
-PACKER ~
-
->lua
-    use {
-      "declancm/cinnamon.nvim",
-      config = function() require("cinnamon").setup() end
-    }
-<
-
-
 LAZY ~
 
 >lua
     {
       "declancm/cinnamon.nvim",
-      config = true
+      version = "*", -- use latest release
+      opts = {
+        -- change default options here
+      },
     }
 <
 
