@@ -14,4 +14,10 @@ M.notify = function(message, level, options)
     notify_fn("[cinnamon.nvim] " .. message, notify_level)
 end
 
+---@param str string
+M.keycode = function(str)
+    -- NOTE: This is a backwards-compatible vim.keycode
+    return vim.api.nvim_replace_termcodes(str, true, true, true)
+end
+
 return M

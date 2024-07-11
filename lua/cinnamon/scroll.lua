@@ -122,13 +122,13 @@ H.execute_command = function(command)
     if type(command) == "string" then
         if command[1] == ":" then
             -- Ex (command-line) command
-            vim.cmd(vim.keycode(command:sub(2)))
+            vim.cmd(utils.keycode(command:sub(2)))
         elseif command ~= "" then
             -- Normal mode command
             if vim.v.count ~= 0 then
-                vim.cmd("silent! normal! " .. vim.v.count .. vim.keycode(command))
+                vim.cmd("silent! normal! " .. vim.v.count .. utils.keycode(command))
             else
-                vim.cmd("silent! normal! " .. vim.keycode(command))
+                vim.cmd("silent! normal! " .. utils.keycode(command))
             end
         end
     elseif type(command) == "function" then
@@ -180,9 +180,9 @@ H.scroll_view = function(direction, view_error, step_size)
         command = command .. step_size
     end
     if direction == "up" then
-        command = command .. vim.keycode("<c-y>")
+        command = command .. utils.keycode("<c-y>")
     elseif direction == "down" then
-        command = command .. vim.keycode("<c-e>")
+        command = command .. utils.keycode("<c-e>")
     elseif direction == "left" then
         command = command .. "zh"
     elseif direction == "right" then
