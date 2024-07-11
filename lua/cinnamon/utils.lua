@@ -15,8 +15,8 @@ M.notify = function(message, level, options)
 end
 
 ---@param str string
-M.keycode = function(str)
-    -- NOTE: This is a backwards-compatible vim.keycode
+---@return string
+M.keycode = vim.keycode or function(str)
     return vim.api.nvim_replace_termcodes(str, true, true, true)
 end
 
