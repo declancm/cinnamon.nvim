@@ -35,15 +35,6 @@ https://github.com/declancm/cinnamon.nvim/assets/90937622/3a107151-a92f-47b9-be2
 
 Just install with your favorite package manager and run the setup function.
 
-### Packer
-
-```lua
-use {
-  "declancm/cinnamon.nvim",
-  config = function() require("cinnamon").setup() end
-}
-```
-
 ### Lazy
 
 ```lua
