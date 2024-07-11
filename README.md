@@ -40,7 +40,10 @@ Just install with your favorite package manager and run the setup function.
 ```lua
 {
   "declancm/cinnamon.nvim",
-  config = true
+  version = "*", -- use latest release
+  opts = {
+    -- change default options here
+  },
 }
 ```
 
