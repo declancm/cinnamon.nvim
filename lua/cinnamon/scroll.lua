@@ -37,8 +37,8 @@ M.scroll = function(command, options)
     local final_buffer = vim.api.nvim_get_current_buf()
     local final_window = vim.api.nvim_get_current_win()
 
-    local line_delta = H.get_line_delta(original_position.line, final_position.line)
-    local column_delta = H.get_column_delta(original_position.col, final_position.col)
+    local line_delta = H.get_line_delta(original_position, final_position)
+    local column_delta = H.get_column_delta(original_position, final_position)
     local step_size = 1
     local step_delay =
         math.min(options.delay, options.max_delta.time / line_delta, options.max_delta.time / column_delta)
@@ -75,12 +75,14 @@ M.scroll = function(command, options)
     end
 end
 
----@param line1 number
----@param line2 number
+---@param pos1 Position
+---@param pos2 Position
 ---@return number
-H.get_line_delta = function(line1, line2)
+H.get_line_delta = function(pos1, pos2)
     -- TODO: handle wrapped lines
     local distance = 0
+    local line1 = pos1.line
+    local line2 = pos2.line
     local max_distance = math.abs(line2 - line1)
     local direction = (line2 > line1) and 1 or -1
     local get_fold_end = (direction == 1) and vim.fn.foldclosedend or vim.fn.foldclosed
@@ -105,12 +107,14 @@ H.get_line_delta = function(line1, line2)
     return distance
 end
 
----@param col1 number
----@param col2 number
+---@param pos1 Position
+---@param pos2 Position
 ---@return number
-H.get_column_delta = function(col1, col2)
-    -- TODO: handle wrapped lines
-    return math.abs(col2 - col1)
+H.get_column_delta = function(pos1, pos2)
+    if vim.wo.wrap then
+        return math.abs(pos2.wincol - pos1.wincol)
+    end
+    return math.abs(pos2.col - pos1.col)
 end
 
 ---@param command string | function
