@@ -63,9 +63,7 @@ function M.setup(user_config)
     user_config.options.delay = user_config.options.delay or user_config.default_delay
     user_config.options.max_delta = user_config.options.max_delta or {}
     if user_config.scroll_limit ~= nil then
-        if user_config.scroll_limit < 0 then
-            user_config.options.max_delta.line = 9999
-        else
+        if user_config.scroll_limit >= 0 then
             user_config.options.max_delta.line = user_config.scroll_limit
         end
     end
