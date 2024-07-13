@@ -66,22 +66,24 @@ return {
     },
     ---@class ScrollOptions
     options = {
-        -- Post-movement callback
-        callback = nil, ---@type function?
+        -- Optional post-movement callback
+        callback = function() end,
         -- Delay between each movement step (in ms)
         delay = 7,
         max_delta = {
-            -- Maximum distance for line movements. Set to `nil` to disable
-            line = nil, ---@type number?
-            -- Maximum distance for column movements. Set to `nil` to disable
-            column = nil, ---@type number?
+            -- Maximum distance for line movements before smooth
+            -- scrolling is skipped. Set to `false` to disable
+            line = false,
+            -- Maximum distance for column movements before smooth
+            -- scrolling is skipped. Set to `false` to disable
+            column = false,
             -- Maximum duration for a movement (in ms). Automatically adjusts the step delay
-            time = 1000, ---@type number
+            time = 1000,
         },
         -- The scrolling mode
         -- `cursor`: Smoothly scrolls the cursor for any movement
         -- `window`: Smoothly scrolls the window ONLY when the cursor moves out of view
-        mode = "cursor", ---@type "cursor" | "window"
+        mode = "cursor",
     },
 }
 ```

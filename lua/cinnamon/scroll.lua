@@ -56,8 +56,8 @@ M.scroll = function(command, options)
         and original_window == final_window
         and vim.fn.foldclosed(final_position.line) == -1 -- Not within a closed fold
         and not H.positions_within_threshold(original_position, final_position, 1, 2)
-        and (options.max_delta.line == nil or (line_delta <= options.max_delta.line))
-        and (options.max_delta.column == nil or (column_delta <= options.max_delta.column))
+        and (not options.max_delta.line or (line_delta <= options.max_delta.line))
+        and (not options.max_delta.column or (column_delta <= options.max_delta.column))
         and step_delay > 0
         and step_size < math.huge
     )
