@@ -11,13 +11,13 @@ customizable Neovim plugin written in Lua!
 
 ## ✨ Features
 
-* Can add smooth scrolling to any normal mode movement, command, or Lua function
+* Can add smooth cursor and window scroll animation to any normal mode movement, command, or Lua function
 * Horizontal, vertical, and diagonal scrolling
 * Adjusts scroll speed based on movement distance
 * Non-blocking delays using luv
 * Two scrolling modes:
-    * `cursor`: Smoothly scrolls the cursor for any movement
-    * `window`: Smoothly scrolls the window ONLY when the cursor moves out of view
+    * `cursor`: animate cursor and window scrolling for any movement
+    * `window`: animate window scrolling ONLY when the cursor moves out of view
 
 ## 📋 Requirements
 
@@ -71,24 +71,24 @@ return {
         -- Delay between each movement step (in ms)
         delay = 5,
         step_size = {
-            -- Default number of cursor/window lines moved per step
+            -- Number of cursor/window lines moved per step
             vertical = 1,
-            -- Default number of cursor/window columns moved per step
+            -- Number of cursor/window columns moved per step
             horizontal = 2,
         },
         max_delta = {
-            -- Maximum distance for line movements before smooth
-            -- scrolling is skipped. Set to `false` to disable
+            -- Maximum distance for line movements before scroll
+            -- animation is skipped. Set to `false` to disable
             line = false,
-            -- Maximum distance for column movements before smooth
-            -- scrolling is skipped. Set to `false` to disable
+            -- Maximum distance for column movements before scroll
+            -- animation is skipped. Set to `false` to disable
             column = false,
             -- Maximum duration for a movement (in ms). Automatically scales the delay and step size
             time = 1000,
         },
         -- The scrolling mode
-        -- `cursor`: Smoothly scrolls the cursor for any movement
-        -- `window`: Smoothly scrolls the window ONLY when the cursor moves out of view
+        -- `cursor`: animate cursor and window scrolling for any movement
+        -- `window`: animate window scrolling ONLY when the cursor moves out of view
         mode = "cursor",
     },
 }
@@ -112,7 +112,7 @@ require("cinnamon").setup {
 
 ### Basic Keymaps
 
-**Smooth scrolling for ...**
+**Scroll animation for ...**
 
 | Category | Keys |
 |-|-|
@@ -124,7 +124,7 @@ require("cinnamon").setup {
 
 ### Extra Keymaps
 
-**Smooth scrolling for ...**
+**Scroll animation for ...**
 
 | Category | Keys |
 |-|-|
@@ -141,6 +141,8 @@ require("cinnamon").setup {
 ### Description
 
 `require("cinnamon").scroll({command}, {options})`
+
+Executes the given command with cursor and window scroll animation.
 
 * `{command}` __(string|function)__ Can be any of the following:
   * Normal mode movement command
@@ -175,7 +177,6 @@ See the [Default Options](#default-options) for more information.
 ```lua
 local cinnamon = require("cinnamon")
 
--- Setup the plugin with default options
 cinnamon.setup()
 
 -- Centered scrolling:
@@ -204,5 +205,20 @@ flash.setup({
 
 - `CinnamonCmdPre` - Triggered before the given command is executed
 - `CinnamonCmdPost` - Triggered after the given command is executed
-- `CinnamonScrollPre` - Triggered before the smooth scroll movement
-- `CinnamonScrollPost` - Triggered after the smooth scroll movement
+- `CinnamonScrollPre` - Triggered before the scroll animation
+- `CinnamonScrollPost` - Triggered after the scroll animation
+
+## 🚫 Disabling
+
+- `vim.b.cinnamon_disable` __(boolean)__ Disable scroll animation for the current buffer
+- `vim.g.cinnamon_disable` __(boolean)__ Disable scroll animation globally
+
+Example Usage:
+
+```lua
+-- Disable scrolling for help buffers
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = "help",
+    callback = function() vim.b.cinnamon_disable = true end,
+})
+```
