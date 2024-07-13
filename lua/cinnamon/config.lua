@@ -13,8 +13,8 @@ local defaults = {
         callback = nil, ---@type function?
         delay = 7, ---@type number
         max_delta = {
-            line = nil, ---@type number?
-            column = nil, ---@type number?
+            line = false, ---@type number | false
+            column = false, ---@type number | false
             time = 1000, ---@type number
         },
         mode = "cursor", ---@type "cursor" | "window"
