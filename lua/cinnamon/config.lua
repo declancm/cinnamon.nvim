@@ -12,6 +12,10 @@ local defaults = {
     options = {
         callback = nil, ---@type function?
         delay = 5, ---@type number
+        step_size = {
+            vertical = 1, ---@type number
+            horizontal = 2, ---@type number
+        },
         max_delta = {
             line = false, ---@type number | false
             column = false, ---@type number | false

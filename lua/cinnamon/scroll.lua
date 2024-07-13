@@ -36,12 +36,17 @@ M.scroll = function(command, options)
 
     local line_delta = H.get_line_delta(original_position, final_position)
     local column_delta = H.get_column_delta(original_position, final_position)
-    local step_size = 1
-    local step_delay =
-        math.min(options.delay, options.max_delta.time / line_delta, options.max_delta.time / column_delta)
+    local vertical_step_size = options.step_size.vertical
+    local horizontal_step_size = options.step_size.horizontal
+    local step_delay = math.min(
+        options.delay,
+        (options.max_delta.time * vertical_step_size) / line_delta,
+        (options.max_delta.time * horizontal_step_size) / column_delta
+    )
     if step_delay < 1 then
         -- Skip steps so that there is always a smooth scroll
-        step_size = math.ceil(1 / step_delay)
+        vertical_step_size = math.ceil(vertical_step_size / step_delay)
+        horizontal_step_size = math.ceil(horizontal_step_size / step_delay)
         step_delay = 1
     end
     step_delay = math.floor(step_delay)
@@ -52,17 +57,31 @@ M.scroll = function(command, options)
         and original_buffer == final_buffer
         and original_window == final_window
         and vim.fn.foldclosed(final_position.line) == -1 -- Not within a closed fold
-        and not H.positions_within_threshold(original_position, final_position, 1, 2)
+        and not H.positions_within_threshold(
+            original_position,
+            final_position,
+            vertical_step_size,
+            horizontal_step_size
+        )
         and (options.mode == "cursor" or H.window_scrolled(original_view, final_view))
         and (not options.max_delta.line or (line_delta <= options.max_delta.line))
         and (not options.max_delta.column or (column_delta <= options.max_delta.column))
         and step_delay > 0
-        and step_size < math.huge
+        and (math.max(vertical_step_size, horizontal_step_size) < math.huge)
     )
 
     if is_scrollable then
         vim.fn.winrestview(original_view)
-        H.scroller:start(final_position, final_view, final_buffer, final_window, step_delay, step_size, options)
+        H.scroller:start(
+            final_position,
+            final_view,
+            final_buffer,
+            final_window,
+            step_delay,
+            vertical_step_size,
+            horizontal_step_size,
+            options
+        )
     else
         H.cleanup(options)
     end
@@ -198,7 +217,16 @@ H.scroller = {}
 ---@param window_id number
 ---@param step_delay number
 ---@param options ScrollOptions
-function H.scroller:start(target_position, target_view, buffer_id, window_id, step_delay, step_size, options)
+function H.scroller:start(
+    target_position,
+    target_view,
+    buffer_id,
+    window_id,
+    step_delay,
+    vertical_step_size,
+    horizontal_step_size,
+    options
+)
     self.target_position = target_position
     self.target_view = target_view
     self.buffer_id = buffer_id
@@ -206,8 +234,8 @@ function H.scroller:start(target_position, target_view, buffer_id, window_id, st
     self.options = options
     self.window_only = (options.mode ~= "cursor")
     self.step_delay = step_delay
-    self.vertical_step_size = step_size
-    self.horizontal_step_size = step_size * 2 -- Columns are around half the size of lines
+    self.vertical_step_size = vertical_step_size
+    self.horizontal_step_size = horizontal_step_size
 
     if self.window_only then
         -- Hide the cursor

@@ -70,6 +70,12 @@ return {
         callback = function() end,
         -- Delay between each movement step (in ms)
         delay = 5,
+        step_size = {
+            -- Default number of cursor/window lines moved per step
+            vertical = 1,
+            -- Default number of cursor/window columns moved per step
+            horizontal = 2,
+        },
         max_delta = {
             -- Maximum distance for line movements before smooth
             -- scrolling is skipped. Set to `false` to disable
@@ -77,7 +83,7 @@ return {
             -- Maximum distance for column movements before smooth
             -- scrolling is skipped. Set to `false` to disable
             column = false,
-            -- Maximum duration for a movement (in ms). Automatically adjusts the step delay
+            -- Maximum duration for a movement (in ms). Automatically scales the delay and step size
             time = 1000,
         },
         -- The scrolling mode
