@@ -61,6 +61,8 @@ H.scroller = {
 
         local is_scrollable = (
             not config.disabled
+            and not vim.g.cinnamon_disable
+            and not vim.b.cinnamon_disable
             and vim.fn.reg_executing() == "" -- A macro is not being executed
             and original_buffer_id == self.buffer_id
             and original_window_id == self.window_id
