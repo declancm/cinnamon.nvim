@@ -129,6 +129,7 @@ H.execute_command = function(command)
             if vim.v.count ~= 0 then
                 command = vim.v.count .. command
             end
+            -- Indexing the vim.cmd table gives a simpler error message
             local success, message = pcall(vim.cmd.normal, { command, bang = true })
             if not success then
                 vim.notify(message:gsub("^Vim:", ""), vim.log.levels.ERROR)
