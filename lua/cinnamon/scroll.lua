@@ -125,10 +125,13 @@ H.execute_command = function(command)
             vim.cmd(utils.keycode(command:sub(2)))
         elseif command ~= "" then
             -- Normal mode command
+            command = utils.keycode(command)
             if vim.v.count ~= 0 then
-                vim.cmd("silent! normal! " .. vim.v.count .. utils.keycode(command))
-            else
-                vim.cmd("silent! normal! " .. utils.keycode(command))
+                command = vim.v.count .. command
+            end
+            local success, message = pcall(vim.cmd.normal, { command, bang = true })
+            if not success then
+                vim.notify(message:gsub("^Vim:", ""), vim.log.levels.ERROR)
             end
         end
     elseif type(command) == "function" then
