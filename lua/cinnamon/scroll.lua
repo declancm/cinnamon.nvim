@@ -20,9 +20,6 @@ M.scroll = function(command, options)
 
     options = vim.tbl_deep_extend("keep", options or {}, config.get().options)
 
-    local saved_lazyredraw = vim.o.lazyredraw
-    vim.o.lazyredraw = true
-
     local original_view = vim.fn.winsaveview()
     local original_position = H.get_position()
     local original_buffer = vim.api.nvim_get_current_buf()
@@ -56,6 +53,7 @@ M.scroll = function(command, options)
         and original_window == final_window
         and vim.fn.foldclosed(final_position.line) == -1 -- Not within a closed fold
         and not H.positions_within_threshold(original_position, final_position, 1, 2)
+        and (options.mode == "cursor" or H.window_scrolled(original_view, final_view))
         and (not options.max_delta.line or (line_delta <= options.max_delta.line))
         and (not options.max_delta.column or (column_delta <= options.max_delta.column))
         and step_delay > 0
@@ -64,11 +62,6 @@ M.scroll = function(command, options)
 
     if is_scrollable then
         vim.fn.winrestview(original_view)
-    end
-
-    vim.o.lazyredraw = saved_lazyredraw
-
-    if is_scrollable then
         H.scroller:start(final_position, final_view, final_buffer, final_window, step_delay, step_size, options)
     else
         H.cleanup(options)
@@ -424,18 +417,25 @@ H.get_position = function()
     }
 end
 
----@param p1 Position
----@param p2 Position
+---@param pos1 Position
+---@param pos2 Position
 ---@param horizontal_threshold number
 ---@param vertical_threshold number
-H.positions_within_threshold = function(p1, p2, horizontal_threshold, vertical_threshold)
+H.positions_within_threshold = function(pos1, pos2, horizontal_threshold, vertical_threshold)
     -- stylua: ignore start
-    if math.abs(p1.line - p2.line) > horizontal_threshold then return false end
-    if math.abs(p1.col - p2.col) > vertical_threshold then return false end
-    if math.abs(p1.winline - p2.winline) > horizontal_threshold then return false end
-    if math.abs(p1.wincol - p2.wincol) > vertical_threshold then return false end
+    if math.abs(pos1.line - pos2.line) > horizontal_threshold then return false end
+    if math.abs(pos1.col - pos2.col) > vertical_threshold then return false end
+    if math.abs(pos1.winline - pos2.winline) > horizontal_threshold then return false end
+    if math.abs(pos1.wincol - pos2.wincol) > vertical_threshold then return false end
     -- stylua: ignore end
     return true
+end
+
+---@param view1 table
+---@param view2 table
+---@return boolean
+H.window_scrolled = function(view1, view2)
+    return view1.topline ~= view2.topline or view1.leftcol ~= view2.leftcol
 end
 
 return M
