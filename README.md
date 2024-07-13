@@ -69,7 +69,7 @@ return {
         -- Optional post-movement callback
         callback = function() end,
         -- Delay between each movement step (in ms)
-        delay = 7,
+        delay = 5,
         max_delta = {
             -- Maximum distance for line movements before smooth
             -- scrolling is skipped. Set to `false` to disable

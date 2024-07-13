@@ -11,7 +11,7 @@ local defaults = {
     ---@class ScrollOptions
     options = {
         callback = nil, ---@type function?
-        delay = 7, ---@type number
+        delay = 5, ---@type number
         max_delta = {
             line = false, ---@type number | false
             column = false, ---@type number | false
