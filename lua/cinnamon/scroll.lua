@@ -113,10 +113,19 @@ H.scroller = {
         vim.api.nvim_exec_autocmds("User", { pattern = "CinnamonScrollPre" })
 
         self.scroll_scheduler = vim.uv.new_timer()
-        self.queued_steps = 0
         local scroller_busy = false
+        self.queued_steps = 0
+        local previous_tick = vim.uv.hrtime() -- ns
+
         self.scroll_scheduler:start(0, self.step_delay, function()
-            self.queued_steps = self.queued_steps + 1
+            -- The timer isn't precise so the time between calls is measured
+            local current_tick = vim.uv.hrtime() -- ns
+            local elapsed = (current_tick - previous_tick) / 1e6 -- ms
+            previous_tick = current_tick
+            local steps = math.floor((elapsed / self.step_delay) + 0.5)
+            self.queued_steps = self.queued_steps + steps
+
+            -- Use a busy flag to prevent multiple calls to the scroll function
             if not scroller_busy then
                 scroller_busy = true
                 vim.schedule(function()
