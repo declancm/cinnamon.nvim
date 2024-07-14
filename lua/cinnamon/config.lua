@@ -11,6 +11,7 @@ local defaults = {
     ---@class ScrollOptions
     options = {
         callback = nil, ---@type function?
+        _weak_callback = nil, ---@type function?
         delay = 5, ---@type number
         step_size = {
             vertical = 1, ---@type number
