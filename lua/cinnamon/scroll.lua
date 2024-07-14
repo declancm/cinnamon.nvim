@@ -41,8 +41,8 @@ H.scroller = {
         self.buffer_id = vim.api.nvim_get_current_buf()
         self.window_id = vim.api.nvim_get_current_win()
 
-        local line_delta = H.get_line_delta(original_position, self.target_position)
-        local column_delta = H.get_column_delta(original_position, self.target_position)
+        local line_delta = math.abs(H.get_line_error(original_position, self.target_position))
+        local column_delta = math.abs(H.get_column_error(original_position, self.target_position))
         self.vertical_step_size = self.options.step_size.vertical
         self.horizontal_step_size = self.options.step_size.horizontal
         self.step_delay = math.min(
@@ -191,38 +191,34 @@ H.scroller = {
         local moved_left = false
         local moved_right = false
 
-        local horizontal_error
-        if vim.wo.wrap then
-            horizontal_error = self.target_position.wincol - vim.fn.wincol()
-        else
-            horizontal_error = self.target_position.col - vim.fn.virtcol(".")
-        end
-        if horizontal_error < 0 then
-            H.move_cursor("left", -horizontal_error, self.horizontal_step_size)
+        local col_error =
+            H.get_column_error({ col = vim.fn.virtcol("."), wincol = vim.fn.wincol() }, self.target_position)
+        if col_error < 0 then
+            H.move_cursor("left", -col_error, self.horizontal_step_size)
             moved_left = true
-        elseif horizontal_error > 0 then
-            H.move_cursor("right", horizontal_error, self.horizontal_step_size)
+        elseif col_error > 0 then
+            H.move_cursor("right", col_error, self.horizontal_step_size)
             moved_right = true
         end
 
-        local vertical_error = self.target_position.line - vim.fn.line(".")
-        if vertical_error == 0 then
-            if horizontal_error == 0 and self:line_is_wrapped() then
+        local line_error = H.get_line_error({ line = vim.fn.line(".") }, self.target_position)
+        if line_error == 0 then
+            if col_error == 0 and self:line_is_wrapped() then
                 -- If the column is not correct but the window column
                 -- is, the cursor is on the wrong visual line.
                 local col_diff = self.target_position.col - vim.fn.virtcol(".")
                 if col_diff < 0 then
-                    vertical_error = -1
+                    line_error = -1
                 elseif col_diff > 0 then
-                    vertical_error = 1
+                    line_error = 1
                 end
             end
         end
-        if vertical_error < 0 then
-            H.move_cursor("up", -vertical_error, self.vertical_step_size)
+        if line_error < 0 then
+            H.move_cursor("up", -line_error, self.vertical_step_size)
             moved_up = true
-        elseif vertical_error > 0 then
-            H.move_cursor("down", vertical_error, self.vertical_step_size)
+        elseif line_error > 0 then
+            H.move_cursor("down", line_error, self.vertical_step_size)
             moved_down = true
         end
 
@@ -393,10 +389,10 @@ H.get_position = function()
     }
 end
 
----@param pos1 Position
----@param pos2 Position
+---@param pos1 Position | {line: number}
+---@param pos2 Position | {line: number}
 ---@return number
-H.get_line_delta = function(pos1, pos2)
+H.get_line_error = function(pos1, pos2)
     -- TODO: handle wrapped lines
     local distance = 0
     local line1 = pos1.line
@@ -411,28 +407,28 @@ H.get_line_delta = function(pos1, pos2)
         local fold_end = get_fold_end(line)
         if fold_end ~= -1 then
             if (line2_fold_end ~= -1) and (fold_end == line2_fold_end) then
-                -- The end line is within the same fold so the delta is the same
+                -- The end line is within the same fold so the distance is the same
                 return distance
             else
                 -- Skip over the fold
                 line = fold_end
             end
         end
-        distance = distance + 1
+        distance = distance + direction
         line = line + direction
     end
 
     return distance
 end
 
----@param pos1 Position
----@param pos2 Position
+---@param pos1 Position | {col: number, wincol: number}
+---@param pos2 Position | {col: number, wincol: number}
 ---@return number
-H.get_column_delta = function(pos1, pos2)
+H.get_column_error = function(pos1, pos2)
     if vim.wo.wrap then
-        return math.abs(pos2.wincol - pos1.wincol)
+        return pos2.wincol - pos1.wincol
     end
-    return math.abs(pos2.col - pos1.col)
+    return pos2.col - pos1.col
 end
 
 ---@param pos1 Position
