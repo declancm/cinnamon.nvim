@@ -292,8 +292,9 @@ H.scroller = {
     end,
 
     cleanup = function(self)
-        if self.options.callback ~= nil then
-            local success, message = pcall(self.options.callback)
+        local callback = self.options.callback or self.options._weak_callback
+        if callback ~= nil then
+            local success, message = pcall(callback)
             if not success then
                 utils.notify("Error executing callback: " .. message, "warn")
             end

@@ -42,12 +42,12 @@ M.setup = function(user_config)
                 end)
             end
         end
-        vim.keymap.set("n", "n", function() M.scroll("n", { callback = next_search_cb }) end)
-        vim.keymap.set("n", "N", function() M.scroll("N", { callback = prev_search_cb }) end)
-        vim.keymap.set("n", "*", function() M.scroll("*", { callback = next_search_cb }) end)
-        vim.keymap.set("n", "#", function() M.scroll("#", { callback = prev_search_cb }) end)
-        vim.keymap.set("n", "g*", function() M.scroll("g*", { callback = next_search_cb }) end)
-        vim.keymap.set("n", "g#", function() M.scroll("g#", { callback = prev_search_cb }) end)
+        vim.keymap.set("n", "n", function() M.scroll("n", { _weak_callback = next_search_cb }) end)
+        vim.keymap.set("n", "N", function() M.scroll("N", { _weak_callback = prev_search_cb }) end)
+        vim.keymap.set("n", "*", function() M.scroll("*", { _weak_callback = next_search_cb }) end)
+        vim.keymap.set("n", "#", function() M.scroll("#", { _weak_callback = prev_search_cb }) end)
+        vim.keymap.set("n", "g*", function() M.scroll("g*", { _weak_callback = next_search_cb }) end)
+        vim.keymap.set("n", "g#", function() M.scroll("g#", { _weak_callback = prev_search_cb }) end)
 
         -- Previous/next cursor location:
         vim.keymap.set("n", "<C-o>", function() M.scroll("<C-o>") end)
