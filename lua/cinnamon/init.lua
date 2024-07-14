@@ -27,12 +27,27 @@ M.setup = function(user_config)
         vim.keymap.set({ "n", "x" }, "}", function() M.scroll("}") end)
 
         -- Previous/next search result:
-        vim.keymap.set("n", "n", function() M.scroll("n") end)
-        vim.keymap.set("n", "N", function() M.scroll("N") end)
-        vim.keymap.set("n", "*", function() M.scroll("*") end)
-        vim.keymap.set("n", "#", function() M.scroll("#") end)
-        vim.keymap.set("n", "g*", function() M.scroll("g*") end)
-        vim.keymap.set("n", "g#", function() M.scroll("g#") end)
+        -- TODO: Remove callbacks once conflict with noice.nvim is resolved. See #50
+        local next_search_cb = function()
+            if package.loaded["noice"] then
+                vim.schedule(function()
+                    pcall(vim.cmd.normal, { "Nn", bang = true, mods = { keepjumps = true } })
+                end)
+            end
+        end
+        local prev_search_cb = function()
+            if package.loaded["noice"] then
+                vim.schedule(function()
+                    pcall(vim.cmd.normal, { "nN", bang = true, mods = { keepjumps = true } })
+                end)
+            end
+        end
+        vim.keymap.set("n", "n", function() M.scroll("n", { callback = next_search_cb }) end)
+        vim.keymap.set("n", "N", function() M.scroll("N", { callback = prev_search_cb }) end)
+        vim.keymap.set("n", "*", function() M.scroll("*", { callback = next_search_cb }) end)
+        vim.keymap.set("n", "#", function() M.scroll("#", { callback = prev_search_cb }) end)
+        vim.keymap.set("n", "g*", function() M.scroll("g*", { callback = next_search_cb }) end)
+        vim.keymap.set("n", "g#", function() M.scroll("g#", { callback = prev_search_cb }) end)
 
         -- Previous/next cursor location:
         vim.keymap.set("n", "<C-o>", function() M.scroll("<C-o>") end)
