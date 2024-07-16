@@ -20,4 +20,6 @@ M.keycode = vim.keycode or function(str)
     return vim.api.nvim_replace_termcodes(str, true, true, true)
 end
 
+M.uv = vim.uv or vim.loop
+
 return M

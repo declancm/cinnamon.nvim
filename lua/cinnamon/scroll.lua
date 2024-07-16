@@ -106,7 +106,7 @@ H.scroller = {
 
         local timeout = self.options.max_delta.time + 1000
         self.timed_out = false
-        self.timeout_timer = vim.uv.new_timer()
+        self.timeout_timer = utils.uv.new_timer()
         self.timeout_timer:start(timeout, 0, function()
             self.timed_out = true
             utils.notify("Scroll timed out", "error", { schedule = true })
@@ -114,14 +114,14 @@ H.scroller = {
 
         vim.api.nvim_exec_autocmds("User", { pattern = "CinnamonScrollPre" })
 
-        self.scroll_scheduler = vim.uv.new_timer()
+        self.scroll_scheduler = utils.uv.new_timer()
         local scroller_busy = false
         self.queued_steps = 0
-        local previous_tick = vim.uv.hrtime() -- ns
+        local previous_tick = utils.uv.hrtime() -- ns
 
         self.scroll_scheduler:start(0, self.step_delay, function()
             -- The timer isn't precise so the time between calls is measured
-            local current_tick = vim.uv.hrtime() -- ns
+            local current_tick = utils.uv.hrtime() -- ns
             local elapsed = (current_tick - previous_tick) / 1e6 -- ms
             previous_tick = current_tick
             local steps = math.floor((elapsed / self.step_delay) + 0.5)
