@@ -20,10 +20,10 @@ H.scroller = {
     ---@param options? ScrollOptions
     init = function(self, command, options)
         -- Lock the function to prevent re-entrancy. Must be first.
-        if H.locked then
+        if self.locked then
             return
         end
-        H.locked = true
+        self.locked = true
 
         self.options = vim.tbl_deep_extend("keep", options or {}, config.get().options)
 
@@ -67,6 +67,7 @@ H.scroller = {
             and original_buffer_id == self.buffer_id
             and original_window_id == self.window_id
             and vim.fn.foldclosed(self.target_position.line) == -1 -- Not within a closed fold
+            and (self.prev_now == nil or (utils.uv.now() - self.prev_now) > 100) -- Not a held key
             and not H.positions_within_threshold(
                 original_position,
                 self.target_position,
@@ -295,7 +296,8 @@ H.scroller = {
                 utils.notify("Error executing callback: " .. message, "warn")
             end
         end
-        H.locked = false
+        self.prev_now = utils.uv.now()
+        self.locked = false
     end,
 }
 
