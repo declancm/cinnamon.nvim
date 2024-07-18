@@ -154,6 +154,7 @@ H.scroller = {
             or (self.previous_position ~= nil and not H.positions_equal(H.get_position(), self.previous_position))
         then
             self:stop()
+            return
         end
 
         local winline_before = vim.fn.winline()
@@ -192,6 +193,7 @@ H.scroller = {
             and math.abs(self.error.wincol) < 1
         then
             self:stop()
+            return
         end
     end,
 
