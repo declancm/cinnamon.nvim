@@ -61,7 +61,7 @@ H.scroller = {
         local vertical_step_count = duration / self.step_delay
         local horizontal_step_count = duration / self.step_delay
 
-        self.rates = {
+        self.step_rate = {
             line = self.error.line / vertical_step_count,
             col = self.error.col / horizontal_step_count,
             winline = self.error.winline / vertical_step_count,
@@ -72,6 +72,7 @@ H.scroller = {
             not config.disabled
             and not vim.g.cinnamon_disable
             and not vim.b.cinnamon_disable
+            and step_count > 1
             and vim.fn.reg_executing() == "" -- A macro is not being executed
             and original_buffer_id == self.buffer_id
             and original_window_id == self.window_id
@@ -100,7 +101,14 @@ H.scroller = {
         vim.wo.scrolloff = 0 -- Don't scroll the view when the cursor is near the edge
 
         self.initial_changedtick = vim.b.changedtick
-        self.previous_position = nil -- Check if the cursor moved inbetween scroll steps
+        self.previous_step_position = nil -- Check if the cursor moved inbetween scroll steps
+        self.previous_step_tick = utils.uv.hrtime() -- ns
+        self.step_queue = {
+            line = 0,
+            col = 0,
+            winline = 0,
+            wincol = 0,
+        }
 
         local timeout = self.options.max_delta.time + 1000
         self.timed_out = false
@@ -114,27 +122,8 @@ H.scroller = {
 
         self.scroll_scheduler = utils.uv.new_timer()
         local scroller_busy = false
-        local previous_tick = utils.uv.hrtime() -- ns
-        self.queue = {
-            line = 0,
-            col = 0,
-            winline = 0,
-            wincol = 0,
-        }
-
         self.scroll_scheduler:start(0, self.step_delay, function()
-            -- The timer isn't precise so the time between calls is measured
-            local current_tick = utils.uv.hrtime() -- ns
-            local elapsed = (current_tick - previous_tick) / 1e6 -- ms
-            previous_tick = current_tick
-            local size = elapsed / self.step_delay
-
-            self.queue.line = H.smaller(self.queue.line + size * self.rates.line, self.error.line)
-            self.queue.col = H.smaller(self.queue.col + size * self.rates.col, self.error.col)
-            self.queue.winline = H.smaller(self.queue.winline + size * self.rates.winline, self.error.winline)
-            self.queue.wincol = H.smaller(self.queue.wincol + size * self.rates.wincol, self.error.wincol)
-
-            -- Use a busy flag to prevent multiple calls to the scroll function
+            -- Use a busy flag to prevent multiple scheduled calls
             if not scroller_busy then
                 scroller_busy = true
                 vim.schedule(function()
@@ -151,37 +140,52 @@ H.scroller = {
             or (self.window_id ~= vim.api.nvim_get_current_win())
             or (self.buffer_id ~= vim.api.nvim_get_current_buf())
             or (self.initial_changedtick ~= vim.b.changedtick)
-            or (self.previous_position ~= nil and not H.positions_equal(H.get_position(), self.previous_position))
+            or (
+                self.previous_step_position ~= nil
+                and not H.positions_equal(H.get_position(), self.previous_step_position)
+            )
         then
             self:stop()
             return
         end
 
+        local current_step_tick = utils.uv.hrtime() -- ns
+        local elapsed = (current_step_tick - self.previous_step_tick) / 1e6 -- ms
+        self.previous_step_tick = current_step_tick
+        local step_size = elapsed / self.step_delay
+
+        self.step_queue.line = H.smaller(self.step_queue.line + step_size * self.step_rate.line, self.error.line)
+        self.step_queue.col = H.smaller(self.step_queue.col + step_size * self.step_rate.col, self.error.col)
+        self.step_queue.winline =
+            H.smaller(self.step_queue.winline + step_size * self.step_rate.winline, self.error.winline)
+        self.step_queue.wincol =
+            H.smaller(self.step_queue.wincol + step_size * self.step_rate.wincol, self.error.wincol)
+
         local winline_before = vim.fn.winline()
         local wincol_before = vim.fn.wincol()
 
-        local line_step = H.move_step("line", self.queue.line)
-        local col_step = H.move_step("col", self.queue.col)
-
-        self.queue.line = self.queue.line - line_step
-        self.error.line = self.error.line - line_step
-        self.queue.col = self.queue.col - col_step
-        self.error.col = self.error.col - col_step
+        local line_step = H.move_step("line", self.step_queue.line)
+        local col_step = H.move_step("col", self.step_queue.col)
 
         local winline_change = vim.fn.winline() - winline_before
         local wincol_change = vim.fn.wincol() - wincol_before
 
-        self.queue.winline = self.queue.winline - winline_change
+        self.step_queue.line = self.step_queue.line - line_step
+        self.error.line = self.error.line - line_step
+        self.step_queue.col = self.step_queue.col - col_step
+        self.error.col = self.error.col - col_step
+
+        self.step_queue.winline = self.step_queue.winline - winline_change
         self.error.winline = self.error.winline - winline_change
-        self.queue.wincol = self.queue.wincol - wincol_change
+        self.step_queue.wincol = self.step_queue.wincol - wincol_change
         self.error.wincol = self.error.wincol - wincol_change
 
-        local winline_step = H.move_step("winline", self.queue.winline)
-        local wincol_step = H.move_step("wincol", self.queue.wincol)
+        local winline_step = H.move_step("winline", self.step_queue.winline)
+        local wincol_step = H.move_step("wincol", self.step_queue.wincol)
 
-        self.queue.winline = self.queue.winline - winline_step
+        self.step_queue.winline = self.step_queue.winline - winline_step
         self.error.winline = self.error.winline - winline_step
-        self.queue.wincol = self.queue.wincol - wincol_step
+        self.step_queue.wincol = self.step_queue.wincol - wincol_step
         self.error.wincol = self.error.wincol - wincol_step
 
         self.previous_position = H.get_position()
@@ -219,7 +223,7 @@ H.scroller = {
                 self.target_view.coladd,
                 self.target_view.curswant + 1,
             })
-            vim.cmd("redraw") -- Cursor isn't redrawn if the window was exited
+            vim.cmd.redraw() -- Cursor isn't redrawn if the window was exited
         end)
 
         vim.api.nvim_exec_autocmds("User", { pattern = "CinnamonScrollPost" })
