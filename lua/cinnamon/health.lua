@@ -9,8 +9,8 @@ local M = {}
 M.check = function()
     start("cinnamon.nvim")
 
-    if vim.o.wrap then
-        warn("'wrap' is enabled. This will cause issues with the animations.")
+    if vim.go.wrap then
+        warn("'wrap' is enabled. This will cause issues with animations.")
     else
         ok("'wrap' is disabled.")
     end
