@@ -167,25 +167,28 @@ H.scroller = {
         local line_step = H.move_step("line", self.step_queue.line)
         local col_step = H.move_step("col", self.step_queue.col)
 
-        local winline_change = vim.fn.winline() - winline_before
-        local wincol_change = vim.fn.wincol() - wincol_before
+        local winline_step = vim.fn.winline() - winline_before
+        local wincol_step = vim.fn.wincol() - wincol_before
 
         self.step_queue.line = self.step_queue.line - line_step
-        self.error.line = self.error.line - line_step
         self.step_queue.col = self.step_queue.col - col_step
+        self.error.line = self.error.line - line_step
         self.error.col = self.error.col - col_step
 
-        self.step_queue.winline = self.step_queue.winline - winline_change
-        self.error.winline = self.error.winline - winline_change
-        self.step_queue.wincol = self.step_queue.wincol - wincol_change
-        self.error.wincol = self.error.wincol - wincol_change
+        self.step_queue.winline = self.step_queue.winline - winline_step
+        self.step_queue.wincol = self.step_queue.wincol - wincol_step
+        self.error.winline = self.error.winline - winline_step
+        self.error.wincol = self.error.wincol - wincol_step
 
-        local winline_step = H.move_step("winline", self.step_queue.winline)
-        local wincol_step = H.move_step("wincol", self.step_queue.wincol)
+        -- When wrap is enabled, the winline change is not equal to the step size
+        winline_before = vim.fn.winline()
+        H.move_step("winline", self.step_queue.winline)
+        winline_step = vim.fn.winline() - winline_before
+        wincol_step = H.move_step("wincol", self.step_queue.wincol)
 
         self.step_queue.winline = self.step_queue.winline - winline_step
-        self.error.winline = self.error.winline - winline_step
         self.step_queue.wincol = self.step_queue.wincol - wincol_step
+        self.error.winline = self.error.winline - winline_step
         self.error.wincol = self.error.wincol - wincol_step
 
         self.previous_position = H.get_position()
