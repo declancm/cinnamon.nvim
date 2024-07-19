@@ -89,6 +89,8 @@ H.scroller = {
     end,
 
     start = function(self)
+        vim.api.nvim_exec_autocmds("User", { pattern = "CinnamonScrollPre" })
+
         if self.window_only then
             -- Hide the cursor
             vim.cmd("highlight Cursor blend=100")
@@ -117,8 +119,6 @@ H.scroller = {
             self.timed_out = true
             utils.notify("Scroll timed out", "error", { schedule = true })
         end)
-
-        vim.api.nvim_exec_autocmds("User", { pattern = "CinnamonScrollPre" })
 
         self.scroll_scheduler = utils.uv.new_timer()
         local scroller_busy = false
