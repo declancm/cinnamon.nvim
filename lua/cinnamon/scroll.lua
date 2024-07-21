@@ -21,6 +21,7 @@ H.scroller = {
     init = function(self, command, options)
         -- Lock the function to prevent re-entrancy. Must be first.
         if self.locked then
+            self.interrupted = true
             return
         end
         self.locked = true
@@ -103,7 +104,8 @@ H.scroller = {
         vim.wo.scrolloff = 0 -- Don't scroll the view when the cursor is near the edge
 
         self.initial_changedtick = vim.b.changedtick
-        self.previous_step_position = nil -- Check if the cursor moved inbetween scroll steps
+        self.interrupted = false
+        self.previous_step_position = nil
         self.previous_step_tick = utils.uv.hrtime() -- ns
         self.step_queue = {
             line = 0,
@@ -137,6 +139,7 @@ H.scroller = {
     scroll = function(self)
         if
             self.timed_out
+            or self.interrupted
             or (self.window_id ~= vim.api.nvim_get_current_win())
             or (self.buffer_id ~= vim.api.nvim_get_current_buf())
             or (self.initial_changedtick ~= vim.b.changedtick)
@@ -191,7 +194,7 @@ H.scroller = {
         self.error.winline = self.error.winline - winline_step
         self.error.wincol = self.error.wincol - wincol_step
 
-        self.previous_position = H.get_position()
+        self.previous_step_position = H.get_position()
 
         if
             math.abs(self.error.line) < 1
