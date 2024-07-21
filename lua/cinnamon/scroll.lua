@@ -22,6 +22,9 @@ H.scroller = {
         -- Lock the function to prevent re-entrancy. Must be first.
         if self.locked then
             self.interrupted = true
+            vim.schedule(function()
+                self:init(command, options)
+            end)
             return
         end
         self.locked = true
@@ -76,7 +79,6 @@ H.scroller = {
             and original_buffer_id == self.buffer_id
             and original_window_id == self.window_id
             and (not self.window_only or H.window_scrolled(original_view, self.target_view))
-            and (self.prev_now == nil or (utils.uv.now() - self.prev_now) > 100) -- Not a held key
             and (not self.options.max_delta.line or (math.abs(self.error.line) <= self.options.max_delta.line))
             and (not self.options.max_delta.column or (math.abs(self.error.col) <= self.options.max_delta.column))
         then
@@ -200,9 +202,30 @@ H.scroller = {
             and math.abs(self.error.winline) < 1
             and math.abs(self.error.wincol) < 1
         then
+            self:move_to_target()
             self:stop()
             return
         end
+    end,
+
+    move_to_target = function(self)
+        if self.target_view == nil then
+            error("Target view has not been set")
+        end
+
+        -- The 'curswant' value has to be set with cursor() for the '$' movement.
+        -- Setting it with winrestview() causes issues when within 'scrolloff'.
+        vim.api.nvim_win_call(self.window_id, function()
+            vim.fn.cursor({
+                self.target_view.lnum,
+                self.target_view.col + 1,
+                self.target_view.coladd,
+                self.target_view.curswant + 1,
+            })
+        end)
+
+        -- Cursor isn't redrawn if the window was exited
+        vim.cmd.redraw()
     end,
 
     stop = function(self)
@@ -218,18 +241,6 @@ H.scroller = {
         vim.wo[self.window_id].scrolloff = self.saved_scrolloff
         vim.wo[self.window_id].virtualedit = self.saved_virtualedit
 
-        -- The 'curswant' value has to be set with cursor() for the '$' movement.
-        -- Setting it with winrestview() causes issues when within 'scrolloff'.
-        vim.api.nvim_win_call(self.window_id, function()
-            vim.fn.cursor({
-                self.target_view.lnum,
-                self.target_view.col + 1,
-                self.target_view.coladd,
-                self.target_view.curswant + 1,
-            })
-            vim.cmd.redraw() -- Cursor isn't redrawn if the window was exited
-        end)
-
         vim.api.nvim_exec_autocmds("User", { pattern = "CinnamonScrollPost" })
         self:cleanup()
     end,
@@ -242,7 +253,6 @@ H.scroller = {
                 utils.notify("Error executing callback: " .. message, "warn")
             end
         end
-        self.prev_now = utils.uv.now()
         self.locked = false
     end,
 }
