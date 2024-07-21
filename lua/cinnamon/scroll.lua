@@ -35,9 +35,7 @@ H.scroller = {
         local original_buffer_id = vim.api.nvim_get_current_buf()
         local original_window_id = vim.api.nvim_get_current_win()
 
-        vim.api.nvim_exec_autocmds("User", { pattern = "CinnamonCmdPre" })
         H.execute_command(command)
-        vim.api.nvim_exec_autocmds("User", { pattern = "CinnamonCmdPost" })
 
         self.target_view = vim.fn.winsaveview()
         self.target_position = H.get_position()
@@ -251,6 +249,8 @@ H.scroller = {
 
 ---@param command string | function
 H.execute_command = function(command)
+    vim.api.nvim_exec_autocmds("User", { pattern = "CinnamonCmdPre" })
+
     if type(command) == "string" then
         if command[1] == ":" then
             -- Ex (command-line) command
@@ -277,6 +277,8 @@ H.execute_command = function(command)
 
     -- Some plugins rely on this event to modify the final cursor position
     vim.api.nvim_exec_autocmds("CursorMoved", {})
+
+    vim.api.nvim_exec_autocmds("User", { pattern = "CinnamonCmdPost" })
 end
 
 ---@param component "line" | "col" | "winline" | "wincol"
