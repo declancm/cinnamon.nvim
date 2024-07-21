@@ -85,7 +85,8 @@ H.scroller = {
             vim.fn.winrestview(original_view)
             self:start()
         else
-            self:cleanup()
+            self:execute_callback()
+            self.locked = false
         end
     end,
 
@@ -149,6 +150,7 @@ H.scroller = {
             )
         then
             self:stop()
+            self.locked = false
             return
         end
 
@@ -204,6 +206,8 @@ H.scroller = {
         then
             self:move_to_target()
             self:stop()
+            self:execute_callback()
+            self.locked = false
             return
         end
     end,
@@ -228,6 +232,16 @@ H.scroller = {
         vim.cmd.redraw()
     end,
 
+    execute_callback = function(self)
+        local callback = self.options.callback or self.options._weak_callback
+        if callback ~= nil then
+            local success, message = pcall(callback)
+            if not success then
+                utils.notify("Error executing callback: " .. message, "warn")
+            end
+        end
+    end,
+
     stop = function(self)
         self.scroll_scheduler:close()
         self.timeout_timer:close()
@@ -242,18 +256,6 @@ H.scroller = {
         vim.wo[self.window_id].virtualedit = self.saved_virtualedit
 
         vim.api.nvim_exec_autocmds("User", { pattern = "CinnamonScrollPost" })
-        self:cleanup()
-    end,
-
-    cleanup = function(self)
-        local callback = self.options.callback or self.options._weak_callback
-        if callback ~= nil then
-            local success, message = pcall(callback)
-            if not success then
-                utils.notify("Error executing callback: " .. message, "warn")
-            end
-        end
-        self.locked = false
     end,
 }
 
@@ -297,7 +299,8 @@ end
 H.move_step = function(component, distance)
     local command = "normal! "
     local movement = ""
-    local count = math.floor(math.abs(distance))
+    distance = (distance > 0) and math.floor(distance) or math.ceil(distance)
+    local count = math.abs(distance)
 
     if count == 0 then
         return 0
@@ -319,7 +322,7 @@ H.move_step = function(component, distance)
 
     vim.cmd(command .. movement)
 
-    return (distance < 0) and -count or count
+    return distance
 end
 
 ---@return Position
