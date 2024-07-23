@@ -36,14 +36,14 @@ H.scroller = {
         local original_window_id = vim.api.nvim_get_current_win()
         local original_buffer_id = vim.api.nvim_get_current_buf()
         local original_view = vim.fn.winsaveview()
-        self.original_position = H.get_position()
+        self.original_position = H.get_position(original_window_id)
 
         H.execute_command(command)
 
         self.window_id = vim.api.nvim_get_current_win()
         self.buffer_id = vim.api.nvim_get_current_buf()
         self.target_view = vim.fn.winsaveview()
-        self.target_position = H.get_position()
+        self.target_position = H.get_position(self.window_id)
 
         self.error = {
             line = H.get_line_error(self.original_position, self.target_position),
@@ -105,7 +105,7 @@ H.scroller = {
 
         if self.window_only then
             -- Hide the cursor
-            vim.cmd("highlight Cursor blend=100")
+            vim.cmd.highlight("Cursor blend=100")
             vim.opt.guicursor:append({ "a:Cursor/lCursor" })
         end
 
@@ -157,7 +157,7 @@ H.scroller = {
             or (self.initial_changedtick ~= vim.b.changedtick)
             or (
                 self.previous_step_position ~= nil
-                and not H.positions_equal(H.get_position(), self.previous_step_position)
+                and not H.positions_equal(H.get_position(self.window_id), self.previous_step_position)
             )
         then
             self:stop()
@@ -180,8 +180,7 @@ H.scroller = {
         local winline_before = vim.fn.winline()
         local wincol_before = vim.fn.wincol()
 
-        local line_step = self:move_cursor("line", self.step_queue.line)
-        local col_step = self:move_cursor("col", self.step_queue.col)
+        local line_step, col_step = self:move_cursor(self.step_queue)
 
         local winline_step = vim.fn.winline() - winline_before
         local wincol_step = vim.fn.wincol() - wincol_before
@@ -211,7 +210,7 @@ H.scroller = {
         self.step_queue.winline = self.step_queue.winline - winline_step
         self.error.winline = self.error.winline - winline_step
 
-        self.previous_step_position = H.get_position()
+        self.previous_step_position = H.get_position(self.window_id)
 
         if
             math.abs(self.error.line) < 1
@@ -227,52 +226,45 @@ H.scroller = {
         end
     end,
 
-    ---@param component "line" | "col"
-    ---@param distance number
-    move_cursor = function(self, component, distance)
-        if distance > 0 then
-            distance = math.floor(distance)
-        else
-            distance = math.ceil(distance)
+    ---@param delta Position
+    ---@return number, number
+    move_cursor = function(self, delta)
+        local line_distance = delta.line
+        local col_distance = delta.col
+
+        line_distance = H.round_towards_zero(line_distance)
+        col_distance = H.round_towards_zero(col_distance)
+
+        if line_distance ~= 0 or col_distance ~= 0 then
+            self.current_position.line = self.current_position.line + line_distance
+            self.current_position.col = self.current_position.col + col_distance
+            vim.api.nvim_win_set_cursor(self.window_id or 0, { self.current_position.line, self.current_position.col })
         end
 
-        if distance == 0 then
-            return 0
-        end
-
-        self.current_position[component] = self.current_position[component] + distance
-        vim.api.nvim_win_set_cursor(0, { self.current_position.line, self.current_position.col })
-
-        return distance
+        return line_distance, col_distance
     end,
 
     ---@param component "winline" | "wincol"
     ---@param distance number
     ---@return number
     move_window = function(self, component, distance)
-        if distance > 0 then
-            distance = math.floor(distance)
-        else
-            distance = math.ceil(distance)
-        end
-        local count = math.abs(distance)
+        distance = H.round_towards_zero(distance)
 
-        if count == 0 then
+        if distance == 0 then
             return 0
         end
 
-        local command = "normal! "
-        if count > 1 then
-            command = command .. count
-        end
-
+        local count = math.abs(distance)
+        local command
         if component == "winline" then
-            command = command .. (distance > 0 and "\25" or "\5")
+            command = (distance > 0) and "\25" or "\5"
         else
-            command = command .. (distance > 0 and "zh" or "zl")
+            command = (distance > 0) and "zh" or "zl"
         end
-
-        vim.cmd(command)
+        if count > 1 then
+            command = count .. command
+        end
+        vim.cmd.normal({ command, bang = true })
 
         return distance
     end,
@@ -305,7 +297,7 @@ H.scroller = {
 
         if self.window_only then
             -- Restore the cursor
-            vim.cmd("highlight Cursor blend=0")
+            vim.cmd.highlight("Cursor blend=0")
             vim.opt.guicursor:remove({ "a:Cursor/lCursor" })
         end
 
@@ -350,9 +342,10 @@ H.execute_command = function(command)
     vim.api.nvim_exec_autocmds("User", { pattern = "CinnamonCmdPost" })
 end
 
+---@param winid? number
 ---@return Position
-H.get_position = function()
-    local cursor = vim.api.nvim_win_get_cursor(0)
+H.get_position = function(winid)
+    local cursor = vim.api.nvim_win_get_cursor(winid or 0)
     return {
         line = cursor[1],
         col = cursor[2],
@@ -418,6 +411,12 @@ end
 ---@return number
 H.smaller = function(a, b)
     return (math.abs(a) < math.abs(b)) and a or b
+end
+
+---@param n number
+---@return number
+H.round_towards_zero = function(n)
+    return (n > 0) and math.floor(n) or math.ceil(n)
 end
 
 return M
