@@ -64,11 +64,21 @@ H.scroller = {
         local horizontal_step_count = duration / self.step_delay
 
         self.step_rate = {
-            line = self.error.line / vertical_step_count,
-            col = self.error.col / horizontal_step_count,
-            winline = self.error.winline / vertical_step_count,
-            wincol = self.error.wincol / horizontal_step_count,
+            line = 0,
+            col = 0,
+            winline = 0,
+            wincol = 0,
         }
+
+        if vertical_step_count ~= 0 then
+            self.step_rate.line = self.error.line / vertical_step_count
+            self.step_rate.winline = self.error.winline / vertical_step_count
+        end
+
+        if horizontal_step_count ~= 0 then
+            self.step_rate.col = self.error.col / horizontal_step_count
+            self.step_rate.wincol = self.error.wincol / horizontal_step_count
+        end
 
         if
             not config.disabled
@@ -186,16 +196,20 @@ H.scroller = {
         self.error.winline = self.error.winline - winline_step
         self.error.wincol = self.error.wincol - wincol_step
 
-        -- When wrap is enabled, the winline change is not equal to the step size
-        winline_before = vim.fn.winline()
-        self:move_window("winline", self.step_queue.winline)
-        winline_step = vim.fn.winline() - winline_before
-        wincol_step = self:move_window("wincol", self.step_queue.wincol)
+        if vim.wo[self.window_id].wrap then
+            winline_before = vim.fn.winline()
+            self:move_window("winline", self.step_queue.winline)
+            winline_step = vim.fn.winline() - winline_before
+        else
+            winline_step = self:move_window("winline", self.step_queue.winline)
+            wincol_step = self:move_window("wincol", self.step_queue.wincol)
+
+            self.step_queue.wincol = self.step_queue.wincol - wincol_step
+            self.error.wincol = self.error.wincol - wincol_step
+        end
 
         self.step_queue.winline = self.step_queue.winline - winline_step
-        self.step_queue.wincol = self.step_queue.wincol - wincol_step
         self.error.winline = self.error.winline - winline_step
-        self.error.wincol = self.error.wincol - wincol_step
 
         self.previous_step_position = H.get_position()
 
@@ -384,10 +398,10 @@ end
 H.positions_equal = function(pos1, pos2, threshold)
     threshold = threshold or 0
     -- stylua: ignore start
-    if math.abs(pos1.line - pos2.line) > threshold then return false end
-    if math.abs(pos1.col - pos2.col) > threshold then return false end
+    if math.abs(pos1.line    - pos2.line   ) > threshold then return false end
+    if math.abs(pos1.col     - pos2.col    ) > threshold then return false end
     if math.abs(pos1.winline - pos2.winline) > threshold then return false end
-    if math.abs(pos1.wincol - pos2.wincol) > threshold then return false end
+    if math.abs(pos1.wincol  - pos2.wincol ) > threshold then return false end
     -- stylua: ignore end
     return true
 end
