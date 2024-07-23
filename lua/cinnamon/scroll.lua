@@ -33,23 +33,23 @@ H.scroller = {
         self.window_only = (self.options.mode ~= "cursor")
         self.step_delay = math.max(math.floor(self.options.delay), 1)
 
-        local original_view = vim.fn.winsaveview()
-        local original_position = H.get_position()
-        local original_buffer_id = vim.api.nvim_get_current_buf()
         local original_window_id = vim.api.nvim_get_current_win()
+        local original_buffer_id = vim.api.nvim_get_current_buf()
+        local original_view = vim.fn.winsaveview()
+        self.original_position = H.get_position()
 
         H.execute_command(command)
 
+        self.window_id = vim.api.nvim_get_current_win()
+        self.buffer_id = vim.api.nvim_get_current_buf()
         self.target_view = vim.fn.winsaveview()
         self.target_position = H.get_position()
-        self.buffer_id = vim.api.nvim_get_current_buf()
-        self.window_id = vim.api.nvim_get_current_win()
 
         self.error = {
-            line = H.get_line_error(original_position, self.target_position),
-            col = self.target_position.col - original_position.col,
-            winline = self.target_position.winline - original_position.winline,
-            wincol = self.target_position.wincol - original_position.wincol,
+            line = H.get_line_error(self.original_position, self.target_position),
+            col = self.target_position.col - self.original_position.col,
+            winline = self.target_position.winline - self.original_position.winline,
+            wincol = self.target_position.wincol - self.original_position.wincol,
         }
 
         local step_count = math.max(
@@ -104,6 +104,7 @@ H.scroller = {
         self.saved_scrolloff = vim.wo.scrolloff
         vim.wo.scrolloff = 0 -- Don't scroll the view when the cursor is near the edge
 
+        self.current_position = self.original_position
         self.initial_changedtick = vim.b.changedtick
         self.interrupted = false
         self.previous_step_position = nil
@@ -169,8 +170,8 @@ H.scroller = {
         local winline_before = vim.fn.winline()
         local wincol_before = vim.fn.wincol()
 
-        local line_step = H.move_step("line", self.step_queue.line)
-        local col_step = H.move_step("col", self.step_queue.col)
+        local line_step = self:move_cursor("line", self.step_queue.line)
+        local col_step = self:move_cursor("col", self.step_queue.col)
 
         local winline_step = vim.fn.winline() - winline_before
         local wincol_step = vim.fn.wincol() - wincol_before
@@ -187,9 +188,9 @@ H.scroller = {
 
         -- When wrap is enabled, the winline change is not equal to the step size
         winline_before = vim.fn.winline()
-        H.move_step("winline", self.step_queue.winline)
+        self:move_window("winline", self.step_queue.winline)
         winline_step = vim.fn.winline() - winline_before
-        wincol_step = H.move_step("wincol", self.step_queue.wincol)
+        wincol_step = self:move_window("wincol", self.step_queue.wincol)
 
         self.step_queue.winline = self.step_queue.winline - winline_step
         self.step_queue.wincol = self.step_queue.wincol - wincol_step
@@ -212,23 +213,65 @@ H.scroller = {
         end
     end,
 
+    ---@param component "line" | "col"
+    ---@param distance number
+    move_cursor = function(self, component, distance)
+        if distance > 0 then
+            distance = math.floor(distance)
+        else
+            distance = math.ceil(distance)
+        end
+
+        if distance == 0 then
+            return 0
+        end
+
+        self.current_position[component] = self.current_position[component] + distance
+        vim.api.nvim_win_set_cursor(0, { self.current_position.line, self.current_position.col })
+
+        return distance
+    end,
+
+    ---@param component "winline" | "wincol"
+    ---@param distance number
+    ---@return number
+    move_window = function(self, component, distance)
+        if distance > 0 then
+            distance = math.floor(distance)
+        else
+            distance = math.ceil(distance)
+        end
+        local count = math.abs(distance)
+
+        if count == 0 then
+            return 0
+        end
+
+        local command = "normal! "
+        if count > 1 then
+            command = command .. count
+        end
+
+        if component == "winline" then
+            command = command .. (distance > 0 and "\25" or "\5")
+        else
+            command = command .. (distance > 0 and "zh" or "zl")
+        end
+
+        vim.cmd(command)
+
+        return distance
+    end,
+
     move_to_target = function(self)
         if self.target_view == nil then
             error("Target view has not been set")
         end
 
-        -- The 'curswant' value has to be set with cursor() for the '$' movement.
-        -- Setting it with winrestview() causes issues when within 'scrolloff'.
         vim.api.nvim_win_call(self.window_id, function()
-            vim.fn.cursor({
-                self.target_view.lnum,
-                self.target_view.col + 1,
-                self.target_view.coladd,
-                self.target_view.curswant + 1,
-            })
+            vim.fn.winrestview(self.target_view)
         end)
 
-        -- Cursor isn't redrawn if the window was exited
         vim.cmd.redraw()
     end,
 
@@ -293,43 +336,12 @@ H.execute_command = function(command)
     vim.api.nvim_exec_autocmds("User", { pattern = "CinnamonCmdPost" })
 end
 
----@param component "line" | "col" | "winline" | "wincol"
----@param distance number
----@return number
-H.move_step = function(component, distance)
-    local command = "normal! "
-    local movement = ""
-    distance = (distance > 0) and math.floor(distance) or math.ceil(distance)
-    local count = math.abs(distance)
-
-    if count == 0 then
-        return 0
-    elseif count > 1 then
-        command = command .. count
-    end
-
-    if component == "line" then
-        movement = distance > 0 and "j" or "k"
-    elseif component == "col" then
-        movement = distance > 0 and "l" or "h"
-    elseif component == "winline" then
-        movement = distance > 0 and "\25" or "\5"
-    elseif component == "wincol" then
-        movement = distance > 0 and "zh" or "zl"
-    else
-        error("Invalid component: " .. component)
-    end
-
-    vim.cmd(command .. movement)
-
-    return distance
-end
-
 ---@return Position
 H.get_position = function()
+    local cursor = vim.api.nvim_win_get_cursor(0)
     return {
-        line = vim.fn.line("."),
-        col = vim.fn.virtcol("."),
+        line = cursor[1],
+        col = cursor[2],
         winline = vim.fn.winline(),
         wincol = vim.fn.wincol(),
     }
