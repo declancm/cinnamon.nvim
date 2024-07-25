@@ -9,6 +9,10 @@ local H = {}
 ---@field winline number
 ---@field wincol number
 
+local disabled_filetypes = {
+    dashboard = true,
+}
+
 ---@param command string | function
 ---@param options? ScrollOptions
 M.scroll = function(command, options)
@@ -88,6 +92,7 @@ H.scroller = {
             and vim.fn.reg_executing() == "" -- A macro is not being executed
             and original_buffer_id == self.buffer_id
             and original_window_id == self.window_id
+            and not disabled_filetypes[vim.bo[self.buffer_id].filetype]
             and (not self.window_only or H.window_scrolled(original_view, self.target_view))
             and (not self.options.max_delta.line or (math.abs(self.error.line) <= self.options.max_delta.line))
             and (not self.options.max_delta.column or (math.abs(self.error.col) <= self.options.max_delta.column))
