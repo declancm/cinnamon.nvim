@@ -74,32 +74,32 @@ M.setup = function(user_config)
         vim.keymap.set({ "n", "x" }, "z-", function() M.scroll("z-") end)
         vim.keymap.set({ "n", "x" }, "z^", function() M.scroll("z^") end)
         vim.keymap.set({ "n", "x" }, "z+", function() M.scroll("z+") end)
-        vim.keymap.set({ "n", "x" }, "<C-y>", function() M.scroll("<C-y>") end)
-        vim.keymap.set({ "n", "x" }, "<C-e>", function() M.scroll("<C-e>") end)
+        vim.keymap.set({ "n", "x" }, "<C-y>", function() M.scroll("<C-y>", { count_only = true }) end)
+        vim.keymap.set({ "n", "x" }, "<C-e>", function() M.scroll("<C-e>", { count_only = true }) end)
 
         -- Horizontal screen scrolling:
-        vim.keymap.set({ "n", "x" }, "zh", function() M.scroll("zh") end)
-        vim.keymap.set({ "n", "x" }, "zl", function() M.scroll("zl") end)
+        vim.keymap.set({ "n", "x" }, "zh", function() M.scroll("zh", { count_only = true }) end)
+        vim.keymap.set({ "n", "x" }, "zl", function() M.scroll("zl", { count_only = true }) end)
         vim.keymap.set({ "n", "x" }, "zH", function() M.scroll("zH") end)
         vim.keymap.set({ "n", "x" }, "zL", function() M.scroll("zL") end)
         vim.keymap.set({ "n", "x" }, "zs", function() M.scroll("zs") end)
         vim.keymap.set({ "n", "x" }, "ze", function() M.scroll("ze") end)
 
         -- Up/down movements:
-        vim.keymap.set({ "n", "x" }, "k", function() M.scroll("k") end)
-        vim.keymap.set({ "n", "x" }, "j", function() M.scroll("j") end)
-        vim.keymap.set({ "n", "x" }, "<Up>", function() M.scroll("<Up>") end)
-        vim.keymap.set({ "n", "x" }, "<Down>", function() M.scroll("<Down>") end)
-        vim.keymap.set({ "n", "x" }, "gk", function() M.scroll("gk") end)
-        vim.keymap.set({ "n", "x" }, "gj", function() M.scroll("gj") end)
-        vim.keymap.set({ "n", "x" }, "g<Up>", function() M.scroll("g<Up>") end)
-        vim.keymap.set({ "n", "x" }, "g<Down>", function() M.scroll("g<Down>") end)
+        vim.keymap.set({ "n", "x" }, "k", function() M.scroll("k", { count_only = true }) end)
+        vim.keymap.set({ "n", "x" }, "j", function() M.scroll("j", { count_only = true }) end)
+        vim.keymap.set({ "n", "x" }, "<Up>", function() M.scroll("<Up>", { count_only = true }) end)
+        vim.keymap.set({ "n", "x" }, "<Down>", function() M.scroll("<Down>", { count_only = true }) end)
+        vim.keymap.set({ "n", "x" }, "gk", function() M.scroll("gk", { count_only = true }) end)
+        vim.keymap.set({ "n", "x" }, "gj", function() M.scroll("gj", { count_only = true }) end)
+        vim.keymap.set({ "n", "x" }, "g<Up>", function() M.scroll("g<Up>", { count_only = true }) end)
+        vim.keymap.set({ "n", "x" }, "g<Down>", function() M.scroll("g<Down>", { count_only = true }) end)
 
         -- Left/right movements:
-        vim.keymap.set({ "n", "x" }, "h", function() M.scroll("h") end)
-        vim.keymap.set({ "n", "x" }, "l", function() M.scroll("l") end)
-        vim.keymap.set({ "n", "x" }, "<Left>", function() M.scroll("<Left>") end)
-        vim.keymap.set({ "n", "x" }, "<Right>", function() M.scroll("<Right>") end)
+        vim.keymap.set({ "n", "x" }, "h", function() M.scroll("h", { count_only = true }) end)
+        vim.keymap.set({ "n", "x" }, "l", function() M.scroll("l", { count_only = true }) end)
+        vim.keymap.set({ "n", "x" }, "<Left>", function() M.scroll("<Left>", { count_only = true }) end)
+        vim.keymap.set({ "n", "x" }, "<Right>", function() M.scroll("<Right>", { count_only = true }) end)
     end
     --stylua: ignore end
 end

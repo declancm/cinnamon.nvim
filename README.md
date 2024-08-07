@@ -73,6 +73,9 @@ return {
         -- `window`: animate window scrolling ONLY when the cursor moves out of view
         mode = "cursor",
 
+        -- Only animate scrolling if a count is provided
+        count_only = false,
+
         -- Delay between each movement step (in ms)
         delay = 5,
 
