@@ -1,4 +1,4 @@
-*cinnamon.nvim.txt*        For Neovim >= 0.8.0       Last change: 2024 July 25
+*cinnamon.nvim.txt*       For Neovim >= 0.8.0      Last change: 2024 August 07
 
 ==============================================================================
 Table of Contents                            *cinnamon.nvim-table-of-contents*
@@ -72,6 +72,9 @@ DEFAULT OPTIONS ~
             -- `cursor`: animate cursor and window scrolling for any movement
             -- `window`: animate window scrolling ONLY when the cursor moves out of view
             mode = "cursor",
+    
+            -- Only animate scrolling if a count is provided
+            count_only = false,
     
             -- Delay between each movement step (in ms)
             delay = 5,
