@@ -23,6 +23,7 @@ local defaults = {
             time = 1000, ---@type number
         },
         mode = "cursor", ---@type "cursor" | "window"
+        count_only = false, ---@type boolean
     },
 }
 

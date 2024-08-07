@@ -90,6 +90,7 @@ H.scroller = {
             and not vim.b.cinnamon_disable
             and step_count > 1
             and vim.fn.reg_executing() == "" -- A macro is not being executed
+            and (not self.options.count_only or vim.v.count ~= 0)
             and original_buffer_id == self.buffer_id
             and original_window_id == self.window_id
             and not disabled_filetypes[vim.bo[self.buffer_id].filetype]
